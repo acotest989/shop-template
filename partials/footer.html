@@ -1,0 +1,53 @@
+<footer class="mt-auto bg-gray-900 text-gray-400">
+  <div class="mx-auto max-w-5xl px-4 py-10">
+
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="lg:col-span-2">
+        <p class="text-sm font-bold uppercase tracking-widest text-white">Shop</p>
+        <p class="mt-3 max-w-xs text-sm leading-relaxed">
+          A small demo storefront built with Alpine and Tailwind — no framework, no build step.
+        </p>
+
+        <div class="mt-5 flex gap-2">
+          <template x-for="method in ['VISA', 'MC', 'AMEX', 'PayPal']" :key="method">
+            <span
+              class="rounded-md border border-white/15 px-2 py-1 text-[11px] font-semibold tracking-wide text-gray-300"
+              x-text="method"
+            ></span>
+          </template>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-white">Store</p>
+        <nav class="mt-3 flex flex-col gap-2 text-sm">
+          <a href="/" class="transition-colors hover:text-white">All products</a>
+          <a href="/login" class="transition-colors hover:text-white" x-show="!$store.session.user">Sign in</a>
+          <button
+            type="button"
+            class="cursor-pointer text-left transition-colors hover:text-white"
+            x-show="$store.session.user"
+            @click="signOut()"
+          >Sign out</button>
+        </nav>
+      </div>
+
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-white">Support</p>
+        <ul class="mt-3 flex flex-col gap-2 text-sm">
+          <li>Mon–Fri, 9–17h</li>
+          <li>support@shop.test</li>
+          <li>Free returns for 30 days</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center">
+      <p x-text="'© ' + new Date().getFullYear() + ' Shop. All rights reserved.'"></p>
+      <p class="sm:ml-auto">Prices include VAT.</p>
+    </div>
+
+  </div>
+</footer>

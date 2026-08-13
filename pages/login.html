@@ -1,0 +1,51 @@
+<main class="flex flex-1 items-center justify-center p-4" x-data="loginPage">
+  <div class="card w-full max-w-sm p-6">
+    <h1 class="text-lg font-semibold text-gray-900">Sign in</h1>
+    <p class="muted mt-1">Demo: <span class="font-mono">demo@shop.test</span> / <span class="font-mono">test1234</span></p>
+
+    <form class="mt-5 flex flex-col gap-4" @submit.prevent="submit()">
+      <div>
+        <label for="email" class="label">Email</label>
+        <input
+          id="email"
+          x-ref="email"
+          type="email"
+          required
+          autocomplete="username"
+          x-model="email"
+          :disabled="pending"
+          class="input mt-1"
+        >
+      </div>
+
+      <div>
+        <label for="password" class="label">Password</label>
+        <input
+          id="password"
+          x-ref="password"
+          type="password"
+          required
+          autocomplete="current-password"
+          x-model="password"
+          :disabled="pending"
+          class="input mt-1"
+        >
+      </div>
+
+      <p
+        x-show="error"
+        x-text="error"
+        role="alert"
+        aria-live="polite"
+        class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+      ></p>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-full"
+        :disabled="pending"
+        x-text="pending ? 'Signing in…' : 'Sign in'"
+      ></button>
+    </form>
+  </div>
+</main>

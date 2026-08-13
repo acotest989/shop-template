@@ -1,0 +1,28 @@
+<header class="sticky top-0 z-20 border-b border-gray-200 bg-white/90 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
+
+    <a href="/" class="text-sm font-bold uppercase tracking-widest text-gray-900">Shop</a>
+
+    <nav class="flex items-center gap-4 text-sm">
+      <a
+        href="/"
+        class="transition-colors hover:text-gray-900"
+        :class="$router.context.path === '/' ? 'font-medium text-gray-900' : 'text-gray-500'"
+      >Products</a>
+    </nav>
+
+    <div class="ml-auto flex items-center gap-3">
+      <template x-if="$store.session.user">
+        <div class="flex items-center gap-3">
+          <span class="muted hidden sm:inline" x-text="$store.session.user.name"></span>
+          <button type="button" class="btn btn-ghost btn-sm" @click="signOut()">Sign out</button>
+        </div>
+      </template>
+
+      <template x-if="!$store.session.user">
+        <a href="/login" class="btn btn-primary btn-sm">Sign in</a>
+      </template>
+    </div>
+
+  </div>
+</header>

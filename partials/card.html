@@ -1,0 +1,70 @@
+<article class="card group relative flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-lg focus-within:ring-2 focus-within:ring-gray-900 focus-within:ring-offset-2">
+
+  <div class="relative aspect-square overflow-hidden bg-gray-100">
+    <img
+      :src="product.image"
+      :alt="product.title"
+      width="600"
+      height="600"
+      loading="lazy"
+      class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+      :class="{ 'opacity-60': !product.available }"
+    >
+
+    <span
+      x-show="discountPercent(product.price, product.compare_at_price) > 0"
+      x-text="'-' + discountPercent(product.price, product.compare_at_price) + '%'"
+      class="badge badge-ink absolute left-2 top-2"
+    ></span>
+
+    <div
+      x-show="!product.available"
+      class="absolute inset-0 grid place-items-center bg-white/50 backdrop-blur-[1px]"
+    >
+      <span class="badge badge-ink px-3 py-1 uppercase tracking-wider">Sold out</span>
+    </div>
+  </div>
+
+  <div class="flex flex-1 flex-col p-3">
+    <p class="eyebrow" x-text="product.vendor"></p>
+
+    <h3 class="mt-1 text-sm font-medium leading-snug text-gray-900">
+      <a
+        :href="'/products/' + product.handle"
+        class="line-clamp-2 transition-colors after:absolute after:inset-0 focus:outline-none group-hover:text-gray-500"
+        x-text="product.title"
+      ></a>
+    </h3>
+
+    <p class="mt-1 flex items-center gap-1 text-xs text-gray-500">
+      <span class="text-amber-400">&#9733;</span>
+      <span x-text="product.rating.toFixed(1)"></span>
+    </p>
+
+    <div class="mt-2 flex items-baseline gap-2">
+      <span class="text-base font-semibold text-gray-900" x-text="money(product.price, product.currency)"></span>
+      <span
+        x-show="product.compare_at_price"
+        class="text-sm text-gray-400 line-through"
+        x-text="money(product.compare_at_price, product.currency)"
+      ></span>
+    </div>
+
+    <p
+      x-show="product.available && product.stock <= 3"
+      class="badge badge-warn mt-2 self-start"
+      x-text="'Only ' + product.stock + ' left'"
+    ></p>
+
+    <div class="relative mt-auto pt-3">
+      <button
+        type="button"
+        class="btn btn-primary w-full"
+        :disabled="!product.available"
+        :aria-label="'Add ' + product.title + ' to cart'"
+        x-text="product.available ? 'Add to cart' : 'Sold out'"
+      ></button>
+    </div>
+  </div>
+
+</article>

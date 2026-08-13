@@ -1,0 +1,83 @@
+<main class="mx-auto w-full max-w-5xl p-4" x-data="productPage">
+
+  <template x-if="pending">
+    <div class="grid gap-8 md:grid-cols-2" aria-hidden="true">
+      <div class="skeleton aspect-square w-full rounded-xl"></div>
+      <div class="pt-2">
+        <div class="skeleton h-2 w-1/4"></div>
+        <div class="skeleton mt-3 h-6 w-3/4"></div>
+        <div class="skeleton mt-4 h-5 w-1/3"></div>
+        <div class="skeleton mt-8 h-10 w-40 rounded-lg"></div>
+      </div>
+    </div>
+  </template>
+
+  <template x-if="error">
+    <div class="p-8 text-center">
+      <p class="rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600" x-text="error"></p>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Back to products</button>
+    </div>
+  </template>
+
+  <template x-if="product">
+    <div class="grid gap-8 md:grid-cols-2">
+      <div class="card relative aspect-square overflow-hidden bg-gray-100">
+        <img
+          :src="product.image"
+          :alt="product.title"
+          width="600"
+          height="600"
+          class="h-full w-full object-cover"
+          :class="{ 'opacity-60': !product.available }"
+        >
+        <span
+          x-show="discountPercent(product.price, product.compare_at_price) > 0"
+          x-text="'-' + discountPercent(product.price, product.compare_at_price) + '%'"
+          class="badge badge-ink absolute left-3 top-3"
+        ></span>
+      </div>
+
+      <div class="flex flex-col">
+        <p class="eyebrow" x-text="product.vendor"></p>
+        <h1 class="mt-1 text-2xl font-semibold text-gray-900" x-text="product.title"></h1>
+
+        <p class="mt-2 flex items-center gap-1 text-sm text-gray-500">
+          <span class="text-amber-400">&#9733;</span>
+          <span x-text="product.rating.toFixed(1)"></span>
+        </p>
+
+        <div class="mt-4 flex items-baseline gap-3">
+          <span class="text-2xl font-semibold text-gray-900" x-text="money(product.price, product.currency)"></span>
+          <span
+            x-show="product.compare_at_price"
+            class="text-gray-400 line-through"
+            x-text="money(product.compare_at_price, product.currency)"
+          ></span>
+        </div>
+
+        <p
+          x-show="product.available && product.stock <= 3"
+          class="badge badge-warn mt-3 self-start"
+          x-text="'Only ' + product.stock + ' left'"
+        ></p>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <template x-for="tag in product.tags" :key="tag">
+            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500" x-text="tag"></span>
+          </template>
+        </div>
+
+        <div class="mt-8 flex gap-3">
+          <button
+            type="button"
+            class="btn btn-primary flex-1"
+            :disabled="!product.available"
+            x-text="product.available ? 'Add to cart' : 'Sold out'"
+          ></button>
+          <button type="button" class="btn btn-ghost" @click="goBack()">Back</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+</main>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop</title>
+  <meta name="description" content="A small demo storefront built with Alpine and Tailwind — no framework, no build step.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/theme.css" as="fetch" crossorigin>
+  <style>[x-cloak] { display: none !important; }</style>
+  <script type="module" src="/main.js" defer></script>
+</head>
+<body class="bg-gray-50">
+  <div id="app" x-data="app" x-cloak>
+
+    <div x-html="partials.toast"></div>
+
+    <div id="page" class="flex flex-col min-h-screen"></div>
+
+  </div>
+</body>
+</html>

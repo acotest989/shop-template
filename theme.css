@@ -1,0 +1,50 @@
+/* Design system — every partial builds from these, nothing styles itself from scratch.
+   ink = gray-900 (brand + primary action), amber = warning, red = error only.
+   Injected as <style type="text/tailwindcss"> by app.js; the browser build only reads style tags. */
+
+/* Route changes focus <main> so screen readers announce the new page.
+   It is not reachable by tabbing, so the ring would only ever confuse sighted users. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+  }
+
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2
+           text-sm font-medium transition duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  .btn-primary {
+    @apply bg-gray-900 text-white hover:bg-gray-700 active:scale-[.98]
+           focus-visible:ring-gray-900 disabled:bg-gray-200 disabled:text-gray-400;
+  }
+  .btn-ghost {
+    @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:scale-[.98]
+           focus-visible:ring-gray-900;
+  }
+  .btn-sm { @apply px-3 py-1.5; }
+
+  .input {
+    @apply w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 transition
+           focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10
+           disabled:bg-gray-50;
+  }
+  .label {
+    @apply block text-xs font-medium uppercase tracking-wider text-gray-400;
+  }
+
+  .badge {
+    @apply rounded-full px-2 py-0.5 text-[11px] font-bold;
+  }
+  .badge-ink  { @apply bg-gray-900 text-white shadow-sm; }
+  .badge-warn { @apply bg-amber-100 text-amber-700; }
+
+  .skeleton { @apply animate-pulse rounded bg-gray-200; }
+  .muted    { @apply text-sm text-gray-500; }
+  .eyebrow  { @apply text-[11px] font-medium uppercase tracking-wider text-gray-400; }
+}
