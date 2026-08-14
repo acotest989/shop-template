@@ -8,7 +8,7 @@ import { loginPage } from './pages/login.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
-  theme: '/theme.css',
+  theme: '/assets/theme.css',
   debug: true, // boot log + window.dbg
   // path -> page name. The name gives the template (/pages/<name>.html) and the title.
   // Use an object when a route needs different chrome than the rest:

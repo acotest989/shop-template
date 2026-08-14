@@ -16,7 +16,7 @@ Live Server, with the server root set to this folder:
 }
 ```
 
-`file` is the SPA fallback: every 404 returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
+`file` is the SPA fallback: every 404 returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
 
 Sign in with `demo@shop.test` / `test1234`.
 
@@ -27,7 +27,9 @@ Sign in with `demo@shop.test` / `test1234`.
 index.html        shell: toast slot and #page render target
 main.js           entry point: the app's whole configuration
 app.js            extras merged into the root component (money, signIn, signOut)
-theme.css         design system (.card, .btn, .input, .badge…)
+assets/
+  main.css        loaded with a <link>: x-cloak, before any JS runs
+  theme.css       design system (.card, .btn, .input, .badge…)
 
 pages/            one .html + one .js per route
 partials/         markup reused across routes
@@ -43,7 +45,7 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 ## Decisions worth knowing
 
-**No build step.** Tailwind runs through its browser build, which compiles CSS at runtime and only reads `<style type="text/tailwindcss">` tags — it supports neither `<link>` nor `@import` for local files. That is why `theme.css` is fetched and injected as a style tag by the framework. A production setup would use the Tailwind CLI and ship a compiled stylesheet instead.
+**No build step.** Tailwind runs through its browser build, which compiles CSS at runtime and only reads `<style type="text/tailwindcss">` tags — it supports neither `<link>` nor `@import` for local files. That is why `assets/theme.css` is fetched and injected as a style tag by the framework. A production setup would use the Tailwind CLI and ship a compiled stylesheet instead.
 
 **Data lives behind `services/`.** Pages never fetch anything themselves, and never see the API's shape: `services/products.js` maps [dummyjson.com](https://dummyjson.com) records into the app's own product — dollars become cents, a discount percentage becomes a compare-at price, the title becomes a handle. Pointing the shop at a different API is one file. Auth is still faked in `services/auth.js`; `services/mock.js` marks what is left.
 
