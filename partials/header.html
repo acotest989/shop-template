@@ -17,7 +17,7 @@
         href="/cart"
         class="relative rounded-lg p-1.5 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
         :class="$router.context.path === '/cart' ? 'text-gray-900' : 'text-gray-500'"
-        :aria-label="`Cart, ${$store.cart.count} items`"
+        :aria-label="`Cart, ${$store.cart.count} ${$store.cart.count === 1 ? 'item' : 'items'}`"
       >
         <!-- Inline, not <img>: only this way does the icon follow currentColor. -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="none"
@@ -33,7 +33,7 @@
           x-show="$store.cart.count > 0"
           x-text="$store.cart.count"
           x-transition.scale.duration.200ms
-          class="badge badge-ink absolute -right-0.5 -top-0.5 min-w-[18px] text-center leading-tight"
+          class="badge-count badge-ink absolute -right-0.5 -top-0.5"
         ></span>
       </a>
 

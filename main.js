@@ -21,7 +21,7 @@ createApp({
     '/products/:handle': 'product',
     '/cart': 'cart',
   },
-  protected: ['/admin', '/profile', '/settings', '/chat'], // register protected route here
+  protected: [/* '/admin', '/profile', '/settings', '/chat' */], // register protected route here
   // Overrides only — a page with no entry gets its own name as the title.
   titles: {
     404: 'Page not found',

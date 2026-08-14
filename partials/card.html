@@ -61,8 +61,9 @@
         type="button"
         class="btn btn-primary w-full"
         :disabled="!product.available"
-        :aria-label="'Add ' + product.title + ' to cart'"
+        :aria-label="product.available ? 'Add ' + product.title + ' to cart' : product.title + ' is sold out'"
         x-text="product.available ? 'Add to cart' : 'Sold out'"
+        @click="$store.cart.add(product)"
       ></button>
     </div>
   </div>

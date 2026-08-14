@@ -44,6 +44,12 @@
   .badge-ink  { @apply bg-gray-900 text-white shadow-sm; }
   .badge-warn { @apply bg-amber-100 text-amber-700; }
 
+  /* Sits on top of an icon, so it needs a fixed round shape and a ring to cut itself out. */
+  .badge-count {
+    @apply grid h-4 min-w-4 place-items-center rounded-full px-1
+           text-[10px] font-bold leading-none ring-2 ring-white;
+  }
+
   .skeleton { @apply animate-pulse rounded bg-gray-200; }
   .muted    { @apply text-sm text-gray-500; }
   .eyebrow  { @apply text-[11px] font-medium uppercase tracking-wider text-gray-400; }

@@ -49,10 +49,14 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 **Data lives behind `services/`.** Pages never fetch anything themselves, and never see the API's shape: `services/products.js` maps [dummyjson.com](https://dummyjson.com) records into the app's own product — dollars become cents, a discount percentage becomes a compare-at price, the title becomes a handle. Pointing the shop at a different API is one file. Auth is still faked in `services/auth.js`; `services/mock.js` marks what is left.
 
-**State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard.
+**State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
+
+**A cart line is not a product.** `stores/cart.js` copies eight fields out of a product instead of spreading it. The price is a snapshot of what the visitor agreed to; everything else in `localStorage` would be stale data pretending to be fresh, and every future API field would silently become part of a schema that has to survive across releases.
 
 **Routing.** Route templates are fetched by the router and rendered into `#page`. Links are plain `<a href>`; the router intercepts clicks itself, which keeps Ctrl+click and keyboard behaviour intact. Scroll reset, focus movement and page titles are handled on router events, since the router does none of them.
 
 ## Not done yet
 
-The cart. "Add to cart" is the only button in the app that does nothing.
+Checkout — the button on `/cart` is the only one in the app that does nothing. Auth is faked, and the product list has no search or paging.
+
+The cart was added without touching AlpineShell: a store, a page, a route, two `@click`s.
