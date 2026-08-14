@@ -2,7 +2,7 @@
 
 A demo storefront built on **AlpineShell** — structure and conventions for Alpine.js apps: routing, pages, partials and stores, without a build step. Every dependency comes from a CDN as an ES module; there is no package manager.
 
-The framework lives in `alpineshell/` and is meant to be extracted into its own package. The app never reaches into it — it calls `createApp()` and imports a few helpers, nothing else.
+The framework is [AlpineShell](https://github.com/acotest989/alpineshell-starter), pulled from a CDN and pinned to a tag in the import map in `index.html`. Point that entry at `/alpineshell/index.js` and drop a copy of the framework in to work on it locally.
 
 ## Running it
 
@@ -23,11 +23,6 @@ Sign in with `demo@shop.test` / `test1234`.
 ## Layout
 
 ```
-alpineshell/      the framework
-  index.js        createApp() — the whole public API
-  router.js       routing, auth guard, titles, navigation events
-  root.js         root component, loads partials
-  http.js         fetch client, errorMessage()
 
 index.html        shell: toast slot and #page render target
 main.js           entry point: the app's whole configuration

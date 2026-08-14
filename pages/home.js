@@ -1,5 +1,5 @@
 import { fetchProducts, PAGE_SIZE } from '../services/products.js';
-import { errorMessage } from '../alpineshell/index.js';
+import { errorMessage } from 'alpineshell';
 
 // init() runs every time the route renders home.html
 export const homePage = () => ({

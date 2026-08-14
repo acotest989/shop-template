@@ -1,4 +1,4 @@
-import { createApp } from './alpineshell/index.js';
+import { createApp } from 'alpineshell';
 
 import { app } from './app.js';
 import { session } from './stores/session.js';
@@ -27,7 +27,8 @@ createApp({
     login: 'Sign in',
   },
   stores: { session }, // register new store here
-  partials: ['header', 'footer', 'card', 'toast'], // register new partial here
+  // Only partials you render yourself with x-html; header and footer are fetched by the router.
+  partials: ['card', 'toast'],
   pages: { homePage, productPage, loginPage }, // register new page data here
   // Defaults in effect — uncomment to change:
   // siteName: document.title,   // suffix after the page title

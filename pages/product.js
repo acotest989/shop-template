@@ -1,5 +1,5 @@
 import { fetchProduct } from '../services/products.js';
-import { setPageTitle, errorMessage } from '../alpineshell/index.js';
+import { setPageTitle, errorMessage } from 'alpineshell';
 
 export const productPage = () => ({
   product: null,

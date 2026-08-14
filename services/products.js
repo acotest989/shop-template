@@ -1,4 +1,4 @@
-import { http } from '../alpineshell/index.js';
+import { http } from 'alpineshell';
 import { toProduct } from '../models/product.js';
 
 const ENDPOINT = 'https://dummyjson.com/products';
