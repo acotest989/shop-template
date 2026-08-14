@@ -34,7 +34,7 @@
               ></a>
               <span class="muted mt-0.5" x-text="money(item.price, item.currency)"></span>
 
-              <div class="mt-auto flex items-center gap-3 pt-2">
+              <div class="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 pt-2">
                 <div class="flex items-center rounded-lg border border-gray-300">
                   <button
                     type="button"
@@ -60,13 +60,13 @@
                   :aria-label="'Remove ' + item.title + ' from cart'"
                   @click="$store.cart.remove(item.id)"
                 >Remove</button>
+
+                <span
+                  class="ml-auto text-sm font-semibold text-gray-900"
+                  x-text="money(item.price * item.qty, item.currency)"
+                ></span>
               </div>
             </div>
-
-            <span
-              class="shrink-0 self-end text-sm font-semibold text-gray-900"
-              x-text="money(item.price * item.qty, item.currency)"
-            ></span>
 
           </li>
         </template>
