@@ -6,6 +6,7 @@ import { cart } from './stores/cart.js';
 import { homePage } from './pages/home.js';
 import { productPage } from './pages/product.js';
 import { loginPage } from './pages/login.js';
+import { checkoutPage } from './pages/checkout.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
@@ -20,6 +21,7 @@ createApp({
     '/login': { page: 'login', header: false, footer: true },
     '/products/:handle': 'product',
     '/cart': 'cart',
+    '/checkout': 'checkout',
   },
   protected: [/* '/admin', '/profile', '/settings', '/chat' */], // register protected route here
   // Overrides only — a page with no entry gets its own name as the title.
@@ -31,7 +33,7 @@ createApp({
   stores: { session, cart }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
   partials: ['card', 'toast'],
-  pages: { homePage, productPage, loginPage }, // register new page data here
+  pages: { homePage, productPage, loginPage, checkoutPage }, // register new page data here
   // Defaults in effect — uncomment to change:
   // siteName: document.title,   // suffix after the page title
   // loginPath: '/login',        // where the guard sends a signed-out visitor

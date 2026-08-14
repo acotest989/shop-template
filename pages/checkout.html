@@ -1,0 +1,155 @@
+<main class="mx-auto w-full max-w-3xl p-4" x-data="checkoutPage">
+
+  <!-- receipt -->
+  <template x-if="order">
+    <div class="card p-8 text-center">
+      <p class="eyebrow">Order placed</p>
+      <h1 class="mt-2 text-xl font-semibold text-gray-900">Thank you, <span x-text="order.customer.name"></span>.</h1>
+      <p class="muted mt-2">
+        Reference <span class="font-mono text-gray-900" x-text="order.reference"></span> —
+        <span x-text="money(order.total, order.currency)"></span> to
+        <span x-text="order.customer.email"></span>.
+      </p>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Continue shopping</button>
+    </div>
+  </template>
+
+  <!-- nothing to pay for -->
+  <template x-if="!order && $store.cart.count === 0">
+    <div class="card p-8 text-center">
+      <p class="muted">Your cart is empty.</p>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Browse products</button>
+    </div>
+  </template>
+
+  <template x-if="!order && $store.cart.count > 0">
+    <div>
+      <h1 class="mb-4 text-xl font-semibold text-gray-900">Checkout</h1>
+
+      <div class="grid gap-4 md:grid-cols-5">
+
+        <form class="card flex flex-col gap-4 p-4 md:col-span-3" @submit.prevent="submit()" novalidate>
+          <div>
+            <label for="name" class="label">Full name</label>
+            <input
+              id="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Ada Lovelace"
+              x-model="form.name"
+              @input="errors.name = ''"
+              :disabled="submitting"
+              class="input mt-1"
+              :class="errors.name && 'border-red-400'"
+            >
+            <p class="muted mt-1 text-xs" x-show="!errors.name">The name the courier asks for at the door.</p>
+            <p class="mt-1 text-xs text-red-600" x-show="errors.name" x-text="errors.name"></p>
+          </div>
+
+          <div>
+            <label for="email" class="label">Email</label>
+            <input
+              id="email"
+              type="email"
+              autocomplete="email"
+              placeholder="ada@example.com"
+              x-model="form.email"
+              @input="errors.email = ''"
+              :disabled="submitting"
+              class="input mt-1"
+              :class="errors.email && 'border-red-400'"
+            >
+            <p class="muted mt-1 text-xs" x-show="!errors.email">Where the order confirmation is sent.</p>
+            <p class="mt-1 text-xs text-red-600" x-show="errors.email" x-text="errors.email"></p>
+          </div>
+
+          <div>
+            <label for="phone" class="label">Phone</label>
+            <input
+              id="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+387 61 000 000"
+              x-model="form.phone"
+              @input="errors.phone = ''"
+              :disabled="submitting"
+              class="input mt-1"
+              :class="errors.phone && 'border-red-400'"
+            >
+            <p class="muted mt-1 text-xs" x-show="!errors.phone">How the courier reaches you about the delivery.</p>
+            <p class="mt-1 text-xs text-red-600" x-show="errors.phone" x-text="errors.phone"></p>
+          </div>
+
+          <div>
+            <label for="address" class="label">Shipping address</label>
+            <input
+              id="address"
+              type="text"
+              autocomplete="street-address"
+              placeholder="Maršala Tita 12, 71000 Sarajevo"
+              x-model="form.address"
+              @input="errors.address = ''"
+              :disabled="submitting"
+              class="input mt-1"
+              :class="errors.address && 'border-red-400'"
+            >
+            <p class="muted mt-1 text-xs" x-show="!errors.address">Street and number, postal code and city.</p>
+            <p class="mt-1 text-xs text-red-600" x-show="errors.address" x-text="errors.address"></p>
+          </div>
+
+          <p
+            x-show="error"
+            x-text="error"
+            role="alert"
+            aria-live="polite"
+            class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+          ></p>
+
+          <button
+            type="submit"
+            class="btn btn-primary mt-2 w-full"
+            :disabled="submitting"
+            x-text="submitting ? 'Placing order…' : 'Place order'"
+          ></button>
+
+          <p class="muted text-center text-xs">No card is charged — payment is simulated.</p>
+        </form>
+
+        <aside class="card h-fit p-4 md:col-span-2">
+          <p class="label">Order summary</p>
+
+          <ul class="mt-3 flex flex-col gap-2">
+            <template x-for="item in $store.cart.items" :key="item.id">
+              <li class="flex gap-2 text-sm">
+                <span class="min-w-0 flex-1 truncate text-gray-900" x-text="item.title"></span>
+                <span class="muted shrink-0" x-text="'×' + item.qty"></span>
+                <span
+                  class="shrink-0 font-medium text-gray-900"
+                  x-text="money(item.price * item.qty, item.currency)"
+                ></span>
+              </li>
+            </template>
+          </ul>
+
+          <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 text-sm">
+            <span class="muted">Shipping</span>
+            <span class="font-medium text-gray-900">Free</span>
+          </div>
+
+          <div class="mt-2 flex items-baseline justify-between">
+            <span class="text-sm font-medium text-gray-900">Total</span>
+            <span
+              class="text-lg font-semibold text-gray-900"
+              x-text="money($store.cart.subtotal, $store.cart.currency)"
+            ></span>
+          </div>
+
+          <button type="button" class="btn btn-ghost mt-4 w-full" @click="goTo('/cart')">Edit cart</button>
+        </aside>
+
+      </div>
+    </div>
+  </template>
+
+</main>

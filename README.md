@@ -57,6 +57,6 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 ## Not done yet
 
-Checkout — the button on `/cart` is the only one in the app that does nothing. Auth is faked, and the product list has no search or paging.
+Real auth and a real payment provider — `services/auth.js` and `services/orders.js` are the two seams where they would go, and both are marked by importing `services/mock.js`. The product list has no paging, so it renders the whole catalogue.
 
-The cart was added without touching AlpineShell: a store, a page, a route, two `@click`s.
+Nothing here has needed a change to AlpineShell. The cart, search and checkout are all stores, pages, services and routes.
