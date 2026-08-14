@@ -8,6 +8,11 @@
   outline: none;
 }
 
+/* The search field carries its own clear button; WebKit's would be a second one. */
+input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+
 @layer components {
   .card {
     @apply rounded-xl border border-gray-200 bg-white shadow-sm;
