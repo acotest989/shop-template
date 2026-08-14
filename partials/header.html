@@ -12,6 +12,31 @@
     </nav>
 
     <div class="ml-auto flex items-center gap-3">
+
+      <a
+        href="/cart"
+        class="relative rounded-lg p-1.5 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+        :class="$router.context.path === '/cart' ? 'text-gray-900' : 'text-gray-500'"
+        :aria-label="`Cart, ${$store.cart.count} items`"
+      >
+        <!-- Inline, not <img>: only this way does the icon follow currentColor. -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <path d="M2.75 3.75h1.3a1 1 0 0 1 .98.79l.47 1.71" />
+          <path d="M5.5 6.25h14.2l-1.7 7.2a1.5 1.5 0 0 1-1.46 1.15H8.9a1.5 1.5 0 0 1-1.47-1.19Z" />
+          <circle cx="9.5" cy="18" r="1.4" />
+          <circle cx="16.5" cy="18" r="1.4" />
+        </svg>
+
+        <span
+          x-show="$store.cart.count > 0"
+          x-text="$store.cart.count"
+          x-transition.scale.duration.200ms
+          class="badge badge-ink absolute -right-0.5 -top-0.5 min-w-[18px] text-center leading-tight"
+        ></span>
+      </a>
+
       <template x-if="$store.session.user">
         <div class="flex items-center gap-3">
           <span class="muted hidden sm:inline" x-text="$store.session.user.name"></span>

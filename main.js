@@ -19,6 +19,7 @@ createApp({
     '/': 'home',
     '/login': { page: 'login', header: false, footer: true },
     '/products/:handle': 'product',
+    '/cart': 'cart',
   },
   protected: ['/admin', '/profile', '/settings', '/chat'], // register protected route here
   // Overrides only — a page with no entry gets its own name as the title.

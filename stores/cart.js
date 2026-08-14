@@ -1,3 +1,16 @@
+// A cart line is not a product: only what the cart shows or charges for.
+// The price is a snapshot from the moment of adding — that is what the visitor agreed to.
+const toLine = (product, qty) => ({
+  id: product.id,
+  handle: product.handle,
+  title: product.title,
+  image: product.image,
+  price: product.price,
+  currency: product.currency,
+  stock: product.stock,
+  qty,
+});
+
 export const cart = () => ({
   items: Alpine.$persist([]).as('cart'),
   
@@ -33,7 +46,7 @@ export const cart = () => ({
     if (item) {
       this.setQty(item.id, item.qty + qty);
     } else {
-      this.items.push({ ...product, qty });
+      this.items.push(toLine(product, Math.min(qty, product.stock)));
     }
   },
   
