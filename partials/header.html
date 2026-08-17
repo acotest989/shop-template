@@ -39,7 +39,12 @@
 
       <template x-if="$store.session.user">
         <div class="flex items-center gap-3">
-          <span class="muted hidden sm:inline" x-text="$store.session.user.name"></span>
+          <a
+            href="/account"
+            class="muted hidden transition-colors hover:text-gray-900 sm:inline"
+            :class="$router.context.path === '/account' && 'font-medium text-gray-900'"
+            x-text="$store.session.user.name"
+          ></a>
           <button type="button" class="btn btn-ghost btn-sm" @click="signOut()">Sign out</button>
         </div>
       </template>

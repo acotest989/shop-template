@@ -16,7 +16,23 @@ That is the whole shop on `http://127.0.0.1:8090`: PocketBase answers `/api` and
 
 `--indexFallback` is on by default, and it is the SPA fallback: an unknown path returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
 
-Sign in with `demo@shop.test` / `test1234`.
+Sign in with `demo@shop.test` / `test1234`, or register your own account.
+
+## Accounts
+
+The whole surface is real, not stubbed: register, email verification, password reset, changing your name, email or password, and deleting the account. `/account` is the only guarded route.
+
+Three of those arrive by email, so the templates under **Collections → users → Options** in the PocketBase dashboard must link back here rather than to its own UI — the token is the only required part of the URL:
+
+| | |
+|---|---|
+| Verification | `{APP_URL}/verify/{TOKEN}` |
+| Password reset | `{APP_URL}/reset-password/{TOKEN}` |
+| Email change | `{APP_URL}/confirm-email/{TOKEN}` |
+
+`{APP_URL}` comes from **Settings → Application**, and mail needs SMTP configured — the built-in sendmail will not deliver.
+
+Two behaviours worth knowing before they surprise you. Changing a password or an email invalidates every token the account has, so the app signs itself out on purpose. And `/forgot-password` answers the same way whether or not the address has an account, because the honest answer would tell a stranger who is registered here.
 
 Live Server also works, and brings reload-on-save, but then the API is on another origin: add a proxy so `/api` forwards to `127.0.0.1:8090`, and exclude `server/pb_data/**` from the watcher — otherwise every write to the database reloads the page.
 
@@ -61,5 +77,7 @@ That boundary has now been tested rather than asserted. Sign-in moved from a har
 ## Not done yet
 
 Products and orders still come from elsewhere: the catalogue from dummyjson, orders from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. Both belong in PocketBase — orders behind a hook, so the price is never the client's word. The product list has no paging, so it renders the whole catalogue.
+
+On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 
 Nothing here has needed a change to AlpineShell. The cart, search and checkout are all stores, pages, services and routes.

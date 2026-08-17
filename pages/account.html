@@ -1,0 +1,198 @@
+<main class="mx-auto w-full max-w-2xl p-4" x-data="accountPage">
+  <h1 class="mb-4 text-xl font-semibold text-gray-900">Account</h1>
+
+  <div class="flex flex-col gap-4">
+
+    <!-- unverified notice -->
+    <template x-if="!verified">
+      <div class="card flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50 p-4">
+        <p class="text-sm text-amber-800">
+          <span class="font-medium">Your email is not verified.</span>
+          <span x-show="resent"> A new link is on its way.</span>
+        </p>
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm"
+          x-show="!resent"
+          @click="resendVerification()"
+        >Send the link again</button>
+      </div>
+    </template>
+
+    <!-- name -->
+    <section class="card p-4">
+      <p class="label">Your name</p>
+      <form class="mt-3 flex flex-wrap items-start gap-3" @submit.prevent="saveName()" novalidate>
+        <div class="min-w-48 flex-1">
+          <input
+            type="text"
+            autocomplete="name"
+            aria-label="Your name"
+            x-model="profile.name"
+            @input="profile.error = ''; profile.saved = false"
+            :disabled="profile.pending"
+            class="input"
+            :class="profile.error && 'border-red-400'"
+          >
+          <p class="mt-1 text-xs text-red-600" x-show="profile.error" x-text="profile.error"></p>
+          <p class="muted mt-1 text-xs" x-show="profile.saved">Saved.</p>
+        </div>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          :disabled="profile.pending"
+          x-text="profile.pending ? 'Saving…' : 'Save'"
+        ></button>
+      </form>
+    </section>
+
+    <!-- email -->
+    <section class="card p-4">
+      <p class="label">Email</p>
+      <p class="muted mt-1 text-sm">
+        Currently <span class="font-medium text-gray-900" x-text="$store.session.user?.email"></span>.
+      </p>
+
+      <template x-if="emailChange.sent">
+        <p class="muted mt-3 text-sm">
+          We sent a confirmation link to
+          <span class="font-medium text-gray-900" x-text="emailChange.email"></span>.
+          The address changes once you open it — that link is what proves the inbox is yours.
+        </p>
+      </template>
+
+      <template x-if="!emailChange.sent">
+        <form class="mt-3 flex flex-wrap items-start gap-3" @submit.prevent="sendEmailChange()" novalidate>
+          <div class="min-w-48 flex-1">
+            <input
+              type="email"
+              autocomplete="email"
+              aria-label="New email address"
+              placeholder="new@example.com"
+              x-model="emailChange.email"
+              @input="emailChange.error = ''"
+              :disabled="emailChange.pending"
+              class="input"
+              :class="emailChange.error && 'border-red-400'"
+            >
+            <p class="mt-1 text-xs text-red-600" x-show="emailChange.error" x-text="emailChange.error"></p>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-ghost"
+            :disabled="emailChange.pending"
+            x-text="emailChange.pending ? 'Sending…' : 'Change email'"
+          ></button>
+        </form>
+      </template>
+    </section>
+
+    <!-- password -->
+    <section class="card p-4">
+      <p class="label">Password</p>
+      <p class="muted mt-1 text-sm">Changing it signs out every device, including this one.</p>
+
+      <form class="mt-3 flex flex-col gap-3" @submit.prevent="savePassword()" novalidate>
+        <div>
+          <input
+            type="password"
+            autocomplete="current-password"
+            aria-label="Current password"
+            placeholder="Current password"
+            x-model="password.old"
+            @input="password.errors.old = ''; password.error = ''"
+            :disabled="password.pending"
+            class="input"
+            :class="password.errors.old && 'border-red-400'"
+          >
+          <p class="mt-1 text-xs text-red-600" x-show="password.errors.old" x-text="password.errors.old"></p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <div class="min-w-48 flex-1">
+            <input
+              type="password"
+              autocomplete="new-password"
+              aria-label="New password"
+              placeholder="New password"
+              x-model="password.next"
+              @input="password.errors.next = ''"
+              :disabled="password.pending"
+              class="input"
+              :class="password.errors.next && 'border-red-400'"
+            >
+            <p class="mt-1 text-xs text-red-600" x-show="password.errors.next" x-text="password.errors.next"></p>
+          </div>
+          <div class="min-w-48 flex-1">
+            <input
+              type="password"
+              autocomplete="new-password"
+              aria-label="Repeat new password"
+              placeholder="Repeat new password"
+              x-model="password.confirm"
+              @input="password.errors.confirm = ''"
+              :disabled="password.pending"
+              class="input"
+              :class="password.errors.confirm && 'border-red-400'"
+            >
+            <p class="mt-1 text-xs text-red-600" x-show="password.errors.confirm" x-text="password.errors.confirm"></p>
+          </div>
+        </div>
+
+        <p
+          x-show="password.error"
+          x-text="password.error"
+          role="alert"
+          aria-live="polite"
+          class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+        ></p>
+
+        <button
+          type="submit"
+          class="btn btn-primary self-start"
+          :disabled="password.pending"
+          x-text="password.pending ? 'Changing…' : 'Change password'"
+        ></button>
+      </form>
+    </section>
+
+    <!-- delete -->
+    <section class="card border-red-200 p-4">
+      <p class="label text-red-500">Delete account</p>
+
+      <template x-if="!danger.confirming">
+        <div class="mt-1">
+          <p class="muted text-sm">The account and its orders go with it. This cannot be undone.</p>
+          <button type="button" class="btn btn-ghost mt-3 border-red-300 text-red-600 hover:bg-red-50" @click="danger.confirming = true">
+            Delete account
+          </button>
+        </div>
+      </template>
+
+      <template x-if="danger.confirming">
+        <div class="mt-1">
+          <p class="text-sm font-medium text-red-700">Delete this account for good?</p>
+          <p
+            x-show="danger.error"
+            x-text="danger.error"
+            role="alert"
+            class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+          ></p>
+          <div class="mt-3 flex flex-wrap gap-3">
+            <button
+              type="button"
+              class="btn bg-red-600 text-white hover:bg-red-500"
+              :disabled="danger.pending"
+              @click="confirmDelete()"
+              x-text="danger.pending ? 'Deleting…' : 'Yes, delete it'"
+            ></button>
+            <button type="button" class="btn btn-ghost" :disabled="danger.pending" @click="danger.confirming = false">
+              Keep my account
+            </button>
+          </div>
+        </div>
+      </template>
+    </section>
+
+  </div>
+</main>

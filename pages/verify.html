@@ -1,0 +1,30 @@
+<main class="flex flex-1 items-center justify-center p-4" x-data="verifyPage">
+  <div class="card w-full max-w-sm p-6 text-center">
+
+    <template x-if="pending">
+      <div>
+        <div class="skeleton mx-auto h-3 w-32"></div>
+        <div class="skeleton mx-auto mt-3 h-3 w-48"></div>
+      </div>
+    </template>
+
+    <template x-if="!pending && !error">
+      <div>
+        <p class="eyebrow">Email verified</p>
+        <h1 class="mt-2 text-lg font-semibold text-gray-900">That address is yours.</h1>
+        <p class="muted mt-2">Nothing else to do — the account is confirmed.</p>
+        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/')">Continue shopping</button>
+      </div>
+    </template>
+
+    <template x-if="error">
+      <div>
+        <p class="eyebrow">Verification failed</p>
+        <h1 class="mt-2 text-lg font-semibold text-gray-900" x-text="error"></h1>
+        <p class="muted mt-2">Signing in and asking for a new link from your account page will send a fresh one.</p>
+        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/login')">Sign in</button>
+      </div>
+    </template>
+
+  </div>
+</main>

@@ -7,6 +7,11 @@ import { homePage } from './pages/home.js';
 import { productPage } from './pages/product.js';
 import { loginPage } from './pages/login.js';
 import { registerPage } from './pages/register.js';
+import { verifyPage } from './pages/verify.js';
+import { forgotPage } from './pages/forgot.js';
+import { resetPage } from './pages/reset.js';
+import { accountPage } from './pages/account.js';
+import { confirmEmailPage } from './pages/confirm-email.js';
 import { checkoutPage } from './pages/checkout.js';
 
 createApp({
@@ -21,22 +26,36 @@ createApp({
     '/': 'home',
     '/login': { page: 'login', header: false, footer: true },
     '/register': { page: 'register', header: false, footer: true },
+    // The paths the mail templates link to; the token is the whole point of the route.
+    '/verify/:token': { page: 'verify', header: false, footer: true },
+    '/forgot-password': { page: 'forgot', header: false, footer: true },
+    '/reset-password/:token': { page: 'reset', header: false, footer: true },
+    '/confirm-email/:token': { page: 'confirm-email', header: false, footer: true },
+    '/account': 'account',
     '/products/:handle': 'product',
     '/cart': 'cart',
     '/checkout': 'checkout',
   },
-  protected: [/* '/admin', '/profile', '/settings', '/chat' */], // register protected route here
+  protected: ['/account'], // register protected route here
   // Overrides only — a page with no entry gets its own name as the title.
   titles: {
     404: 'Page not found',
     home: 'Products',
     login: 'Sign in',
     register: 'Create an account',
+    verify: 'Verify your email',
+    forgot: 'Reset your password',
+    reset: 'Set a new password',
+    'confirm-email': 'Confirm your new email',
   },
   stores: { session, cart }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
   partials: ['card', 'toast'],
-  pages: { homePage, productPage, loginPage, registerPage, checkoutPage }, // register new page data here
+  // register new page data here
+  pages: {
+    homePage, productPage, loginPage, registerPage, verifyPage,
+    forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage,
+  },
   // Defaults in effect — uncomment to change:
   // siteName: document.title,   // suffix after the page title
   // loginPath: '/login',        // where the guard sends a signed-out visitor
