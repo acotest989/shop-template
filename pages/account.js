@@ -17,7 +17,7 @@ export const accountPage = () => ({
   verified: isVerified(),
   resent: false,
 
-  profile: { name: '', pending: false, error: '', saved: false },
+  profile: { name: '', pending: false, error: '' },
   emailChange: { email: '', pending: false, error: '', sent: false },
   password: { old: '', next: '', confirm: '', errors: {}, pending: false, error: '' },
   danger: { confirming: false, pending: false, error: '' },
@@ -31,7 +31,6 @@ export const accountPage = () => ({
     if (section.pending) return;
 
     section.error = '';
-    section.saved = false;
 
     if (section.name.trim().length < 2) {
       section.error = 'Please enter your name.';
@@ -42,7 +41,7 @@ export const accountPage = () => ({
 
     try {
       await updateName(section.name);
-      section.saved = true;
+      this.notify('Name saved.', 'success');
     } catch (err) {
       console.error(err);
       section.error = err.fields?.name ?? errorMessage(err, 'Could not save your name.');
@@ -55,8 +54,10 @@ export const accountPage = () => ({
     try {
       await requestVerification(this.$store.session.user.email);
       this.resent = true;
+      this.notify('A new verification link is on its way.');
     } catch (err) {
       console.error(err);
+      this.notify('Could not send the link. Try again in a minute.', 'error');
     }
   },
 

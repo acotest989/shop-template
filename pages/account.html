@@ -8,7 +8,6 @@
       <div class="card flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50 p-4">
         <p class="text-sm text-amber-800">
           <span class="font-medium">Your email is not verified.</span>
-          <span x-show="resent"> A new link is on its way.</span>
         </p>
         <button
           type="button"
@@ -35,7 +34,6 @@
             :class="profile.error && 'border-red-400'"
           >
           <p class="mt-1 text-xs text-red-600" x-show="profile.error" x-text="profile.error"></p>
-          <p class="muted mt-1 text-xs" x-show="profile.saved">Saved.</p>
         </div>
         <button
           type="submit"
