@@ -6,25 +6,19 @@ The framework is [AlpineShell](https://github.com/acotest989/alpineshell), pulle
 
 ## Running it
 
-Live Server, with the server root set to this folder:
-
-```json
-// .vscode/settings.json (workspace root)
-{
-  "liveServer.settings.root": "/shop",
-  "liveServer.settings.file": "index.html"
-}
-```
-
-`file` is the SPA fallback: every 404 returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
-
-Sign-in talks to a real backend, so start that too — see [server/README.md](server/README.md):
+One process serves both halves — see [server/README.md](server/README.md):
 
 ```bash
-cd server && ./pocketbase serve
+cd server && ./pocketbase serve --publicDir=..
 ```
 
-Then sign in with `demo@shop.test` / `test1234`. Everything except sign-in still works without it.
+That is the whole shop on `http://127.0.0.1:8090`: PocketBase answers `/api` and serves these files for everything else. Same origin, so there is nothing to configure for CORS and the SDK needs no host — `services/pb.js` points at `/`.
+
+`--indexFallback` is on by default, and it is the SPA fallback: an unknown path returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
+
+Sign in with `demo@shop.test` / `test1234`.
+
+Live Server also works, and brings reload-on-save, but then the API is on another origin: add a proxy so `/api` forwards to `127.0.0.1:8090`, and exclude `server/pb_data/**` from the watcher — otherwise every write to the database reloads the page.
 
 ## Layout
 

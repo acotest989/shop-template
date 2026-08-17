@@ -18,6 +18,40 @@ export async function login({ email, password }) {
   }
 }
 
+// PocketBase reports validation per field. Flattening it here means the page never
+// learns the shape of somebody else's error response.
+function fieldErrors(err) {
+  const fields = err.data?.data;
+  if (!fields || Object.keys(fields).length === 0) return null;
+
+  return Object.fromEntries(
+    Object.entries(fields).map(([field, detail]) => [field, detail.message]),
+  );
+}
+
+// create() does not sign anybody in, so the three steps are deliberate: make the
+// account, send the verification link, then start the session.
+export async function register({ name, email, password }) {
+  const identity = email.trim();
+
+  try {
+    await pb.collection('users').create({ name: name.trim(), email: identity, password, passwordConfirm: password });
+  } catch (err) {
+    const fields = fieldErrors(err);
+    if (!fields) throw err;
+
+    const rejected = new Error('Please check the form.');
+    rejected.fields = fields;
+    throw rejected;
+  }
+
+  // A mail failure must not read as a failed signup: the account exists either way,
+  // and a retry would come back as "email already in use".
+  await pb.collection('users').requestVerification(identity).catch(console.error);
+
+  return login({ email: identity, password });
+}
+
 export function logout() {
   pb.authStore.clear();
 }

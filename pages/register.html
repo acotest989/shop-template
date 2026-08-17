@@ -1,0 +1,104 @@
+<main class="flex flex-1 items-center justify-center p-4" x-data="registerPage">
+
+  <template x-if="registered">
+    <div class="card w-full max-w-sm p-6 text-center">
+      <p class="eyebrow">Welcome</p>
+      <h1 class="mt-2 text-lg font-semibold text-gray-900">You are signed in.</h1>
+      <p class="muted mt-2">
+        We sent a verification link to <span class="font-medium text-gray-900" x-text="form.email"></span>.
+        You can shop right away; confirming it just proves the address is yours.
+      </p>
+      <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/')">Start shopping</button>
+    </div>
+  </template>
+
+  <template x-if="!registered">
+    <div class="card w-full max-w-sm p-6">
+      <h1 class="text-lg font-semibold text-gray-900">Create an account</h1>
+      <p class="muted mt-1">Already have one? <a href="/login" class="font-medium text-gray-900 underline underline-offset-2">Sign in</a>.</p>
+
+      <form class="mt-5 flex flex-col gap-4" @submit.prevent="submit()" novalidate>
+        <div>
+          <label for="name" class="label">Name</label>
+          <input
+            id="name"
+            x-init="$el.focus()"
+            type="text"
+            autocomplete="name"
+            placeholder="Ada Lovelace"
+            x-model="form.name"
+            @input="errors.name = ''"
+            :disabled="pending"
+            class="input mt-1"
+            :class="errors.name && 'border-red-400'"
+          >
+          <p class="mt-1 text-xs text-red-600" x-show="errors.name" x-text="errors.name"></p>
+        </div>
+
+        <div>
+          <label for="email" class="label">Email</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="ada@example.com"
+            x-model="form.email"
+            @input="errors.email = ''"
+            :disabled="pending"
+            class="input mt-1"
+            :class="errors.email && 'border-red-400'"
+          >
+          <p class="muted mt-1 text-xs" x-show="!errors.email">Where the verification link is sent.</p>
+          <p class="mt-1 text-xs text-red-600" x-show="errors.email" x-text="errors.email"></p>
+        </div>
+
+        <div>
+          <label for="password" class="label">Password</label>
+          <input
+            id="password"
+            type="password"
+            autocomplete="new-password"
+            x-model="form.password"
+            @input="errors.password = ''"
+            :disabled="pending"
+            class="input mt-1"
+            :class="errors.password && 'border-red-400'"
+          >
+          <p class="muted mt-1 text-xs" x-show="!errors.password">At least 8 characters.</p>
+          <p class="mt-1 text-xs text-red-600" x-show="errors.password" x-text="errors.password"></p>
+        </div>
+
+        <div>
+          <label for="passwordConfirm" class="label">Repeat password</label>
+          <input
+            id="passwordConfirm"
+            type="password"
+            autocomplete="new-password"
+            x-model="form.passwordConfirm"
+            @input="errors.passwordConfirm = ''"
+            :disabled="pending"
+            class="input mt-1"
+            :class="errors.passwordConfirm && 'border-red-400'"
+          >
+          <p class="mt-1 text-xs text-red-600" x-show="errors.passwordConfirm" x-text="errors.passwordConfirm"></p>
+        </div>
+
+        <p
+          x-show="error"
+          x-text="error"
+          role="alert"
+          aria-live="polite"
+          class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"
+        ></p>
+
+        <button
+          type="submit"
+          class="btn btn-primary w-full"
+          :disabled="pending"
+          x-text="pending ? 'Creating account…' : 'Create account'"
+        ></button>
+      </form>
+    </div>
+  </template>
+
+</main>
