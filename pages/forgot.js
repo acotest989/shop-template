@@ -1,4 +1,5 @@
 import { requestPasswordReset } from '../services/auth.js';
+import { errorMessage } from 'alpineshell';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -20,10 +21,14 @@ export const forgotPage = () => ({
     this.pending = true;
 
     // The service swallows failures on purpose, so the answer is the same whether
-    // or not the address has an account here.
-    await requestPasswordReset(this.email);
-
-    this.pending = false;
-    this.sent = true;
+    // or not the address has an account here. Only being rate limited comes back.
+    try {
+      await requestPasswordReset(this.email);
+      this.sent = true;
+    } catch (err) {
+      this.error = errorMessage(err, 'Could not send the link.');
+    } finally {
+      this.pending = false;
+    }
   },
 });

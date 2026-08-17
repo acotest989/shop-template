@@ -1,5 +1,5 @@
 import { register } from '../services/auth.js';
-import { errorMessage } from 'alpineshell';
+import { errorMessage, consumeRedirect } from 'alpineshell';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8; // PocketBase's own minimum for the users collection
@@ -24,6 +24,12 @@ export const registerPage = () => ({
     };
 
     return !Object.values(this.errors).some(Boolean);
+  },
+
+  // Whoever the guard bounced to /login may have come here instead; the destination
+  // it remembered is still theirs.
+  start() {
+    this.goTo(consumeRedirect() ?? '/');
   },
 
   async submit() {

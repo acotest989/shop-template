@@ -4,11 +4,17 @@ import { toUser } from '../models/user.js';
 // All contact with the SDK's auth lives here. The token is the SDK's business —
 // it stores it, refreshes it and sends it — so nothing above this file sees one.
 
+// The rate limiter answers 429, and its own wording is not something to hand a
+// visitor. Every entry point here can hit it, so the translation lives in one place.
+const TOO_MANY = 'Too many attempts. Please wait a minute and try again.';
+
 export async function login({ email, password }) {
   try {
     const { record } = await pb.collection('users').authWithPassword(email.trim(), password);
     return toUser(record);
   } catch (err) {
+    if (err.status === 429) throw new Error(TOO_MANY);
+
     // PocketBase answers a bad identity or password with 400; anything else is a
     // real failure and must not be disguised as wrong credentials.
     if (err.status === 400) {
@@ -22,6 +28,8 @@ export async function login({ email, password }) {
 // a plain { field: message } — means a page never learns the shape of somebody
 // else's error response.
 function rethrow(err) {
+  if (err.status === 429) throw new Error(TOO_MANY);
+
   const fields = err.data?.data;
   if (!fields || Object.keys(fields).length === 0) throw err;
 
@@ -67,11 +75,13 @@ export async function confirmVerification(token) {
 }
 
 // Never reports whether the address exists: that answer alone would tell a stranger
-// who has an account here.
+// who has an account here. Being rate limited is not that answer — it is about us,
+// not about them — so it is the one failure worth showing.
 export async function requestPasswordReset(email) {
   try {
     await pb.collection('users').requestPasswordReset(email.trim());
   } catch (err) {
+    if (err.status === 429) throw new Error(TOO_MANY);
     console.error(err);
   }
 }
