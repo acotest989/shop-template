@@ -1,3 +1,5 @@
+import { storageKey } from '../lib/storage.js';
+
 // A cart line is not a product: only what the cart shows or charges for.
 // The price is a snapshot from the moment of adding — that is what the visitor agreed to.
 const toLine = (product, qty) => ({
@@ -12,7 +14,7 @@ const toLine = (product, qty) => ({
 });
 
 export const cart = () => ({
-  items: Alpine.$persist([]).as('cart'),
+  items: Alpine.$persist([]).as(storageKey('cart')),
   
   get count() {
     return this.items.reduce((total, item) => total + item.qty, 0);

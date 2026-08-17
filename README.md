@@ -18,7 +18,13 @@ Live Server, with the server root set to this folder:
 
 `file` is the SPA fallback: every 404 returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
 
-Sign in with `demo@shop.test` / `test1234`.
+Sign-in talks to a real backend, so start that too — see [server/README.md](server/README.md):
+
+```bash
+cd server && ./pocketbase serve
+```
+
+Then sign in with `demo@shop.test` / `test1234`. Everything except sign-in still works without it.
 
 ## Layout
 
@@ -36,7 +42,8 @@ partials/         markup reused across routes
 stores/           Alpine stores (state that outlives a page)
 services/         talks to the outside world; only place that knows endpoints
 models/           what the app's own records look like; API shapes stop here
-lib/              app helpers (money, discountPercent)
+lib/              app helpers (money, discountPercent, storageKey)
+server/           PocketBase: the database, auth and API in one binary
 ```
 
 A route is one line: `'/products/:handle': 'product'`. From that name the framework derives the template (`/pages/product.html`) and the title (`Product`, overridable in `titles`). The page's own markup names its component (`x-data="productPage"`), which `main.js` registers.
@@ -47,7 +54,9 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 **No build step.** Tailwind runs through its browser build, which compiles CSS at runtime and only reads `<style type="text/tailwindcss">` tags — it supports neither `<link>` nor `@import` for local files. That is why `assets/theme.css` is fetched and injected as a style tag by the framework. A production setup would use the Tailwind CLI and ship a compiled stylesheet instead.
 
-**Data lives behind `services/`.** Pages never fetch anything themselves, and never see the API's shape: `services/products.js` maps [dummyjson.com](https://dummyjson.com) records into the app's own product — dollars become cents, a discount percentage becomes a compare-at price, the title becomes a handle. Pointing the shop at a different API is one file. Auth is still faked in `services/auth.js`; `services/mock.js` marks what is left.
+**Data lives behind `services/`.** Pages never fetch anything themselves, and never see the API's shape: `services/products.js` maps [dummyjson.com](https://dummyjson.com) records into the app's own product — dollars become cents, a discount percentage becomes a compare-at price, the title becomes a handle. Pointing the shop at a different API is one file.
+
+That boundary has now been tested rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, and `pages/login.html`, `pages/login.js` and `app.js` did not. Whatever `services/mock.js` still imports is what is still faked.
 
 **State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
 
@@ -57,6 +66,6 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 ## Not done yet
 
-Real auth and a real payment provider — `services/auth.js` and `services/orders.js` are the two seams where they would go, and both are marked by importing `services/mock.js`. The product list has no paging, so it renders the whole catalogue.
+Products and orders still come from elsewhere: the catalogue from dummyjson, orders from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. Both belong in PocketBase — orders behind a hook, so the price is never the client's word. The product list has no paging, so it renders the whole catalogue.
 
 Nothing here has needed a change to AlpineShell. The cart, search and checkout are all stores, pages, services and routes.
