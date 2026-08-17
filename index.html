@@ -9,11 +9,14 @@
   <link rel="stylesheet" href="/assets/main.css">
   <link rel="preload" href="/assets/theme.css" as="fetch" crossorigin>
 
-  <!-- The framework, in one place. Swap the URL for /alpineshell/index.js to work on it locally. -->
+  <!-- Every dependency of this app and its version, in one place. A bare specifier
+       can only resolve one way, so no file can load a second copy by accident.
+       Swap the framework URL for /alpineshell/index.js to work on it locally. -->
   <script type="importmap">
   {
     "imports": {
-      "alpineshell": "https://cdn.jsdelivr.net/gh/acotest989/alpineshell@v0.3.1/index.js"
+      "alpineshell": "https://cdn.jsdelivr.net/gh/acotest989/alpineshell@v0.3.1/index.js",
+      "pocketbase": "https://cdn.jsdelivr.net/npm/pocketbase@0.27.3/dist/pocketbase.es.mjs"
     }
   }
   </script>

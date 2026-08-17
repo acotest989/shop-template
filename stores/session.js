@@ -1,22 +1,23 @@
-import { login, AUTH_KEY, AUTH_TOKEN } from '../services/auth.js';
+import { login, logout, currentUser, onAuthChange } from '../services/auth.js';
 
-// A store, not component data: the router's guard reads it from outside Alpine.
+// A mirror, not a second copy: the SDK owns the session and persists it, this store
+// only makes it reactive for the UI and readable by the guard from outside Alpine.
 export const session = () => ({
-  user: Alpine.$persist(null).as(AUTH_KEY),
-  token: Alpine.$persist(null).as(AUTH_TOKEN),
+  user: currentUser(),
+
+  init() {
+    onAuthChange((user) => (this.user = user)); // a token expiring, or another tab signing out
+  },
 
   get isAuthenticated() {
     return this.user != null;
   },
 
   async signIn(email, password) {
-    const { user, token } = await login({ email, password });
-    this.user = user;
-    this.token = token;
+    this.user = await login({ email, password });
   },
 
   signOut() {
-    this.user = null; // removeItem would clear storage but leave stale state in memory
-    this.token = null;
+    logout(); // onAuthChange clears this.user
   },
 });
