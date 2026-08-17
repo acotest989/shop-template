@@ -26,6 +26,19 @@ The dashboard is at `/_/`. The demo account the app signs in with is a record in
 
 Records are data, not schema, so the demo account does not travel with the repository. Create it by hand after the first `serve`.
 
+Settings are the exception to all of this: unlike collections, PocketBase does not write them to a migration when you change them in the dashboard. Anything that must survive a fresh checkout — the rate limits, for instance — is a hand-written migration.
+
+## Before it goes public
+
+None of this matters on `127.0.0.1`, and all of it matters the day the URL is real.
+
+- **Trusted proxy headers** (Settings → Application). Behind a reverse proxy every request appears to come from the proxy, so the rate limiter would count the whole world as one client and one flood would lock everybody out.
+- **Restrict the superuser** to your own IP or subnet, and turn on MFA for it.
+- **Backups to S3-compatible storage** on a schedule. A single-node SQLite database is exactly as durable as the disk under it.
+- **SMTP on the real domain**, with SPF and DKIM, or the verification and reset mail lands in spam.
+- **`--publicDir`** must point at the frontend only. Serving the repository root would publish `server/pb_data/data.db`.
+- **Pin the version** — see below — and read the changelog before upgrading.
+
 ## Pin the version
 
 PocketBase is still pre-1.0 and its own documentation says backward compatibility is not guaranteed until then. Read the changelog before upgrading and bump the version in this file and in the Dockerfile deliberately — never blindly.
