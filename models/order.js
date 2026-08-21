@@ -13,7 +13,7 @@ export function toOrder({ customer, items }) {
       address: customer.address.trim(),
     },
     lines: items.map(({ id, title, price, qty }) => ({ id, title, price, qty })),
-    currency: items[0]?.currency ?? 'USD',
+    currency: items[0]?.currency ?? 'EUR',
     subtotal,
     shipping,
     total: subtotal + shipping,

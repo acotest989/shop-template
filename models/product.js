@@ -15,7 +15,7 @@ export function toProduct(raw) {
     vendor: raw.brand ?? raw.category,
     price,
     compare_at_price: discount > 0 ? Math.round(price / (1 - discount / 100)) : null,
-    currency: 'USD',
+    currency: 'EUR',
     available: raw.availabilityStatus !== 'Out of Stock' && raw.stock > 0,
     stock: raw.stock,
     rating: raw.rating,
