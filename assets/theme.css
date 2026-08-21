@@ -1,6 +1,6 @@
 /* Design system — every partial builds from these, nothing styles itself from scratch.
    ink = gray-900 (brand + primary action), amber = warning, red = error only.
-   Injected as <style type="text/tailwindcss"> by app.js; the browser build only reads style tags. */
+   Injected as <style type="text/tailwindcss"> by the framework; the browser build only reads style tags. */
 
 /* Route changes focus <main> so screen readers announce the new page.
    It is not reachable by tabbing, so the ring would only ever confuse sighted users. */
