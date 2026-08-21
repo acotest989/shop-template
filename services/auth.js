@@ -1,4 +1,5 @@
 import { pb } from './pb.js';
+import { fieldError } from 'alpineshell';
 import { toUser } from '../models/user.js';
 
 // All contact with the SDK's auth lives here. The token is the SDK's business —
@@ -24,6 +25,15 @@ export async function login({ email, password }) {
   }
 }
 
+// Only the ones a visitor can actually trigger. Keyed by code rather than by the
+// server's wording, which changes between releases and would take this with it.
+// Anything unlisted keeps PocketBase's own text: terse, but still specific.
+const SAID_BETTER = {
+  validation_not_unique: 'That address already has an account.',
+  validation_invalid_email: 'That does not look like an email address.',
+  validation_length_out_of_range: 'Too short — use at least 8 characters.',
+};
+
 // PocketBase reports validation per field. Flattening it here — and rethrowing with
 // a plain { field: message } — means a page never learns the shape of somebody
 // else's error response.
@@ -33,11 +43,14 @@ function rethrow(err) {
   const fields = err.data?.data;
   if (!fields || Object.keys(fields).length === 0) throw err;
 
-  const rejected = new Error('Please check the form.');
-  rejected.fields = Object.fromEntries(
-    Object.entries(fields).map(([field, detail]) => [field, detail.message]),
+  throw fieldError(
+    Object.fromEntries(
+      Object.entries(fields).map(([field, detail]) => [
+        field,
+        SAID_BETTER[detail.code] ?? detail.message,
+      ]),
+    ),
   );
-  throw rejected;
 }
 
 // create() does not sign anybody in, so the three steps are deliberate: make the

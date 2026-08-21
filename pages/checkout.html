@@ -36,9 +36,9 @@
               type="text"
               autocomplete="name"
               placeholder="Ada Lovelace"
-              x-model="form.name"
-              @input="errors.name = ''"
-              :disabled="submitting"
+              x-model="values.name"
+              @input="clear('name')"
+              :disabled="pending"
               class="input mt-1"
               :class="errors.name && 'border-red-400'"
             >
@@ -53,9 +53,9 @@
               type="email"
               autocomplete="email"
               placeholder="ada@example.com"
-              x-model="form.email"
-              @input="errors.email = ''"
-              :disabled="submitting"
+              x-model="values.email"
+              @input="clear('email')"
+              :disabled="pending"
               class="input mt-1"
               :class="errors.email && 'border-red-400'"
             >
@@ -71,9 +71,9 @@
               inputmode="tel"
               autocomplete="tel"
               placeholder="+387 61 000 000"
-              x-model="form.phone"
-              @input="errors.phone = ''"
-              :disabled="submitting"
+              x-model="values.phone"
+              @input="clear('phone')"
+              :disabled="pending"
               class="input mt-1"
               :class="errors.phone && 'border-red-400'"
             >
@@ -88,9 +88,9 @@
               type="text"
               autocomplete="street-address"
               placeholder="Maršala Tita 12, 71000 Sarajevo"
-              x-model="form.address"
-              @input="errors.address = ''"
-              :disabled="submitting"
+              x-model="values.address"
+              @input="clear('address')"
+              :disabled="pending"
               class="input mt-1"
               :class="errors.address && 'border-red-400'"
             >
@@ -109,8 +109,8 @@
           <button
             type="submit"
             class="btn btn-primary mt-2 w-full"
-            :disabled="submitting"
-            x-text="submitting ? 'Placing order…' : 'Place order'"
+            :disabled="pending"
+            x-text="pending ? 'Placing order…' : 'Place order'"
           ></button>
 
           <p class="muted text-center text-xs">No card is charged — payment is simulated.</p>

@@ -1,3 +1,7 @@
 server/pocketbase.exe
 server/pocketbase
 server/pb_data/
+
+# A working copy of the framework, for developing it against this app. The import
+# map in index.html points here instead of the CDN while that is going on.
+alpineshell/

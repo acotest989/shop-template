@@ -1,28 +1,20 @@
+import { form } from 'alpineshell';
+
 // Form state only — the session itself lives in the store, signIn() comes from the app component.
 export const loginPage = () => ({
-  email: '',
-  password: '',
-  pending: false,
-  error: '',
+  ...form({ email: '', password: '' }),
 
   init() {
     this.$refs.email.focus(); // the autofocus attribute is ignored on injected markup
   },
 
-  async submit() {
-    if (this.pending) return;
-
-    this.pending = true;
-    this.error = '';
-
+  async save() {
     try {
-      await this.signIn(this.email, this.password);
+      await this.signIn(this.values.email, this.values.password);
     } catch (err) {
-      this.error = err.message;
-      this.password = '';
+      this.values.password = '';
       this.$nextTick(() => this.$refs.password.focus()); // wait for :disabled to lift
-    } finally {
-      this.pending = false;
+      throw err; // the message is form()'s job
     }
   },
 });

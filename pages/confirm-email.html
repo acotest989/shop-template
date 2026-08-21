@@ -22,13 +22,13 @@
             x-init="$el.focus()"
             type="password"
             autocomplete="current-password"
-            x-model="password"
-            @input="error = ''"
+            x-model="values.password"
+            @input="clear('password')"
             :disabled="pending"
             class="input mt-1"
-            :class="error && 'border-red-400'"
+            :class="(errors.password || error) && 'border-red-400'"
           >
-          <p class="mt-1 text-xs text-red-600" x-show="error" x-text="error"></p>
+          <p class="mt-1 text-xs text-red-600" x-show="errors.password || error" x-text="errors.password || error"></p>
         </div>
 
         <button

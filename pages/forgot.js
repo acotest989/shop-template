@@ -1,34 +1,23 @@
 import { requestPasswordReset } from '../services/auth.js';
-import { errorMessage } from 'alpineshell';
+import { form } from 'alpineshell';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export const forgotPage = () => ({
-  email: '',
-  error: '',
-  pending: false,
+  ...form({ email: '' }, { fallback: 'Could not send the link.' }),
+
   sent: false,
 
-  async submit() {
-    if (this.pending) return;
+  validate() {
+    return {
+      email: EMAIL.test(this.values.email.trim()) ? '' : 'Please enter a valid email address.',
+    };
+  },
 
-    if (!EMAIL.test(this.email.trim())) {
-      this.error = 'Please enter a valid email address.';
-      return;
-    }
-
-    this.error = '';
-    this.pending = true;
-
-    // The service swallows failures on purpose, so the answer is the same whether
-    // or not the address has an account here. Only being rate limited comes back.
-    try {
-      await requestPasswordReset(this.email);
-      this.sent = true;
-    } catch (err) {
-      this.error = errorMessage(err, 'Could not send the link.');
-    } finally {
-      this.pending = false;
-    }
+  // The service swallows failures on purpose, so the answer is the same whether or
+  // not the address has an account here. Only being rate limited comes back.
+  async save() {
+    await requestPasswordReset(this.values.email);
+    this.sent = true;
   },
 });

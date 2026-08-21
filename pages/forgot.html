@@ -5,7 +5,7 @@
       <p class="eyebrow">Check your inbox</p>
       <h1 class="mt-2 text-lg font-semibold text-gray-900">The link is on its way.</h1>
       <p class="muted mt-2">
-        If <span class="font-medium text-gray-900" x-text="email"></span> has an account, a reset link is in that inbox.
+        If <span class="font-medium text-gray-900" x-text="values.email"></span> has an account, a reset link is in that inbox.
       </p>
       <button type="button" class="btn btn-ghost mt-6 w-full" @click="goTo('/login')">Back to sign in</button>
     </div>
@@ -25,13 +25,13 @@
             type="email"
             autocomplete="email"
             placeholder="ada@example.com"
-            x-model="email"
-            @input="error = ''"
+            x-model="values.email"
+            @input="clear('email')"
             :disabled="pending"
             class="input mt-1"
-            :class="error && 'border-red-400'"
+            :class="(errors.email || error) && 'border-red-400'"
           >
-          <p class="mt-1 text-xs text-red-600" x-show="error" x-text="error"></p>
+          <p class="mt-1 text-xs text-red-600" x-show="errors.email || error" x-text="errors.email || error"></p>
         </div>
 
         <button
