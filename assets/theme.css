@@ -1,5 +1,6 @@
 /* Design system — every partial builds from these, nothing styles itself from scratch.
-   ink = gray-900 (brand + primary action), amber = warning, red = error only.
+   ink = gray-900 (brand + primary action), amber = accent and warning, red = error,
+   green = something worked, blue = something worth knowing.
    Injected as <style type="text/tailwindcss"> by the framework; the browser build only reads style tags. */
 
 /* Route changes focus <main> so screen readers announce the new page.
@@ -54,6 +55,17 @@ input[type="search"]::-webkit-search-cancel-button {
     @apply grid h-4 min-w-4 place-items-center rounded-full px-1
            text-[10px] font-bold leading-none ring-2 ring-white;
   }
+
+  /* The container carries its accent as a text colour, so the icon, the label and the close
+     button inherit it and only the message itself overrides. Four variants, no ternaries. */
+  .toast {
+    @apply fixed inset-x-4 top-4 z-30 mx-auto flex max-w-lg items-center gap-4
+           rounded-xl border-l-4 p-4 shadow-xl ring-1;
+  }
+  .toast-error   { @apply border-red-500   bg-red-100   ring-red-300   text-red-700; }
+  .toast-warning { @apply border-amber-500 bg-amber-100 ring-amber-300 text-amber-700; }
+  .toast-success { @apply border-green-600 bg-green-100 ring-green-300 text-green-700; }
+  .toast-info    { @apply border-blue-500  bg-blue-100  ring-blue-300  text-blue-700; }
 
   .skeleton { @apply animate-pulse rounded bg-gray-200; }
   .muted    { @apply text-sm text-gray-500; }

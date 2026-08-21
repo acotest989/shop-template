@@ -9,7 +9,9 @@ The framework is [AlpineShell](https://github.com/acotest989/alpineshell), pulle
 One process serves both halves — see [server/README.md](server/README.md):
 
 ```bash
-cd server && ./pocketbase serve --publicDir=..
+cd server
+./setup.sh                          # or .\setup.ps1 — fetches the pinned PocketBase
+./pocketbase serve --publicDir=..
 ```
 
 That is the whole shop on `http://127.0.0.1:8090`: PocketBase answers `/api` and serves these files for everything else. Same origin, so there is nothing to configure for CORS and the SDK needs no host — `services/pb.js` points at `/`.

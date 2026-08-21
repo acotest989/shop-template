@@ -1,24 +1,25 @@
-<!-- One toast, three tempers. Errors keep the loud red; anything else is ink, because
-     in this design system red means something is wrong and nothing else does. -->
+<!-- One toast, four tempers. The colours are .toast-* in theme.css; the container carries its
+     accent as a text colour, so the icon, the label and the close button inherit it. Only
+     'error' waits for the visitor — the framework clears every other type by itself. -->
 <div
   x-show="message.text"
   x-transition:enter="transition duration-300 ease-out"
   x-transition:enter-start="opacity-0 -translate-y-4 scale-95"
   x-transition:leave="transition duration-200 ease-in"
   x-transition:leave-end="opacity-0 -translate-y-4 scale-95"
-  :role="message.type === 'error' ? 'alert' : 'status'"
+  :role="message.type === 'error' || message.type === 'warning' ? 'alert' : 'status'"
   aria-live="polite"
-  class="fixed inset-x-4 top-4 z-30 mx-auto flex max-w-lg items-center gap-4 rounded-xl border-l-4 p-4 shadow-xl ring-1"
-  :class="message.type === 'error'
-    ? 'border-red-500 bg-red-200 shadow-red-900/10 ring-red-300'
-    : 'border-gray-700 bg-gray-900 shadow-gray-900/20 ring-gray-700'"
+  class="toast"
+  :class="'toast-' + message.type"
 >
-  <span
-    class="grid h-10 w-10 shrink-0 place-items-center rounded-full"
-    :class="message.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-white/10 text-white'"
-  >
+  <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/70">
     <!-- error -->
     <svg x-show="message.type === 'error'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+
+    <!-- warning -->
+    <svg x-show="message.type === 'warning'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
     </svg>
 
@@ -27,8 +28,8 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
     </svg>
 
-    <!-- info -->
-    <svg x-show="message.type !== 'error' && message.type !== 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+    <!-- info, and anything the app invents -->
+    <svg x-show="!['error', 'warning', 'success'].includes(message.type)" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25h1.5v5.25m-.75-9h.008v.008H12V7.5Z" />
     </svg>
   </span>
@@ -36,24 +37,16 @@
   <div class="min-w-0 flex-1">
     <p
       class="text-xs font-semibold uppercase tracking-wider"
-      :class="message.type === 'error' ? 'text-red-600' : 'text-gray-400'"
-      x-text="message.type === 'error' ? 'Error' : message.type === 'success' ? 'Done' : 'Note'"
+      x-text="({ error: 'Error', warning: 'Careful', success: 'Done' })[message.type] ?? 'Note'"
     ></p>
-    <p
-      class="text-base font-medium leading-snug"
-      :class="message.type === 'error' ? 'text-red-800' : 'text-white'"
-      x-text="message.text"
-    ></p>
+    <p class="text-base font-medium leading-snug text-gray-900" x-text="message.text"></p>
   </div>
 
   <button
     type="button"
     @click="dismiss()"
     aria-label="Close"
-    class="shrink-0 rounded-lg p-1.5 transition focus-visible:outline-none focus-visible:ring-2"
-    :class="message.type === 'error'
-      ? 'text-red-600 hover:bg-red-100 hover:text-red-700 focus-visible:ring-red-500'
-      : 'text-gray-400 hover:bg-white/10 hover:text-white focus-visible:ring-gray-400'"
+    class="shrink-0 rounded-lg p-1.5 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
   >
     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />

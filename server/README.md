@@ -1,12 +1,13 @@
 # Server
 
-[PocketBase](https://pocketbase.io) **0.39.11** — one binary that is the database, the auth provider and the API.
+[PocketBase](https://pocketbase.io) — one binary that is the database, the auth provider, the file storage and the API.
 
-The binary is not in git: it is ~33 MB and built per platform, and the deploy uses a Linux build. Download the version above from [the releases page](https://github.com/pocketbase/pocketbase/releases) and unzip it here.
+The binary is not in git: ~33 MB, one build per platform, and the deploy uses the Linux one. It is fetched instead, from the version pinned in **`.pb-version`** — the only place that number appears, so an upgrade is one line and both the setup script and the Dockerfile follow it.
 
 ```bash
-./pocketbase serve --publicDir=..                    # http://127.0.0.1:8090
-./pocketbase superuser create you@example.com pass   # first run only
+./setup.sh                                                  # or .\setup.ps1 on Windows
+./pocketbase serve --publicDir=..                           # http://127.0.0.1:8090
+./pocketbase superuser create you@example.com yourpassword  # first run only
 ```
 
 `--publicDir=..` makes PocketBase serve the shop as well as the API: one origin, no CORS, and `--indexFallback` (on by default) sends unknown paths to `index.html`, which is the SPA fallback the router needs. There is no Live Server in the loop, so nothing reloads the page when a write lands in the database.
@@ -20,7 +21,8 @@ The dashboard is at `/_/`. The demo account the app signs in with is a record in
 | | |
 |---|---|
 | `pb_migrations/` | **committed** — the schema as code. Change a collection in the dashboard and PocketBase writes the migration itself; commit it, and a fresh checkout gets the same collections. |
-| `pb_hooks/` | **committed** — server-side logic. |
+| `pb_hooks/` | **committed** — server-side logic; see the README in there. |
+| `.pb-version`, `setup.*`, `Dockerfile` | **committed** — how the binary is obtained, in dev and in production. |
 | `pb_data/` | ignored — the database and uploaded files. |
 | the binary | ignored — see above. |
 
@@ -35,10 +37,28 @@ None of this matters on `127.0.0.1`, and all of it matters the day the URL is re
 - **Trusted proxy headers** (Settings → Application). Behind a reverse proxy every request appears to come from the proxy, so the rate limiter would count the whole world as one client and one flood would lock everybody out.
 - **Restrict the superuser** to your own IP or subnet, and turn on MFA for it.
 - **Backups to S3-compatible storage** on a schedule. A single-node SQLite database is exactly as durable as the disk under it.
+- **`{APP_URL}` under Settings → Application.** A fresh install sets it to `http://localhost:8090`, and every mail template builds its link from it — so locally nothing ever complains, and in production every verification and reset link sends your customers to their own machine. Nothing fails loudly; you find out from the first real account.
 - **SMTP on the real domain**, with SPF and DKIM, or the verification and reset mail lands in spam.
 - **`--publicDir`** must point at the frontend only. Serving the repository root would publish `server/pb_data/data.db`.
 - **Pin the version** — see below — and read the changelog before upgrading.
 
+## Deploying
+
+The `Dockerfile` builds from this app's root, because it has to reach the frontend:
+
+```bash
+docker build -f server/Dockerfile --build-arg PB_VERSION=$(cat server/.pb-version) -t shop .
+docker run -p 8090:8090 -v pb_data:/pb/pb_data shop
+```
+
+It copies the frontend into `pb_public/` **file by file**, on purpose. Copying the app and deleting `server/` afterwards works right up until somebody forgets, and then `pb_data/data.db` is a public download.
+
+Mount `pb_data` as a volume or the first redeploy takes every account and order with it.
+
 ## Pin the version
 
-PocketBase is still pre-1.0 and its own documentation says backward compatibility is not guaranteed until then. Read the changelog before upgrading and bump the version in this file and in the Dockerfile deliberately — never blindly.
+PocketBase is still pre-1.0 and its own documentation says backward compatibility is not guaranteed until then. Upgrading is one line — bump `.pb-version` and re-run the setup script — but read the changelog first, never blindly. What the newest release is:
+
+```powershell
+(Invoke-RestMethod https://api.github.com/repos/pocketbase/pocketbase/releases/latest).tag_name
+```
