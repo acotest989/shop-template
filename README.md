@@ -16,6 +16,8 @@ cd server
 
 That is the whole shop on `http://127.0.0.1:8090`: PocketBase answers `/api` and serves these files for everything else. Same origin, so there is nothing to configure for CORS and the SDK needs no host — `services/pb.js` points at `/`.
 
+The first `serve` applies everything in `server/pb_migrations/`: the collections, the mail templates, and a catalogue of 105 products across 21 categories. There is no seeding step to run.
+
 `--indexFallback` is on by default, and it is the SPA fallback: an unknown path returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
 
 Sign in with `demo@shop.test` / `test1234`, or register your own account.
@@ -24,7 +26,7 @@ Sign in with `demo@shop.test` / `test1234`, or register your own account.
 
 The whole surface is real, not stubbed: register, email verification, password reset, changing your name, email or password, and deleting the account. `/account` is the only guarded route.
 
-Three of those arrive by email, so the templates under **Collections → users → Options** in the PocketBase dashboard must link back here rather than to its own UI — the token is the only required part of the URL:
+Three of those arrive by email, and PocketBase's stock templates link to its own dashboard rather than to this app. The migrations rewrite them, so there is nothing to click — the token is the only required part of each URL:
 
 | | |
 |---|---|
@@ -32,7 +34,7 @@ Three of those arrive by email, so the templates under **Collections → users �
 | Password reset | `{APP_URL}/reset-password/{TOKEN}` |
 | Email change | `{APP_URL}/confirm-email/{TOKEN}` |
 
-`{APP_URL}` comes from **Settings → Application**, and mail needs SMTP configured — the built-in sendmail will not deliver.
+What a migration cannot carry is application settings, so two things stay manual: `{APP_URL}` under **Settings → Application**, and SMTP under **Settings → Mail** — the built-in sendmail will not deliver.
 
 Two behaviours worth knowing before they surprise you. Changing a password or an email invalidates every token the account has, so the app signs itself out on purpose. And `/forgot-password` answers the same way whether or not the address has an account, because the honest answer would tell a stranger who is registered here.
 
@@ -66,9 +68,9 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 **No build step.** Tailwind runs through its browser build, which compiles CSS at runtime and only reads `<style type="text/tailwindcss">` tags — it supports neither `<link>` nor `@import` for local files. That is why `assets/theme.css` is fetched and injected as a style tag by the framework. The compiler goes to the visitor along with the page, and that is a trade the framework makes on purpose — right for a demo like this one, wrong for a content site living on search traffic.
 
-**Data lives behind `services/`.** Pages never fetch anything themselves, and never see the API's shape: `services/products.js` maps [dummyjson.com](https://dummyjson.com) records into the app's own product — dollars become cents, a discount percentage becomes a compare-at price, the title becomes a handle. Pointing the shop at a different API is one file.
+**Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase, `models/product.js` turns a record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. Searching and sorting happen in the database; a page only hands over a term.
 
-That boundary has now been tested rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, and `pages/login.html`, `pages/login.js` and `app.js` did not. Whatever `services/mock.js` still imports is what is still faked.
+That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, while `pages/login.html`, `pages/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/home.js` and `pages/product.js` were not opened at all. Whatever `services/mock.js` still imports is what is still faked.
 
 **State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
 
@@ -80,7 +82,7 @@ That boundary has now been tested rather than asserted. Sign-in moved from a har
 
 ## Not done yet
 
-Products and orders still come from elsewhere: the catalogue from dummyjson, orders from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. Both belong in PocketBase — orders behind a hook, so the price is never the client's word. The product list has no paging, so it renders the whole catalogue.
+Orders still come from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. They belong in PocketBase behind a hook, so the price an order is written at is never the client's word. The product list has no paging either, so it renders the whole catalogue on every visit.
 
 On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 

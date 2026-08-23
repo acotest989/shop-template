@@ -1,54 +1,43 @@
-import { http } from 'alpineshell';
+import { pb } from './pb.js';
 import { toProduct } from '../models/product.js';
 
-const ENDPOINT = 'https://dummyjson.com/products';
-const FIELDS = 'title,price,discountPercentage,rating,stock,brand,category,thumbnail,tags,availabilityStatus';
+// What a card draws. Tags belong to the product page, the timestamps to nobody.
+const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,rating,image';
 
-// The promise is cached, not the result, so parallel callers share one request.
-let catalogRequest = null;
+// "N of M products" counts the match against the whole catalogue, which a filtered
+// request does not report. Any unfiltered load is that number; only a search link
+// opened directly has to ask for it, and then once.
+let catalogSize = null;
 
 // Pages ask in the app's terms and never learn how the question was answered.
-// dummyjson cannot combine /products/search with anything else, so this adapter
-// holds the catalog and matches in memory; against a real API the term would go
-// on the wire and this file would be the only one that changed.
 export async function fetchProducts({ q = '' } = {}) {
-  const catalog = await loadCatalog();
-  const term = q.trim().toLowerCase();
+  const term = q.trim();
 
-  return {
-    items: term ? catalog.filter((product) => matches(product, term)) : catalog,
-    total: catalog.length,
-  };
-}
-
-// The API has no lookup by slug, so the handle is resolved against the catalog.
-export async function fetchProduct(handle) {
-  const catalog = await loadCatalog();
-  return catalog.find((product) => product.handle === handle) ?? null;
-}
-
-const matches = (product, term) =>
-  product.title.toLowerCase().includes(term) ||
-  (product.vendor ?? '').toLowerCase().includes(term) ||
-  product.tags.some((tag) => tag.toLowerCase().includes(term));
-
-function loadCatalog({ force = false } = {}) {
-  if (force || !catalogRequest) {
-    catalogRequest = load().catch((err) => {
-      catalogRequest = null; // a failed request must not be cached forever
-      throw err;
-    });
-  }
-
-  return catalogRequest;
-}
-
-async function load() {
-  // limit=0 is dummyjson's "everything"; searching only what you happened to
-  // fetch would quietly answer from a fraction of the catalog.
-  const { products } = await http.get(ENDPOINT, {
-    params: { limit: 0, select: FIELDS },
+  const records = await pb.collection('products').getFullList({
+    fields: CARD_FIELDS,
+    filter: term ? pb.filter('title ~ {:term} || brand ~ {:term} || tags ?~ {:term}', { term }) : '',
+    sort: 'title',
   });
 
-  return products.map(toProduct);
+  if (!term) catalogSize = records.length;
+  else if (catalogSize === null) catalogSize = await countProducts();
+
+  return { items: records.map(toProduct), total: catalogSize };
 }
+
+export async function fetchProduct(handle) {
+  try {
+    const record = await pb
+      .collection('products')
+      .getFirstListItem(pb.filter('handle = {:handle}', { handle }));
+
+    return toProduct(record);
+  } catch (err) {
+    if (err.status === 404) return null; // no such product is an answer, not a failure
+    throw err;
+  }
+}
+
+// One row asked for and thrown away — the total comes back with it either way.
+const countProducts = async () =>
+  (await pb.collection('products').getList(1, 1, { fields: 'id' })).totalItems;

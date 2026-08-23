@@ -12,8 +12,8 @@
     >
 
     <span
-      x-show="discountPercent(product.price, product.compare_at_price) > 0"
-      x-text="'-' + discountPercent(product.price, product.compare_at_price) + '%'"
+      x-show="discountPercent(product.price, product.regularPrice) > 0"
+      x-text="'-' + discountPercent(product.price, product.regularPrice) + '%'"
       class="badge badge-ink absolute left-2 top-2"
     ></span>
 
@@ -26,7 +26,7 @@
   </div>
 
   <div class="flex flex-1 flex-col p-3">
-    <p class="eyebrow" x-text="product.vendor"></p>
+    <p class="eyebrow" x-text="product.brand"></p>
 
     <h3 class="mt-1 text-sm font-medium leading-snug text-gray-900">
       <a
@@ -44,9 +44,9 @@
     <div class="mt-2 flex items-baseline gap-2">
       <span class="text-base font-semibold text-gray-900" x-text="money(product.price, product.currency)"></span>
       <span
-        x-show="product.compare_at_price"
+        x-show="product.regularPrice"
         class="text-sm text-gray-400 line-through"
-        x-text="money(product.compare_at_price, product.currency)"
+        x-text="money(product.regularPrice, product.currency)"
       ></span>
     </div>
 
