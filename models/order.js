@@ -1,10 +1,10 @@
-// What an order is in this app: who is buying, what they are buying, and the one
-// place the money adds up. Cart lines are narrowed again — an order keeps no image.
+// What an order is in this app, in both directions.
+//
+// Going out, only what the server cannot work out for itself: who is buying, how they
+// mean to pay, and which products at which quantity. Coming back, every amount — none
+// of them was the client's to decide.
 
-export function toOrder({ customer, items }) {
-  const subtotal = items.reduce((total, item) => total + item.price * item.qty, 0);
-  const shipping = 0; // the demo ships free; a real shop would price it here
-
+export function toOrder({ customer, payment, items }) {
   return {
     customer: {
       name: customer.name.trim(),
@@ -12,10 +12,25 @@ export function toOrder({ customer, items }) {
       phone: customer.phone.replace(/\s+/g, ' ').trim(),
       address: customer.address.trim(),
     },
-    lines: items.map(({ id, title, price, qty }) => ({ id, title, price, qty })),
-    currency: items[0]?.currency ?? 'EUR',
-    subtotal,
-    shipping,
-    total: subtotal + shipping,
+    payment,
+
+    // The price travels so the server can refuse a cart that was priced differently,
+    // never so it can bill from it.
+    items: items.map(({ id, qty, price }) => ({ id, qty, price })),
+  };
+}
+
+export function fromOrder(placed) {
+  return {
+    reference: placed.reference,
+    customer: { name: placed.name, email: placed.email },
+    lines: placed.lines,
+    currency: placed.currency,
+    subtotal: placed.subtotal,
+    shipping: placed.shipping,
+    total: placed.total,
+    payment: placed.payment,
+    paid: placed.paid,
+    accountCreated: placed.accountCreated,
   };
 }

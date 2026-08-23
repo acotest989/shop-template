@@ -70,7 +70,7 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 **Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase, `models/product.js` turns a record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. Searching, filtering by category, sorting and paging all happen in the database: a page hands over a term, a category and a page number, and gets back one page of products with the count behind it.
 
-That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, while `pages/login.html`, `pages/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/home.js` and `pages/product.js` were not opened at all. Whatever `services/mock.js` still imports is what is still faked.
+That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, while `pages/login.html`, `pages/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/home.js` and `pages/product.js` were not opened at all. Orders were the last of it, and `services/mock.js` went with them — nothing in this app is faked any more.
 
 **State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
 
@@ -82,7 +82,7 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 ## Not done yet
 
-Orders still come from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. They belong in PocketBase behind a hook, so that the price an order is written at is never the client's word, and so that stock goes down when something is bought. Nothing shows a visitor an order once the receipt is gone, either.
+Nothing shows a visitor an order once the receipt is gone: `/account` has no history yet. The card payment is still simulated — `server/pb_hooks/orders.pb.js` marks a card order paid on arrival, and that line is where a provider would go.
 
 On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 

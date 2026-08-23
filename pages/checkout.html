@@ -10,6 +10,16 @@
         <span x-text="money(order.total, order.currency)"></span> to
         <span x-text="order.customer.email"></span>.
       </p>
+
+      <p class="muted mt-2" x-show="!order.paid">
+        Please have <span x-text="money(order.total, order.currency)"></span> ready for the courier.
+      </p>
+
+      <p class="muted mt-2" x-show="order.accountCreated">
+        We have opened an account for <span x-text="order.customer.email"></span> —
+        the same email carries a link for choosing a password.
+      </p>
+
       <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Continue shopping</button>
     </div>
   </template>
@@ -98,6 +108,33 @@
             <p class="mt-1 text-xs text-red-600" x-show="errors.address" x-text="errors.address"></p>
           </div>
 
+          <fieldset :disabled="pending">
+            <legend class="label">Payment</legend>
+            <div class="mt-1 grid gap-2 sm:grid-cols-2">
+              <label
+                class="card flex cursor-pointer items-start gap-3 p-3"
+                :class="payment === 'card' && 'ring-2 ring-gray-900'"
+              >
+                <input type="radio" name="payment" value="card" x-model="payment" class="mt-0.5 accent-gray-900">
+                <span>
+                  <span class="block text-sm font-medium text-gray-900">Card</span>
+                  <span class="muted text-xs">Simulated — nothing is charged.</span>
+                </span>
+              </label>
+
+              <label
+                class="card flex cursor-pointer items-start gap-3 p-3"
+                :class="payment === 'cod' && 'ring-2 ring-gray-900'"
+              >
+                <input type="radio" name="payment" value="cod" x-model="payment" class="mt-0.5 accent-gray-900">
+                <span>
+                  <span class="block text-sm font-medium text-gray-900">Cash on delivery</span>
+                  <span class="muted text-xs">Pay the courier at the door.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
           <p
             x-show="error"
             x-text="error"
@@ -113,7 +150,7 @@
             x-text="pending ? 'Placing order…' : 'Place order'"
           ></button>
 
-          <p class="muted text-center text-xs">No card is charged — payment is simulated.</p>
+          <p class="muted text-center text-xs" x-show="payment === 'card'">No card is charged — payment is simulated.</p>
         </form>
 
         <aside class="card h-fit p-4 md:col-span-2">

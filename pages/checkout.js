@@ -1,4 +1,3 @@
-import { toOrder } from '../models/order.js';
 import { placeOrder } from '../services/orders.js';
 import { form } from 'alpineshell';
 
@@ -12,6 +11,7 @@ export const checkoutPage = () => ({
   ...form({ name: '', email: '', phone: '', address: '' }, { fallback: 'Could not place the order.' }),
 
   order: null, // set once the order is placed; the page then shows the receipt
+  payment: 'card', // a choice rather than a field: it cannot be filled in wrong
 
   init() {
     this.values.name = this.$store.session.user?.name ?? '';
@@ -34,9 +34,12 @@ export const checkoutPage = () => ({
   },
 
   async save() {
-    const order = toOrder({ customer: this.values, items: this.$store.cart.items });
+    this.order = await placeOrder({
+      customer: this.values,
+      payment: this.payment,
+      items: this.$store.cart.items,
+    });
 
-    this.order = await placeOrder(order);
     this.$store.cart.clear(); // only a placed order empties the cart
   },
 });
