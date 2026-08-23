@@ -24,9 +24,9 @@ migrate(
       fields: [
         { name: 'handle', type: 'text', required: true },
         { name: 'title', type: 'text', required: true },
-        { name: 'vendor', type: 'text' },
+        { name: 'brand', type: 'text' },
 
-        // Required where vendor is not: a product without a brand is ordinary, a product
+        // Required where brand is not: a product without a brand is ordinary, a product
         // belonging to no category is a hole in the catalogue.
         { name: 'category', type: 'text', required: true },
 
