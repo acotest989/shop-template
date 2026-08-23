@@ -20,17 +20,25 @@ export function toOrder({ customer, payment, items }) {
   };
 }
 
-export function fromOrder(placed) {
+// Serves the receipt and the history alike: the hook answers in the same field names
+// the record carries, so one direction home is enough.
+export function fromOrder(raw) {
   return {
-    reference: placed.reference,
-    customer: { name: placed.name, email: placed.email },
-    lines: placed.lines,
-    currency: placed.currency,
-    subtotal: placed.subtotal,
-    shipping: placed.shipping,
-    total: placed.total,
-    payment: placed.payment,
-    paid: placed.paid,
-    accountCreated: placed.accountCreated,
+    id: raw.id, // a record has one; a receipt straight off the wire does not
+    reference: raw.reference,
+    customer: { name: raw.name, email: raw.email },
+    lines: raw.lines,
+    currency: raw.currency,
+    subtotal: raw.subtotal,
+    shipping: raw.shipping,
+    total: raw.total,
+    payment: raw.payment,
+    paid: raw.paid,
+    status: raw.status,
+
+    // PocketBase separates the date and the time with a space, which not every browser
+    // will parse. The wire's habits stop here, as they should.
+    placedAt: raw.created ? raw.created.replace(' ', 'T') : '',
+    accountCreated: raw.accountCreated ?? false,
   };
 }

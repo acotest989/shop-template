@@ -18,6 +18,51 @@
       </div>
     </template>
 
+    <!-- orders -->
+    <section class="card p-4">
+      <p class="label">Your orders</p>
+
+      <p class="muted mt-3 text-sm" x-show="orders.pending">Loading…</p>
+      <p class="mt-3 text-sm text-red-600" x-show="orders.error" x-text="orders.error"></p>
+      <p class="muted mt-3 text-sm" x-show="!orders.pending && !orders.error && !orders.items.length">
+        Nothing yet. Anything you order with this address turns up here.
+      </p>
+
+      <ul class="mt-1 divide-y divide-gray-200" x-show="orders.items.length">
+        <template x-for="order in orders.items" :key="order.id">
+          <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="font-mono text-sm text-gray-900" x-text="order.reference"></p>
+              <p
+                class="muted mt-0.5 truncate text-xs"
+                x-text="formatDate(order.placedAt) + ' — ' + order.lines.map(line => line.title + ' ×' + line.qty).join(', ')"
+              ></p>
+            </div>
+
+            <!-- Two badges because they answer two questions: where it is, and whether
+                 it is settled. Cash on delivery is what makes those come apart. -->
+            <div class="flex shrink-0 items-center gap-2">
+              <span
+                class="badge capitalize"
+                :class="{
+                  'badge-soft': order.status === 'pending',
+                  'badge-good': order.status === 'shipped',
+                  'badge-bad': order.status === 'cancelled',
+                }"
+                x-text="order.status"
+              ></span>
+              <span
+                class="badge"
+                :class="order.paid ? 'badge-good' : 'badge-warn'"
+                x-text="order.paid ? 'Paid' : 'Pay on delivery'"
+              ></span>
+              <span class="text-sm font-semibold text-gray-900" x-text="money(order.total, order.currency)"></span>
+            </div>
+          </li>
+        </template>
+      </ul>
+    </section>
+
     <!-- name -->
     <section class="card p-4">
       <p class="label">Your name</p>

@@ -6,6 +6,7 @@ import {
   deleteAccount,
   isVerified,
 } from '../services/auth.js';
+import { fetchOrders } from '../services/orders.js';
 import { errorMessage } from 'alpineshell';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -17,6 +18,7 @@ export const accountPage = () => ({
   verified: isVerified(),
   resent: false,
 
+  orders: { items: [], pending: true, error: '' },
   profile: { name: '', pending: false, error: '' },
   emailChange: { email: '', pending: false, error: '', sent: false },
   password: { old: '', next: '', confirm: '', errors: {}, pending: false, error: '' },
@@ -24,6 +26,18 @@ export const accountPage = () => ({
 
   init() {
     this.profile.name = this.$store.session.user?.name ?? '';
+    this.loadOrders(); // not awaited: the rest of the page has nothing to wait for
+  },
+
+  async loadOrders() {
+    try {
+      this.orders.items = await fetchOrders();
+    } catch (err) {
+      console.error(err);
+      this.orders.error = errorMessage(err, 'Could not load your orders.');
+    } finally {
+      this.orders.pending = false;
+    }
   },
 
   async saveName() {

@@ -211,6 +211,8 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       total: subtotal + shipping,
       payment: payment,
       paid: order.getBool('paid'),
+      status: order.getString('status'),
+      created: order.getString('created'),
       accountCreated: owner.created,
     };
   });

@@ -82,7 +82,7 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 ## Not done yet
 
-Nothing shows a visitor an order once the receipt is gone: `/account` has no history yet. The card payment is still simulated — `server/pb_hooks/orders.pb.js` marks a card order paid on arrival, and that line is where a provider would go.
+The card payment is simulated: `server/pb_hooks/orders.pb.js` marks a card order paid the moment it arrives, and that one line is where a provider would go. Cash on delivery is not simulated at all — such an order is genuinely unpaid, and nothing yet marks it collected, because nothing here ships.
 
 On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 

@@ -1,5 +1,6 @@
 /* Design system — every partial builds from these, nothing styles itself from scratch.
-   ink = gray-900 (brand + primary action), amber = accent and warning, red = error,
+   ink = gray-900 (brand + primary action), amber = accent, and anything still waiting on
+   the visitor, red = failure, and anything that ended badly,
    green = something worked, blue = something worth knowing.
    Injected as <style type="text/tailwindcss"> by the framework; the browser build only reads style tags. */
 
@@ -49,6 +50,13 @@ input[type="search"]::-webkit-search-cancel-button {
   }
   .badge-ink  { @apply bg-gray-900 text-white shadow-sm; }
   .badge-warn { @apply bg-amber-100 text-amber-700; }
+
+  /* The states an order passes through, in the palette's own terms: waiting is quiet,
+     settled is green, still owed is amber because it wants something, and an order that
+     ended badly is red — amber would ask the visitor to act on what is already over. */
+  .badge-soft { @apply bg-gray-100  text-gray-600; }
+  .badge-good { @apply bg-green-100 text-green-700; }
+  .badge-bad  { @apply bg-red-100   text-red-700; }
 
   /* Not a badge: a badge announces a state, a tag is quiet metadata you can follow.
      It takes its edge from a border rather than a fill, because gray-100 on the

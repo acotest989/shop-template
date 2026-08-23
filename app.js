@@ -1,9 +1,10 @@
 import { consumeRedirect } from 'alpineshell';
-import { money, discountPercent, starPercent } from './lib/format.js';
+import { money, formatDate, discountPercent, starPercent } from './lib/format.js';
 
 // Merged into AlpineShell's root component — available to every page and partial.
 export const app = {
   money,
+  formatDate,
   discountPercent,
   starPercent,
 

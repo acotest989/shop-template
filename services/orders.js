@@ -13,3 +13,10 @@ export async function placeOrder({ customer, payment, items }) {
 
   return fromOrder(placed);
 }
+
+// No filter here on purpose: the collection's list rule already narrows this to the
+// signed-in visitor's own orders, and a rule cannot be forgotten the way a filter can.
+export async function fetchOrders() {
+  const records = await pb.collection('orders').getFullList({ sort: '-created' });
+  return records.map(fromOrder);
+}
