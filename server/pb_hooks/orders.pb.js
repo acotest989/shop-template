@@ -56,7 +56,70 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     throw new BadRequestError('There is nothing in the cart.');
   }
 
+  // Money as a person reads it. The app has toLocaleString; this engine does not.
+  const money = (cents, currency) => (cents / 100).toFixed(2) + ' ' + currency;
+
+  // The buyer writes their own name and address, and both end up inside markup we send
+  // to ourselves. An unescaped angle bracket breaks the mail; a tag would do worse.
+  const esc = (value) => String(value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  // Each letter stands alone: an address that bounces must not take the other one
+  // down with it, and the shop's copy is the one nobody else is watching for.
+  const post = (message, letter, reference) => {
+    try {
+      $app.newMailClient().send(message);
+    } catch (err) {
+      $app.logger().error('order mail failed', 'letter', letter, 'reference', reference, 'error', String(err));
+    }
+  };
+
+  const sendMail = (order, token) => {
+    const meta = $app.settings().meta;
+    const from = { address: meta.senderAddress, name: meta.senderName };
+
+    const rows = order.lines.map((line) =>
+      '<tr><td>' + esc(line.title) + ' &times; ' + line.qty + '</td>' +
+      '<td align="right">' + money(line.price * line.qty, order.currency) + '</td></tr>'
+    ).join('');
+
+    const summary =
+      '<table cellpadding="4" style="border-collapse:collapse">' + rows +
+      '<tr><td><strong>Total</strong></td><td align="right"><strong>' +
+      money(order.total, order.currency) + '</strong></td></tr></table>' +
+      '<p>Shipping to ' + esc(order.address) + '.</p>';
+
+    const settled = order.paid
+      ? '<p>Paid by card. Nothing is owed on delivery.</p>'
+      : '<p>Please have ' + money(order.total, order.currency) + ' ready for the courier.</p>';
+
+    // Only for an account nobody asked for: it exists so this order can be found again,
+    // and the link is the only way into it. No password is ever sent.
+    const welcome = token
+      ? '<p>We have opened an account for ' + esc(order.email) + ' so you can find this order later. ' +
+        '<a href="' + meta.appURL + '/reset-password/' + token + '">Choose a password</a>.</p>'
+      : '';
+
+    post(new MailerMessage({
+      from: from,
+      to: [{ address: order.email, name: order.name }],
+      subject: 'Order ' + order.reference,
+      html: '<p>Thank you, ' + esc(order.name) + '.</p><p>Reference <strong>' + order.reference +
+        '</strong>.</p>' + summary + settled + welcome,
+    }), 'buyer', order.reference);
+
+    // To the address the shop already sends from, so there is nothing extra to configure.
+    post(new MailerMessage({
+      from: from,
+      to: [{ address: meta.senderAddress }],
+      subject: 'New order ' + order.reference + ' — ' + money(order.total, order.currency),
+      html: '<p>' + esc(order.name) + ' &lt;' + esc(order.email) + '&gt;, ' + esc(order.phone) + '</p>' +
+        summary + '<p>Paying by ' + (order.payment === 'cod' ? 'cash on delivery' : 'card') + '.</p>',
+    }), 'shop', order.reference);
+  };
+
   let placed = null;
+  let resetToken = '';
 
   // One transaction: an order that stands while its stock was never taken is worse
   // than no order at all.
@@ -107,6 +170,11 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       ? { record: info.auth, created: false }
       : findOrCreateUser(tx, email, name);
 
+    // Minted here, while the record is at hand, and spent below in the confirmation:
+    // a buyer who did not have an account gets one link that both proves the address
+    // is theirs and lets them pick a password.
+    if (owner.created) resetToken = owner.record.newPasswordResetToken();
+
     const order = new Record(tx.findCollectionByNameOrId('orders'));
     order.set('reference', newReference());
     order.set('user', owner.record.id);
@@ -134,6 +202,8 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       reference: order.getString('reference'),
       name: name,
       email: email,
+      phone: phone,
+      address: address,
       lines: lines,
       currency: currency,
       subtotal: subtotal,
@@ -144,6 +214,14 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       accountCreated: owner.created,
     };
   });
+
+  // Mail is not part of the sale. A shop that refuses an order because its mail server
+  // stalled is worse than one that misses a letter, so this can only be logged.
+  try {
+    sendMail(placed, resetToken);
+  } catch (err) {
+    $app.logger().error('order mail failed', 'reference', placed.reference, 'error', String(err));
+  }
 
   return e.json(200, placed);
 });
