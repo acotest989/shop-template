@@ -71,9 +71,14 @@
           x-text="'Only ' + product.stock + ' left'"
         ></p>
 
-        <div class="mt-4 flex flex-wrap gap-2">
+        <div class="mt-4 flex flex-wrap items-center gap-2">
           <template x-for="tag in product.tags" :key="tag">
-            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500" x-text="tag"></span>
+            <a
+              :href="'/?q=' + encodeURIComponent(tag)"
+              :aria-label="'Search for ' + tag"
+              class="tag"
+              x-text="tag"
+            ></a>
           </template>
         </div>
 

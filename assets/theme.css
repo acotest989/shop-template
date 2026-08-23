@@ -50,6 +50,14 @@ input[type="search"]::-webkit-search-cancel-button {
   .badge-ink  { @apply bg-gray-900 text-white shadow-sm; }
   .badge-warn { @apply bg-amber-100 text-amber-700; }
 
+  /* Not a badge: a badge announces a state, a tag is quiet metadata you can follow.
+     It takes its edge from a border rather than a fill, because gray-100 on the
+     gray-50 page barely shows. */
+  .tag {
+    @apply rounded-full border border-gray-300 bg-white px-2 py-0.5 text-xs text-gray-600
+           transition-colors hover:border-gray-400 hover:text-gray-900;
+  }
+
   /* Sits on top of an icon, so it needs a fixed round shape and a ring to cut itself out. */
   .badge-count {
     @apply grid h-4 min-w-4 place-items-center rounded-full px-1
