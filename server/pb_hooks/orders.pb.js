@@ -46,11 +46,20 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   const address = String(customer.address || '').trim();
   const payment = String(body.payment || '');
 
+  // Card is off until a real provider is wired in. Refusing it here rather than only in
+  // the markup is the whole point: a disabled radio is a suggestion, and a POST naming
+  // 'card' would otherwise walk away with an order marked paid that nobody paid for.
+  // Turning it back on is this line and `cardPayment` in pages/checkout.js.
+  const CARD_PAYMENT = false;
+
   if (!name || !email || !phone || !address) {
     throw new BadRequestError('The delivery details are incomplete.');
   }
   if (payment !== 'card' && payment !== 'cod') {
     throw new BadRequestError('Choose how you would like to pay.');
+  }
+  if (payment === 'card' && !CARD_PAYMENT) {
+    throw new BadRequestError('Card payment is not available yet. Please choose cash on delivery.');
   }
   if (!items.length) {
     throw new BadRequestError('There is nothing in the cart.');

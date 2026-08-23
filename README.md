@@ -86,7 +86,9 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 ## Not done yet
 
-The card payment is simulated: `server/pb_hooks/orders.pb.js` marks a card order paid the moment it arrives, and that one line is where a provider would go. Cash on delivery is not simulated at all — such an order is genuinely unpaid, and nothing yet marks it collected, because nothing here ships.
+Cash on delivery is what the checkout offers, and it is not simulated: such an order is genuinely unpaid, and nothing yet marks it collected, because nothing here ships.
+
+Card is off — the radio is disabled and `server/pb_hooks/orders.pb.js` refuses one, because a disabled radio is only a suggestion and a POST naming `card` would otherwise walk away with an order marked paid. Nothing underneath it was removed: the collection still keeps the value, the hook still has the line that marks such an order paid, and the mail still has its sentence. Turning it on is `CARD_PAYMENT` in the hook and `cardPayment` in `pages/checkout.js` — and that line marking it paid is where a real provider goes.
 
 On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 

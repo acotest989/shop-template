@@ -111,14 +111,30 @@
           <fieldset :disabled="pending">
             <legend class="label">Payment</legend>
             <div class="mt-1 grid gap-2 sm:grid-cols-2">
+              <!-- Off until a provider is wired in, and disabled rather than removed: the
+                   record still knows the value and the hook still has the branch. -->
               <label
-                class="card flex cursor-pointer items-start gap-3 p-3"
-                :class="payment === 'card' && 'ring-2 ring-gray-900'"
+                class="card flex items-start gap-3 p-3"
+                :class="{
+                  'cursor-pointer': cardPayment,
+                  'cursor-not-allowed opacity-60': !cardPayment,
+                  'ring-2 ring-gray-900': payment === 'card',
+                }"
               >
-                <input type="radio" name="payment" value="card" x-model="payment" class="mt-0.5 accent-gray-900">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="card"
+                  x-model="payment"
+                  :disabled="!cardPayment"
+                  class="mt-0.5 accent-gray-900"
+                >
                 <span>
                   <span class="block text-sm font-medium text-gray-900">Card</span>
-                  <span class="muted text-xs">Simulated — nothing is charged.</span>
+                  <span
+                    class="muted text-xs"
+                    x-text="cardPayment ? 'Simulated — nothing is charged.' : 'Not available yet.'"
+                  ></span>
                 </span>
               </label>
 

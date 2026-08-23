@@ -11,7 +11,12 @@ export const checkoutPage = () => ({
   ...form({ name: '', email: '', phone: '', address: '' }, { fallback: 'Could not place the order.' }),
 
   order: null, // set once the order is placed; the page then shows the receipt
-  payment: 'card', // a choice rather than a field: it cannot be filled in wrong
+
+  // What the form offers. The hook refuses a card order as well, and that refusal is
+  // the one that counts — this only decides whether the radio can be reached at all.
+  cardPayment: false,
+
+  payment: 'cod', // a choice rather than a field: it cannot be filled in wrong
 
   init() {
     this.values.name = this.$store.session.user?.name ?? '';
