@@ -227,3 +227,28 @@ routerAdd('POST', '/api/shop/orders', (e) => {
 
   return e.json(200, placed);
 });
+
+// Cancelling puts the goods back. The route above only ever moves stock one way, so
+// without this a cancelled order would keep a shelf empty on nobody's behalf, and go
+// on counting as a sale. Fires for the dashboard too, which is the only place an
+// order's status changes today.
+onRecordUpdate((e) => {
+  const before = e.record.original().getString('status');
+  const after = e.record.getString('status');
+
+  if (after !== 'cancelled' || before === 'cancelled') {
+    e.next();
+    return;
+  }
+
+  // Before the save, so a failure here takes the status change down with it rather
+  // than leaving an order marked cancelled that nobody ever restocked.
+  for (const line of JSON.parse(e.record.getString('lines'))) {
+    const product = e.app.findRecordById('products', line.id);
+    product.set('stock', product.getInt('stock') + line.qty);
+    product.set('sold', Math.max(0, product.getInt('sold') - line.qty));
+    e.app.save(product);
+  }
+
+  e.next();
+}, 'orders');

@@ -26,6 +26,8 @@ Sign in with `demo@shop.test` / `test1234`, or register your own account.
 
 The whole surface is real, not stubbed: register, email verification, password reset, changing your name, email or password, and deleting the account. `/account` is the only guarded route.
 
+Checkout is deliberately not one of them. Ordering as a guest opens an account for the address given, and the confirmation carries the link for choosing a password — no password is ever sent. Every order therefore has an owner, which is what lets `/account` list them and what keeps one visitor from reading another's.
+
 Three of those arrive by email, and PocketBase's stock templates link to its own dashboard rather than to this app. The migrations rewrite them, so there is nothing to click — the token is the only required part of each URL:
 
 | | |
@@ -52,11 +54,11 @@ assets/
   theme.css       design system (.card, .btn, .input, .badge…)
 
 pages/            one .html + one .js per route
-partials/         markup reused across routes
+partials/         markup reused across routes, and chrome that outlives them
 stores/           Alpine stores (state that outlives a page)
 services/         talks to the outside world; only place that knows endpoints
 models/           what the app's own records look like; API shapes stop here
-lib/              app helpers (money, discountPercent, storageKey)
+lib/              money, dates, storage keys; helpers.js takes what has no subject yet
 server/           PocketBase: the database, auth and API in one binary
 ```
 
@@ -75,6 +77,8 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 **State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
 
 **A cart line is not a product.** `stores/cart.js` copies eight fields out of a product instead of spreading it. The price is a snapshot of what the visitor agreed to; everything else in `localStorage` would be stale data pretending to be fresh, and every future API field would silently become part of a schema that has to survive across releases.
+
+**Price and stock are the server's.** The `orders` collection refuses every write, so `server/pb_hooks/orders.pb.js` is the only way one is made. The cart does send the price it displayed, but only so the hook can refuse a cart that was priced differently — every amount stored is read from the `products` records. Stock is checked and lowered inside the same transaction, so an order that exists is an order whose stock was taken, and a refusal leaves the shelf where it was. Only one thing puts goods back: setting an order to `cancelled`, from the dashboard or anywhere else, restocks its lines and undoes the sale.
 
 **Forms are the framework's, validation is the app's.** Every form here spreads `form()` and keeps only `validate()` and `save()`. What the browser can decide never reaches the network; what only the server knows — that an address is taken — comes back as a message on that field. The sequence around it, including refusing a second submit, is not written here at all.
 

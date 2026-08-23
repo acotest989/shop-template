@@ -10,6 +10,7 @@ export function toProduct(raw) {
     currency: raw.currency,
     available: raw.stock > 0,
     stock: raw.stock,
+    sold: raw.sold,
     rating: raw.rating,
     tags: raw.tags ?? [],
     image: raw.image,

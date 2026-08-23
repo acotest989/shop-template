@@ -41,10 +41,7 @@
         <p class="eyebrow" x-text="product.brand"></p>
         <h1 class="mt-1 text-2xl font-semibold text-gray-900" x-text="product.title"></h1>
 
-        <p
-          class="mt-2 flex items-center gap-1.5 text-sm text-gray-500"
-          :aria-label="product.rating.toFixed(1) + ' out of 5'"
-        >
+        <p class="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
           <!-- One row of stars over another, the top one clipped to the score. -->
           <span class="relative leading-none" aria-hidden="true">
             <span class="text-gray-300">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
@@ -54,6 +51,8 @@
             >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
           </span>
           <span x-text="product.rating.toFixed(1)"></span>
+          <span class="sr-only">out of 5</span>
+          <span x-show="product.sold" x-text="'· ' + product.sold + ' sold'"></span>
         </p>
 
         <div class="mt-4 flex items-baseline gap-3">

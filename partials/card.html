@@ -36,10 +36,7 @@
       ></a>
     </h3>
 
-    <p
-      class="mt-1 flex items-center gap-1.5 text-xs text-gray-500"
-      :aria-label="product.rating.toFixed(1) + ' out of 5'"
-    >
+    <p class="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
       <!-- One row of stars over another, the top one clipped to the score. -->
       <span class="relative leading-none" aria-hidden="true">
         <span class="text-gray-300">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
@@ -49,6 +46,10 @@
         >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
       </span>
       <span x-text="product.rating.toFixed(1)"></span>
+      <span class="sr-only">out of 5</span>
+
+      <!-- Only once it has one: '0 sold' reads worse than no number at all. -->
+      <span x-show="product.sold" x-text="'· ' + product.sold + ' sold'"></span>
     </p>
 
     <div class="mt-2 flex items-baseline gap-2">

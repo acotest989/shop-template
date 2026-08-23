@@ -5,7 +5,7 @@ import { toProduct } from '../models/product.js';
 const PER_PAGE = 24;
 
 // What a card draws. Tags belong to the product page, the timestamps to nobody.
-const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,rating,image';
+const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,sold,rating,image';
 
 // Pages ask in the app's terms and never learn how the question was answered.
 export async function fetchProducts({ q = '', category = '', page = 1 } = {}) {

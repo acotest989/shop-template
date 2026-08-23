@@ -4,13 +4,16 @@ Server-side logic in JavaScript, as `*.pb.js` files. PocketBase picks them up fr
 
 This is where anything the client must not decide belongs. The obvious one: never let a browser post the amount it intends to pay. Price the order here, from the records, and reject what does not match.
 
+`orders.pb.js` is that, in full. The `orders` collection refuses every write, and the hook adds a route of its own instead — a browser sends which products at which quantity, and the price, stock, totals and the buyer's account are all settled on this side:
+
 ```js
-// example.pb.js
-onRecordCreateRequest((e) => {
-  e.record.set('total', 0); // computed here, never taken from the request
-  e.next();
-}, 'orders');
+routerAdd('POST', '/api/shop/orders', (e) => {
+  const product = tx.findRecordById('products', item.id);
+  if (Number(item.price) !== product.getInt('price_cents')) { /* refuse */ }
+});
 ```
+
+A route rather than a create hook, because then the collection can stay closed: there is no second way in to keep in step.
 
 The engine is goja: ES5 plus most of ES6, CommonJS only (no ES modules without pre-bundling), no `setTimeout`, no `fetch`, no Node APIs. Each handler runs isolated, so variables declared outside one are not visible inside it.
 
