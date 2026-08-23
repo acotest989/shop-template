@@ -41,8 +41,18 @@
         <p class="eyebrow" x-text="product.brand"></p>
         <h1 class="mt-1 text-2xl font-semibold text-gray-900" x-text="product.title"></h1>
 
-        <p class="mt-2 flex items-center gap-1 text-sm text-gray-500">
-          <span class="text-amber-400">&#9733;</span>
+        <p
+          class="mt-2 flex items-center gap-1.5 text-sm text-gray-500"
+          :aria-label="product.rating.toFixed(1) + ' out of 5'"
+        >
+          <!-- One row of stars over another, the top one clipped to the score. -->
+          <span class="relative leading-none" aria-hidden="true">
+            <span class="text-gray-300">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span
+              class="absolute inset-y-0 left-0 overflow-hidden whitespace-nowrap text-amber-400"
+              :style="'width: ' + starPercent(product.rating) + '%'"
+            >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          </span>
           <span x-text="product.rating.toFixed(1)"></span>
         </p>
 
