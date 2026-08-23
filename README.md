@@ -68,7 +68,7 @@ Routes that need different chrome take an object instead: `'/login': { page: 'lo
 
 **No build step.** Tailwind runs through its browser build, which compiles CSS at runtime and only reads `<style type="text/tailwindcss">` tags — it supports neither `<link>` nor `@import` for local files. That is why `assets/theme.css` is fetched and injected as a style tag by the framework. The compiler goes to the visitor along with the page, and that is a trade the framework makes on purpose — right for a demo like this one, wrong for a content site living on search traffic.
 
-**Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase, `models/product.js` turns a record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. Searching and sorting happen in the database; a page only hands over a term.
+**Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase, `models/product.js` turns a record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. Searching, filtering by category, sorting and paging all happen in the database: a page hands over a term, a category and a page number, and gets back one page of products with the count behind it.
 
 That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, while `pages/login.html`, `pages/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/home.js` and `pages/product.js` were not opened at all. Whatever `services/mock.js` still imports is what is still faked.
 
@@ -82,7 +82,7 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 ## Not done yet
 
-Orders still come from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. They belong in PocketBase behind a hook, so the price an order is written at is never the client's word. The product list has no paging either, so it renders the whole catalogue on every visit.
+Orders still come from `services/orders.js`, which fakes the payment and is the last importer of `services/mock.js`. They belong in PocketBase behind a hook, so that the price an order is written at is never the client's word, and so that stock goes down when something is bought. Nothing shows a visitor an order once the receipt is gone, either.
 
 On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
 
