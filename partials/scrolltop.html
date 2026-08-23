@@ -1,0 +1,20 @@
+<!-- Its own x-data, so no page has to know this exists. Sitting beside #page rather than
+     inside it, the button survives every route and gates itself on scroll position: a short
+     page never reaches the threshold, so nothing has to opt out. -->
+<div
+  x-data="{ shown: false, smooth: !matchMedia('(prefers-reduced-motion: reduce)').matches }"
+  @scroll.window.throttle.100ms="shown = window.scrollY > 800"
+>
+  <button
+    type="button"
+    x-show="shown"
+    x-transition.opacity
+    @click="window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' })"
+    aria-label="Back to top"
+    class="fixed bottom-4 right-4 z-20 grid h-10 w-10 place-items-center rounded-full border border-gray-200 bg-white/90 text-gray-900 shadow-lg backdrop-blur transition-colors hover:bg-white"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+      <path d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+    </svg>
+  </button>
+</div>

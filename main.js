@@ -50,7 +50,7 @@ createApp({
   },
   stores: { session, cart }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
-  partials: ['card', 'toast'],
+  partials: ['card', 'toast', 'scrolltop'],
   // register new page data here
   pages: {
     homePage, productPage, loginPage, registerPage, verifyPage,

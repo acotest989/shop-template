@@ -44,7 +44,7 @@ Live Server also works, and brings reload-on-save, but then the API is on anothe
 
 ```
 
-index.html        shell: toast slot and #page render target
+index.html        shell: partial slots and the #page render target
 main.js           entry point: the app's whole configuration
 app.js            extras merged into the root component (money, signIn, signOut)
 assets/
