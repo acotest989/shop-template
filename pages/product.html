@@ -82,13 +82,35 @@
           </template>
         </div>
 
-        <div class="mt-8 flex gap-3">
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <div class="flex items-center rounded-lg border border-gray-300" x-show="product.available">
+            <button
+              type="button"
+              class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
+              :disabled="!inCart && qty <= 1"
+              aria-label="Decrease quantity"
+              @click="step(-1)"
+            >&minus;</button>
+
+            <span class="w-8 text-center text-sm font-medium" x-text="shownQty"></span>
+
+            <button
+              type="button"
+              class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
+              :disabled="shownQty >= product.stock"
+              aria-label="Increase quantity"
+              @click="step(1)"
+            >+</button>
+          </div>
+
+          <!-- One button, three states. Once the cart holds this product the stepper writes
+               to it directly, so adding again would say nothing the count does not. -->
           <button
             type="button"
             class="btn btn-primary flex-1"
             :disabled="!product.available"
-            x-text="product.available ? 'Add to cart' : 'Sold out'"
-            @click="$store.cart.add(product)"
+            x-text="!product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
+            @click="inCart ? goTo('/cart') : addToCart()"
           ></button>
           <button type="button" class="btn btn-ghost" @click="goBack()">Back</button>
         </div>

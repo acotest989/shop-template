@@ -73,7 +73,7 @@
         :disabled="!product.available"
         :aria-label="product.available ? 'Add ' + product.title + ' to cart' : product.title + ' is sold out'"
         x-text="product.available ? 'Add to cart' : 'Sold out'"
-        @click="$store.cart.add(product)"
+        @click="$store.cart.add(product); notify(product.title + ' added to cart.', 'success')"
       ></button>
     </div>
   </div>
