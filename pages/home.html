@@ -1,6 +1,9 @@
 <main class="mx-auto w-full max-w-5xl p-4" x-data="homePage">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-xl font-semibold text-gray-900">Products</h1>
+    <div class="flex items-baseline gap-2">
+      <h1 class="text-xl font-semibold text-gray-900">Products</h1>
+      <span class="muted" x-show="!pending && !error" x-text="range"></span>
+    </div>
 
     <div class="relative w-full sm:w-64">
       <input
@@ -20,8 +23,6 @@
       >&times;</button>
     </div>
   </div>
-
-  <p class="muted mb-4" x-show="q && !pending" x-text="products.length + ' of ' + total + ' products'"></p>
 
   <!-- loading -->
   <template x-if="pending">
@@ -64,4 +65,47 @@
       </template>
     </div>
   </template>
+
+  <!-- paging -->
+  <nav
+    x-show="!pending && !error && totalPages > 1"
+    aria-label="Pagination"
+    class="mt-6 flex flex-wrap items-center justify-center gap-1"
+  >
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm w-9 px-0 disabled:text-gray-300"
+      :disabled="page === 1"
+      aria-label="Previous page"
+      @click="goToPage(page - 1)"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+        <path d="m15.75 19.5-7.5-7.5 7.5-7.5" />
+      </svg>
+    </button>
+
+    <template x-for="n in totalPages" :key="n">
+      <button
+        type="button"
+        class="btn btn-sm w-9"
+        :class="n === page ? 'btn-primary' : 'btn-ghost'"
+        :aria-current="n === page ? 'page' : false"
+        :aria-label="'Page ' + n"
+        x-text="n"
+        @click="goToPage(n)"
+      ></button>
+    </template>
+
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm w-9 px-0 disabled:text-gray-300"
+      :disabled="page === totalPages"
+      aria-label="Next page"
+      @click="goToPage(page + 1)"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+        <path d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+    </button>
+  </nav>
 </main>
