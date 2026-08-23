@@ -5,6 +5,7 @@ export function toProduct(raw) {
     title: raw.title,
     brand: raw.brand,
     category: raw.category,
+    description: raw.description, // the card never asks for it, so on a grid it is undefined
     price: raw.price_cents,
     regularPrice: raw.regular_price_cents,
     currency: raw.currency,
@@ -14,5 +15,9 @@ export function toProduct(raw) {
     rating: raw.rating,
     tags: raw.tags ?? [],
     image: raw.image,
+
+    // The gallery, and only the product page asks for it. A product with one picture
+    // gets an array of one, so the page has a single rule rather than two cases.
+    images: raw.images?.length ? raw.images : [raw.image],
   };
 }

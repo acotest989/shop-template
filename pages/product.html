@@ -21,20 +21,40 @@
 
   <template x-if="product">
     <div class="grid gap-8 md:grid-cols-2">
-      <div class="card relative aspect-square overflow-hidden bg-gray-100">
-        <img
-          :src="product.image"
-          :alt="product.title"
-          width="600"
-          height="600"
-          class="h-full w-full object-cover"
-          :class="{ 'opacity-60': !product.available }"
-        >
-        <span
-          x-show="discountPercent(product.price, product.regularPrice) > 0"
-          x-text="'-' + discountPercent(product.price, product.regularPrice) + '%'"
-          class="badge badge-ink absolute left-3 top-3"
-        ></span>
+      <div>
+        <div class="card relative aspect-square overflow-hidden bg-gray-100">
+          <img
+            :src="product.images[shown]"
+            :alt="product.title"
+            width="600"
+            height="600"
+            class="h-full w-full object-cover"
+            :class="{ 'opacity-60': !product.available, 'cursor-pointer': product.images.length > 1 }"
+            @click="nextImage()"
+          >
+          <span
+            x-show="discountPercent(product.price, product.regularPrice) > 0"
+            x-text="'-' + discountPercent(product.price, product.regularPrice) + '%'"
+            class="badge badge-ink absolute left-3 top-3"
+          ></span>
+        </div>
+
+        <!-- Not drawn for a product with one picture: a row of one is a control that
+             does nothing, and three or four fit here without hiding any of them. -->
+        <div class="mt-3 flex flex-wrap gap-2" x-show="product.images.length > 1">
+          <template x-for="(src, index) in product.images" :key="src">
+            <button
+              type="button"
+              class="aspect-square w-16 overflow-hidden rounded-lg border bg-gray-100 transition-colors"
+              :class="index === shown ? 'border-gray-900' : 'border-gray-200 hover:border-gray-400'"
+              :aria-label="'Show picture ' + (index + 1) + ' of ' + product.images.length"
+              :aria-current="index === shown"
+              @click="shown = index"
+            >
+              <img :src="src" alt="" width="64" height="64" loading="lazy" class="h-full w-full object-cover">
+            </button>
+          </template>
+        </div>
       </div>
 
       <div class="flex flex-col">
@@ -68,6 +88,12 @@
           x-show="product.available && product.stock <= 3"
           class="badge badge-warn mt-3 self-start"
           x-text="'Only ' + product.stock + ' left'"
+        ></p>
+
+        <p
+          x-show="product.description"
+          x-text="product.description"
+          class="mt-4 text-sm leading-relaxed text-gray-600"
         ></p>
 
         <div class="mt-4 flex flex-wrap items-center gap-2">
