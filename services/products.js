@@ -8,12 +8,17 @@ const PER_PAGE = 24;
 const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,rating,image';
 
 // Pages ask in the app's terms and never learn how the question was answered.
-export async function fetchProducts({ q = '', page = 1 } = {}) {
+export async function fetchProducts({ q = '', category = '', page = 1 } = {}) {
   const term = q.trim();
+
+  // Joined with &&, so the term's alternatives need parentheses of their own.
+  const clauses = [];
+  if (category) clauses.push(pb.filter('category = {:category}', { category }));
+  if (term) clauses.push(pb.filter('(title ~ {:term} || brand ~ {:term} || tags ?~ {:term})', { term }));
 
   const result = await pb.collection('products').getList(page, PER_PAGE, {
     fields: CARD_FIELDS,
-    filter: term ? pb.filter('title ~ {:term} || brand ~ {:term} || tags ?~ {:term}', { term }) : '',
+    filter: clauses.join(' && '),
     sort: 'title',
   });
 
@@ -24,6 +29,17 @@ export async function fetchProducts({ q = '', page = 1 } = {}) {
     page: result.page,
     perPage: result.perPage,
   };
+}
+
+// The catalogue owns the list, so it is read rather than kept in step by hand. One field
+// for every row, deduped here, because the list API has no distinct of its own.
+export async function fetchCategories() {
+  const records = await pb.collection('products').getFullList({
+    fields: 'category',
+    sort: 'category',
+  });
+
+  return [...new Set(records.map((record) => record.category))];
 }
 
 export async function fetchProduct(handle) {

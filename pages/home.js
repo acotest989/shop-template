@@ -1,4 +1,5 @@
-import { fetchProducts } from '../services/products.js';
+import { fetchProducts, fetchCategories } from '../services/products.js';
+import { humanize } from '../lib/helpers.js';
 import { errorMessage } from 'alpineshell';
 
 const SKELETON_COUNT = 12; // roughly a screenful, so the wait has a shape
@@ -11,6 +12,8 @@ export const homePage = () => ({
   perPage: 0,
   page: 1,
   q: '',
+  category: '',
+  categories: [],
   pending: true,
   searching: false,
   error: '',
@@ -22,15 +25,29 @@ export const homePage = () => ({
   async init() {
     const params = new URLSearchParams(location.search);
     this.q = params.get('q') ?? '';
+    this.category = params.get('category') ?? '';
     this.page = Number(params.get('page')) || 1;
 
     await this.search();
+    this.loadCategories(); // not awaited: the grid is the page, the filter only narrows it
 
-    // A new term is a new result set, so it starts over at the first page.
-    this.$watch('q', () => {
-      this.page = 1;
-      this.search();
-    });
+    // Either one is a new result set, so it starts over at the first page.
+    this.$watch('q', () => this.restart());
+    this.$watch('category', () => this.restart());
+  },
+
+  restart() {
+    this.page = 1;
+    this.search();
+  },
+
+  async loadCategories() {
+    try {
+      const names = await fetchCategories();
+      this.categories = names.map((name) => ({ value: name, label: humanize(name) }));
+    } catch (err) {
+      console.error(err); // the select stays empty; searching and browsing still work
+    }
   },
 
   async search() {
@@ -40,7 +57,7 @@ export const homePage = () => ({
     this.syncUrl();
 
     try {
-      const result = await fetchProducts({ q: this.q, page: this.page });
+      const result = await fetchProducts({ q: this.q, category: this.category, page: this.page });
       if (token !== this.latest) return;
 
       this.products = result.items;
@@ -73,6 +90,7 @@ export const homePage = () => ({
     const params = new URLSearchParams();
     const term = this.q.trim();
     if (term) params.set('q', term);
+    if (this.category) params.set('category', this.category);
     if (this.page > 1) params.set('page', this.page);
 
     const query = params.toString();

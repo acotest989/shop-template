@@ -5,22 +5,40 @@
       <span class="muted" x-show="!pending && !error" x-text="range"></span>
     </div>
 
-    <div class="relative w-full sm:w-64">
-      <input
-        x-ref="search"
-        x-model.debounce.250ms="q"
-        type="search"
-        placeholder="Search products…"
-        aria-label="Search products"
-        class="input pr-8"
+    <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+
+      <!-- x-effect, not x-model alone: the options arrive after the select is bound, and a
+           browser does not select an option that did not exist when the value was set. -->
+      <select
+        x-model="category"
+        x-effect="categories.length && ($el.value = category)"
+        aria-label="Filter by category"
+        class="input w-full sm:w-44"
       >
-      <button
-        type="button"
-        x-show="q"
-        @click="clear()"
-        aria-label="Clear search"
-        class="absolute inset-y-0 right-0 px-2 text-lg leading-none text-gray-400 transition-colors hover:text-gray-900"
-      >&times;</button>
+        <option value="">All categories</option>
+        <template x-for="option in categories" :key="option.value">
+          <option :value="option.value" x-text="option.label"></option>
+        </template>
+      </select>
+
+      <div class="relative w-full sm:w-64">
+        <input
+          x-ref="search"
+          x-model.debounce.250ms="q"
+          type="search"
+          placeholder="Search products…"
+          aria-label="Search products"
+          class="input pr-8"
+        >
+        <button
+          type="button"
+          x-show="q"
+          @click="clear()"
+          aria-label="Clear search"
+          class="absolute inset-y-0 right-0 px-2 text-lg leading-none text-gray-400 transition-colors hover:text-gray-900"
+        >&times;</button>
+      </div>
+
     </div>
   </div>
 
