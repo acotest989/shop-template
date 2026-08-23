@@ -82,8 +82,9 @@
         </div>
         <p class="muted mt-1 text-xs">VAT included. Shipping is free.</p>
 
-        <div class="mt-4 flex gap-3">
+        <div class="mt-4 flex flex-wrap gap-3">
           <button type="button" class="btn btn-primary flex-1" @click="goTo('/checkout')">Checkout</button>
+          <button type="button" class="btn btn-ghost" @click="goBack()">Back</button>
           <button type="button" class="btn btn-ghost" @click="$store.cart.clear()">Clear cart</button>
         </div>
       </div>
