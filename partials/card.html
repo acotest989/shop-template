@@ -68,10 +68,12 @@
     ></p>
 
     <div class="relative mt-auto pt-3">
+      <!-- Off once the cart holds all it can take of this one, or the toast would announce
+           an add that never happened. -->
       <button
         type="button"
         class="btn btn-primary w-full"
-        :disabled="!product.available"
+        :disabled="!product.available || $store.cart.qtyOf(product.id) >= $store.cart.maxQty(product)"
         :aria-label="product.available ? 'Add ' + product.title + ' to cart' : product.title + ' is sold out'"
         x-text="product.available ? 'Add to cart' : 'Sold out'"
         @click="$store.cart.add(product); notify(product.title + ' added to cart.', 'success')"

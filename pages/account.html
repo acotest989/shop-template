@@ -40,21 +40,24 @@
             </div>
 
             <!-- Two badges because they answer two questions: where it is, and whether
-                 it is settled. Cash on delivery is what makes those come apart. -->
+                 it is settled. Cash on delivery is what makes those come apart. A delivered
+                 parcel was paid for at the door, whether or not the courier has passed the
+                 money on yet, and an order that ended owes nothing, so it asks for nothing. -->
             <div class="flex shrink-0 items-center gap-2">
               <span
                 class="badge capitalize"
                 :class="{
-                  'badge-soft': order.status === 'pending',
-                  'badge-good': order.status === 'shipped',
-                  'badge-bad': order.status === 'cancelled',
+                  'badge-soft': order.status === 'pending' || order.status === 'shipped',
+                  'badge-good': order.status === 'delivered',
+                  'badge-bad': order.status === 'cancelled' || order.status === 'returned',
                 }"
                 x-text="order.status"
               ></span>
               <span
                 class="badge"
-                :class="order.paid ? 'badge-good' : 'badge-warn'"
-                x-text="order.paid ? 'Paid' : 'Pay on delivery'"
+                x-show="order.status !== 'cancelled' && order.status !== 'returned'"
+                :class="order.paid || order.status === 'delivered' ? 'badge-good' : 'badge-warn'"
+                x-text="order.paid || order.status === 'delivered' ? 'Paid' : 'Pay on delivery'"
               ></span>
               <span class="text-sm font-semibold text-gray-900" x-text="money(order.total, order.currency)"></span>
             </div>

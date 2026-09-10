@@ -28,7 +28,7 @@ export const productPage = () => ({
       this.$store.cart.setQty(this.product.id, this.inCart + by);
       return;
     }
-    this.qty = Math.min(Math.max(this.qty + by, 1), this.product.stock);
+    this.qty = Math.min(Math.max(this.qty + by, 1), this.$store.cart.maxQty(this.product));
   },
 
   addToCart() {

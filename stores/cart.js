@@ -1,5 +1,10 @@
 import { storageKey } from '../lib/storage.js';
 
+// The most of one product a single order takes. The server refuses more on its own —
+// MAX_QTY in server/pb_hooks/orders.pb.js — so this only keeps the cart from building an
+// order that would be turned away.
+const MAX_QTY = 10;
+
 // A cart line is not a product: only what the cart shows or charges for.
 // The price is a snapshot from the moment of adding — that is what the visitor agreed to.
 // Both identifiers, doing different jobs: the id keys the line, the handle builds the link.
@@ -34,6 +39,12 @@ export const cart = () => ({
     return this.items.find(item => item.id === id)?.qty || 0;
   },
 
+  // How far a stepper may go: what is on the shelf, and never past what one order takes.
+  // Anything with a stock will do — a cart line, or a product not in the cart yet.
+  maxQty(item) {
+    return Math.min(item.stock, MAX_QTY);
+  },
+
   setQty(id, qty) {
     if (qty < 1) {
       this.remove(id);
@@ -41,7 +52,7 @@ export const cart = () => ({
     }
     const item = this.items.find(item => item.id === id);
     if (item) {
-      item.qty = Math.min(qty, item.stock);
+      item.qty = Math.min(qty, this.maxQty(item));
     }
   },
 
@@ -50,7 +61,7 @@ export const cart = () => ({
     if (item) {
       this.setQty(item.id, item.qty + qty);
     } else {
-      this.items.push(toLine(product, Math.min(qty, product.stock)));
+      this.items.push(toLine(product, Math.min(qty, this.maxQty(product))));
     }
   },
 

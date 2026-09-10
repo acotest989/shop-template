@@ -78,7 +78,7 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 **A cart line is not a product.** `stores/cart.js` copies eight fields out of a product instead of spreading it. The price is a snapshot of what the visitor agreed to; everything else in `localStorage` would be stale data pretending to be fresh, and every future API field would silently become part of a schema that has to survive across releases.
 
-**Price and stock are the server's.** The `orders` collection refuses every write, so `server/pb_hooks/orders.pb.js` is the only way one is made. The cart does send the price it displayed, but only so the hook can refuse a cart that was priced differently — every amount stored is read from the `products` records. Stock is checked and lowered inside the same transaction, so an order that exists is an order whose stock was taken, and a refusal leaves the shelf where it was. Only one thing puts goods back: setting an order to `cancelled`, from the dashboard or anywhere else, restocks its lines and undoes the sale.
+**Price and stock are the server's.** The `orders` collection refuses every write, so `server/pb_hooks/orders.pb.js` is the only way one is made. The cart does send the price it displayed, but only so the hook can refuse a cart that was priced differently — every amount stored is read from the `products` records. Stock is checked and lowered inside the same transaction, so an order that exists is an order whose stock was taken, and a refusal leaves the shelf where it was. No order takes more than ten of one product: the rate limit bounds how many made-up cash-on-delivery orders one visitor can place, and the cap bounds what each of them can take off a shelf. Two statuses put goods back, `cancelled` and `returned`: setting either, from the dashboard or anywhere else, restocks the order's lines and undoes the sale. Moving the order off them again takes the goods once more, and is refused if they have been sold since.
 
 **Forms are the framework's, validation is the app's.** Every form here spreads `form()` and keeps only `validate()` and `save()`. What the browser can decide never reaches the network; what only the server knows — that an address is taken — comes back as a message on that field. The sequence around it, including refusing a second submit, is not written here at all.
 
@@ -86,7 +86,7 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 ## Not done yet
 
-Cash on delivery is what the checkout offers, and it is not simulated: such an order is genuinely unpaid, and nothing yet marks it collected, because nothing here ships.
+Cash on delivery is what the checkout offers, and it is not simulated: such an order is genuinely unpaid. Nothing here talks to a courier either, so an order's progress is set by hand in the dashboard as the courier reports it — `shipped`, then `delivered`, or `returned` when the parcel is refused at the door — and `paid` is ticked once the courier pays the money over.
 
 Card is off — the radio is disabled and `server/pb_hooks/orders.pb.js` refuses one, because a disabled radio is only a suggestion and a POST naming `card` would otherwise walk away with an order marked paid. Nothing underneath it was removed: the collection still keeps the value, the hook still has the line that marks such an order paid, and the mail still has its sentence. Turning it on is `CARD_PAYMENT` in the hook and `cardPayment` in `pages/checkout.js` — and that line marking it paid is where a real provider goes.
 

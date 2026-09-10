@@ -122,7 +122,7 @@
             <button
               type="button"
               class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
-              :disabled="shownQty >= product.stock"
+              :disabled="shownQty >= $store.cart.maxQty(product)"
               aria-label="Increase quantity"
               @click="step(1)"
             >+</button>
