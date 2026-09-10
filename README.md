@@ -90,6 +90,8 @@ Cash on delivery is what the checkout offers, and it is not simulated: such an o
 
 Card is off — the radio is disabled and `server/pb_hooks/orders.pb.js` refuses one, because a disabled radio is only a suggestion and a POST naming `card` would otherwise walk away with an order marked paid. Nothing underneath it was removed: the collection still keeps the value, the hook still has the line that marks such an order paid, and the mail still has its sentence. Turning it on is `CARD_PAYMENT` in the hook and `cardPayment` in `pages/checkout.js` — and that line marking it paid is where a real provider goes.
 
-On the accounts side, what is left is optional: OAuth2 providers, and turning on the rate limiter before any of this is public, since auth endpoints are what gets hammered first.
+On the accounts side, what is left is optional: OAuth2 providers.
+
+What is not optional is the trusted proxy header, under **Settings → Application**, before any of this is public. Every rate limit here counts per IP address, placing an order included, and behind a proxy every visitor arrives from the proxy's own: the shop would take five orders every ten minutes from the whole world. Which header depends on the host — `Fly-Client-IP` on Fly.io, `CF-Connecting-IP` behind Cloudflare — so no migration sets it. A header the proxy does not overwrite is one any visitor can write, and every limit would count whatever address they claim.
 
 Nothing here has needed a change to AlpineShell. The cart, search and checkout are all stores, pages, services and routes.

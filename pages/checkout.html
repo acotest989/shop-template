@@ -111,7 +111,18 @@
           <fieldset :disabled="pending">
             <legend class="label">Payment</legend>
             <div class="mt-1 grid gap-2 sm:grid-cols-2">
-              <!-- Off until a provider is wired in, and disabled rather than removed: the
+              <label
+                class="card flex cursor-pointer items-start gap-3 p-3"
+                :class="payment === 'cod' && 'ring-2 ring-gray-900'"
+              >
+                <input type="radio" name="payment" value="cod" x-model="payment" class="mt-0.5 accent-gray-900">
+                <span>
+                  <span class="block text-sm font-medium text-gray-900">Cash on delivery</span>
+                  <span class="muted text-xs">Pay the courier at the door.</span>
+                </span>
+              </label>
+            
+                <!-- Off until a provider is wired in, and disabled rather than removed: the
                    record still knows the value and the hook still has the branch. -->
               <label
                 class="card flex items-start gap-3 p-3"
@@ -135,17 +146,6 @@
                     class="muted text-xs"
                     x-text="cardPayment ? 'Simulated — nothing is charged.' : 'Not available yet.'"
                   ></span>
-                </span>
-              </label>
-
-              <label
-                class="card flex cursor-pointer items-start gap-3 p-3"
-                :class="payment === 'cod' && 'ring-2 ring-gray-900'"
-              >
-                <input type="radio" name="payment" value="cod" x-model="payment" class="mt-0.5 accent-gray-900">
-                <span>
-                  <span class="block text-sm font-medium text-gray-900">Cash on delivery</span>
-                  <span class="muted text-xs">Pay the courier at the door.</span>
                 </span>
               </label>
             </div>
