@@ -52,6 +52,11 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   // Turning it back on is this line and `cardPayment` in pages/checkout.js.
   const CARD_PAYMENT = false;
 
+  // Ten of one product is more than a household orders, and it bounds what a single
+  // made-up cash-on-delivery order can take off a shelf: the rate limit counts orders,
+  // this counts what is in them. The cart stops at the same number, in stores/cart.js.
+  const MAX_QTY = 10;
+
   if (!name || !email || !phone || !address) {
     throw new BadRequestError('The delivery details are incomplete.');
   }
@@ -135,6 +140,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   $app.runInTransaction((tx) => {
     const lines = [];
     const bought = [];
+    const seen = [];
     let subtotal = 0;
     let currency = '';
 
@@ -144,9 +150,17 @@ routerAdd('POST', '/api/shop/orders', (e) => {
         throw new BadRequestError('That is not a quantity.');
       }
 
+      // One line per product, the way the cart sends it. A second line would be checked
+      // against stock the first has not taken yet, and would slip past the cap as well.
+      const id = String(item.id);
+      if (seen.indexOf(id) !== -1) {
+        throw new BadRequestError('The same product is in this order twice.');
+      }
+      seen.push(id);
+
       let product;
       try {
-        product = tx.findRecordById('products', String(item.id));
+        product = tx.findRecordById('products', id);
       } catch (err) {
         throw new BadRequestError('One of these products is no longer sold.');
       }
@@ -158,6 +172,9 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       // agreed to one number must not be billed another without being told.
       if (Number(item.price) !== price) {
         throw new BadRequestError('The price of ' + title + ' changed while it was in your cart.');
+      }
+      if (qty > MAX_QTY) {
+        throw new BadRequestError('One order can take at most ' + MAX_QTY + ' of ' + title + '.');
       }
       if (product.getInt('stock') < qty) {
         throw new BadRequestError(title + ' does not have that many left.');
@@ -237,25 +254,41 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   return e.json(200, placed);
 });
 
-// Cancelling puts the goods back. The route above only ever moves stock one way, so
-// without this a cancelled order would keep a shelf empty on nobody's behalf, and go
-// on counting as a sale. Fires for the dashboard too, which is the only place an
-// order's status changes today.
+// Cancelled and returned put the goods back: one before they left, the other once the
+// courier has brought them back. The route above only ever moves stock one way, so
+// without this such an order would keep a shelf empty on nobody's behalf, and go on
+// counting as a sale. Moving an order off either again, to correct a status set by
+// mistake, takes the goods once more. Fires for the dashboard too, which is the only
+// place an order's status changes today.
 onRecordUpdate((e) => {
-  const before = e.record.original().getString('status');
-  const after = e.record.getString('status');
+  const shelved = (status) => status === 'cancelled' || status === 'returned';
+  const before = shelved(e.record.original().getString('status'));
+  const after = shelved(e.record.getString('status'));
 
-  if (after !== 'cancelled' || before === 'cancelled') {
+  // shipped to delivered, or cancelled to returned: the goods stay where they are
+  if (before === after) {
     e.next();
     return;
   }
 
-  // Before the save, so a failure here takes the status change down with it rather
-  // than leaving an order marked cancelled that nobody ever restocked.
+  const direction = after ? 1 : -1; // onto the shelf, or off it again
+  const products = [];
+
+  // Every line is settled before any is written, so a refusal leaves each shelf as it was.
   for (const line of JSON.parse(e.record.getString('lines'))) {
     const product = e.app.findRecordById('products', line.id);
-    product.set('stock', product.getInt('stock') + line.qty);
-    product.set('sold', Math.max(0, product.getInt('sold') - line.qty));
+    const stock = product.getInt('stock') + direction * line.qty;
+    if (stock < 0) {
+      throw new BadRequestError('Not enough ' + product.getString('title') + ' left to reopen this order.');
+    }
+    product.set('stock', stock);
+    product.set('sold', Math.max(0, product.getInt('sold') - direction * line.qty));
+    products.push(product);
+  }
+
+  // Before the save, so a failure here takes the status change down with it rather
+  // than leaving an order whose status and shelf disagree.
+  for (const product of products) {
     e.app.save(product);
   }
 
