@@ -5,14 +5,18 @@ import { storageKey } from '../lib/storage.js';
 // order that would be turned away.
 const MAX_QTY = 10;
 
-// One flat rate per order, in the shop's own currency. SHIPPING in the hook is the one
-// that counts, and it refuses an order whose page showed a different one.
+// The shipping rules as the hook has them: SHIPPING, FREE_FROM and FREE_UP_TO in
+// server/pb_hooks/orders.pb.js. The hook's are the ones that count, and it refuses an
+// order whose page showed less shipping than it works out.
 const SHIPPING = 1500;
+const FREE_FROM = 30000;
+const FREE_UP_TO = 20000;
 
 // A cart line is not a product: only what the cart shows or charges for.
 // The price is a snapshot from the moment of adding — that is what the visitor agreed to.
 // Both identifiers, doing different jobs: the id keys the line, the handle builds the link.
 // A slug is made from text people rewrite; the id keeps pointing at the same product.
+// The weight only tells the cart whether the order ships free; the hook weighs again.
 const toLine = (product, qty) => ({
   id: product.id,
   handle: product.handle,
@@ -21,6 +25,7 @@ const toLine = (product, qty) => ({
   price: product.price,
   currency: product.currency,
   stock: product.stock,
+  weight: product.weight,
   qty,
 });
 
@@ -35,10 +40,28 @@ export const cart = () => ({
     return this.items.reduce((total, item) => total + item.price * item.qty, 0);
   },
 
-  // An empty cart ships nothing; anything else goes out as one parcel.
-  get shipping() {
-    return this.items.length ? SHIPPING : 0;
+  // Grams, or null while any line was added before products had a weight: such a cart
+  // cannot tell whether it ships free, so it shows the flat rate and the hook decides.
+  get weight() {
+    let grams = 0;
+    for (const item of this.items) {
+      if (!(item.weight > 0)) return null;
+      grams += item.weight * item.qty;
+    }
+    return grams;
   },
+
+  // An empty cart ships nothing. One worth FREE_FROM ships free while it weighs no more
+  // than FREE_UP_TO; anything else pays the flat rate for its one parcel.
+  get shipping() {
+    if (!this.items.length) return 0;
+    const weight = this.weight;
+    return this.subtotal >= FREE_FROM && weight !== null && weight <= FREE_UP_TO ? 0 : SHIPPING;
+  },
+
+  // The rules, for the page that explains them.
+  freeFrom: FREE_FROM,
+  freeUpTo: FREE_UP_TO,
 
   get total() {
     return this.subtotal + this.shipping;

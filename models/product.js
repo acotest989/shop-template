@@ -12,6 +12,7 @@ export function toProduct(raw) {
     available: raw.stock > 0,
     stock: raw.stock,
     sold: raw.sold,
+    weight: raw.weight, // grams, packed: what decides whether an order ships free
     rating: raw.rating,
     tags: raw.tags ?? [],
     image: raw.image,

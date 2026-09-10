@@ -81,7 +81,13 @@
           ></span>
         </div>
         <p class="muted mt-1 text-xs">
-          VAT included. Shipping is <span x-text="money($store.cart.shipping, $store.cart.currency)"></span> per order.
+          VAT included.
+          <span x-show="$store.cart.shipping">
+            Shipping <span x-text="money($store.cart.shipping, $store.cart.currency)"></span>, free for orders of
+            <span x-text="money($store.cart.freeFrom, $store.cart.currency)"></span> or more that weigh up to
+            <span x-text="$store.cart.freeUpTo / 1000"></span> kg.
+          </span>
+          <span x-show="!$store.cart.shipping">Shipping is free.</span>
         </p>
 
         <div class="mt-4 flex flex-wrap gap-3">

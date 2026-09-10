@@ -187,7 +187,10 @@
 
           <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 text-sm">
             <span class="muted">Shipping</span>
-            <span class="font-medium text-gray-900" x-text="money($store.cart.shipping, $store.cart.currency)"></span>
+            <span
+              class="font-medium text-gray-900"
+              x-text="$store.cart.shipping ? money($store.cart.shipping, $store.cart.currency) : 'Free'"
+            ></span>
           </div>
 
           <div class="mt-2 flex items-baseline justify-between">

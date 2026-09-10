@@ -4,8 +4,9 @@ import { toProduct } from '../models/product.js';
 // A page of the grid: divisible by both column counts, so the last row is never ragged.
 const PER_PAGE = 24;
 
-// What a card draws. Tags belong to the product page, the timestamps to nobody.
-const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,sold,rating,image';
+// What a card draws, and the weight the cart copies when a card adds to it. Tags belong
+// to the product page, the timestamps to nobody.
+const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,currency,stock,weight,sold,rating,image';
 
 // Pages ask in the app's terms and never learn how the question was answered.
 export async function fetchProducts({ q = '', category = '', page = 1 } = {}) {

@@ -58,9 +58,13 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   const MAX_QTY = 10;
 
   // One flat rate per order, in whatever currency the shop prices in: the courier
-  // charges by weight, but nearly every parcel comes to about this. The cart shows the
-  // same number, in stores/cart.js.
+  // charges by weight, but nearly every parcel comes to about this. An order worth
+  // FREE_FROM ships free as long as it weighs no more than FREE_UP_TO grams; past that
+  // the parcel costs more than free shipping can carry. The cart shows the same rules,
+  // in stores/cart.js.
   const SHIPPING = 1500;
+  const FREE_FROM = 30000;
+  const FREE_UP_TO = 20000;
 
   if (!name || !email || !phone || !address) {
     throw new BadRequestError('The delivery details are incomplete.');
@@ -73,12 +77,6 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   }
   if (!items.length) {
     throw new BadRequestError('There is nothing in the cart.');
-  }
-
-  // Sent for the same reason as the prices below: to be checked, never to be charged.
-  // A page loaded before the rate changed still shows the old one.
-  if (Number(body.shipping) !== SHIPPING) {
-    throw new BadRequestError('The shipping cost has changed. Reload the page to see the new total.');
   }
 
   // Money as a person reads it. The app has toLocaleString; this engine does not.
@@ -110,7 +108,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
 
     const summary =
       '<table cellpadding="4" style="border-collapse:collapse">' + rows +
-      '<tr><td>Shipping</td><td align="right">' + money(order.shipping, order.currency) + '</td></tr>' +
+      '<tr><td>Shipping</td><td align="right">' + (order.shipping ? money(order.shipping, order.currency) : 'Free') + '</td></tr>' +
       '<tr><td><strong>Total</strong></td><td align="right"><strong>' +
       money(order.total, order.currency) + '</strong></td></tr></table>' +
       '<p>Shipping to ' + esc(order.address) + '.</p>';
@@ -203,7 +201,25 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       subtotal += price * qty;
     }
 
-    const shipping = SHIPPING;
+    // Free for an order worth enough that stays light enough. A product nobody has
+    // weighed keeps the whole order on the flat rate.
+    let weight = 0;
+    let weighed = true;
+    for (const entry of bought) {
+      const grams = entry.product.getInt('weight');
+      if (grams <= 0) weighed = false;
+      weight += grams * entry.qty;
+    }
+    const shipping = subtotal >= FREE_FROM && weighed && weight <= FREE_UP_TO ? 0 : SHIPPING;
+
+    // The page sends the shipping it showed, for the same reason as the prices: so the
+    // buyer is never charged more than that. Less is fine — a cart from before weights
+    // were kept cannot promise free shipping, and finding it on the receipt hurts nobody.
+    const shown = Number(body.shipping);
+    if (!Number.isInteger(shown) || shown < shipping) {
+      throw new BadRequestError('Shipping costs more than the page showed. Reload the page to see the new total.');
+    }
+
     const owner = info.auth && info.auth.id
       ? { record: info.auth, created: false }
       : findOrCreateUser(tx, email, name);
