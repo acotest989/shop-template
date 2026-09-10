@@ -187,14 +187,14 @@
 
           <div class="mt-4 flex justify-between border-t border-gray-200 pt-3 text-sm">
             <span class="muted">Shipping</span>
-            <span class="font-medium text-gray-900">Free</span>
+            <span class="font-medium text-gray-900" x-text="money($store.cart.shipping, $store.cart.currency)"></span>
           </div>
 
           <div class="mt-2 flex items-baseline justify-between">
             <span class="text-sm font-medium text-gray-900">Total</span>
             <span
               class="text-lg font-semibold text-gray-900"
-              x-text="money($store.cart.subtotal, $store.cart.currency)"
+              x-text="money($store.cart.total, $store.cart.currency)"
             ></span>
           </div>
 

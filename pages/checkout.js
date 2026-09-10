@@ -43,6 +43,7 @@ export const checkoutPage = () => ({
       customer: this.values,
       payment: this.payment,
       items: this.$store.cart.items,
+      shipping: this.$store.cart.shipping,
     });
 
     this.$store.cart.clear(); // only a placed order empties the cart

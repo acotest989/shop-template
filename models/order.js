@@ -4,7 +4,7 @@
 // mean to pay, and which products at which quantity. Coming back, every amount — none
 // of them was the client's to decide.
 
-export function toOrder({ customer, payment, items }) {
+export function toOrder({ customer, payment, items, shipping }) {
   return {
     customer: {
       name: customer.name.trim(),
@@ -15,8 +15,9 @@ export function toOrder({ customer, payment, items }) {
     payment,
 
     // The price travels so the server can refuse a cart that was priced differently,
-    // never so it can bill from it.
+    // never so it can bill from it. The shipping shown travels for the same reason.
     items: items.map(({ id, qty, price }) => ({ id, qty, price })),
+    shipping,
   };
 }
 

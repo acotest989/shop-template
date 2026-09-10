@@ -80,7 +80,9 @@
             x-text="money($store.cart.subtotal, $store.cart.currency)"
           ></span>
         </div>
-        <p class="muted mt-1 text-xs">VAT included. Shipping is free.</p>
+        <p class="muted mt-1 text-xs">
+          VAT included. Shipping is <span x-text="money($store.cart.shipping, $store.cart.currency)"></span> per order.
+        </p>
 
         <div class="mt-4 flex flex-wrap gap-3">
           <button type="button" class="btn btn-primary flex-1" @click="goTo('/checkout')">Checkout</button>

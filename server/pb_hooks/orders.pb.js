@@ -57,6 +57,11 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   // this counts what is in them. The cart stops at the same number, in stores/cart.js.
   const MAX_QTY = 10;
 
+  // One flat rate per order, in whatever currency the shop prices in: the courier
+  // charges by weight, but nearly every parcel comes to about this. The cart shows the
+  // same number, in stores/cart.js.
+  const SHIPPING = 1500;
+
   if (!name || !email || !phone || !address) {
     throw new BadRequestError('The delivery details are incomplete.');
   }
@@ -68,6 +73,12 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   }
   if (!items.length) {
     throw new BadRequestError('There is nothing in the cart.');
+  }
+
+  // Sent for the same reason as the prices below: to be checked, never to be charged.
+  // A page loaded before the rate changed still shows the old one.
+  if (Number(body.shipping) !== SHIPPING) {
+    throw new BadRequestError('The shipping cost has changed. Reload the page to see the new total.');
   }
 
   // Money as a person reads it. The app has toLocaleString; this engine does not.
@@ -99,6 +110,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
 
     const summary =
       '<table cellpadding="4" style="border-collapse:collapse">' + rows +
+      '<tr><td>Shipping</td><td align="right">' + money(order.shipping, order.currency) + '</td></tr>' +
       '<tr><td><strong>Total</strong></td><td align="right"><strong>' +
       money(order.total, order.currency) + '</strong></td></tr></table>' +
       '<p>Shipping to ' + esc(order.address) + '.</p>';
@@ -191,7 +203,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       subtotal += price * qty;
     }
 
-    const shipping = 0; // the demo ships free; a real shop would price it here
+    const shipping = SHIPPING;
     const owner = info.auth && info.auth.id
       ? { record: info.auth, created: false }
       : findOrCreateUser(tx, email, name);

@@ -5,6 +5,10 @@ import { storageKey } from '../lib/storage.js';
 // order that would be turned away.
 const MAX_QTY = 10;
 
+// One flat rate per order, in the shop's own currency. SHIPPING in the hook is the one
+// that counts, and it refuses an order whose page showed a different one.
+const SHIPPING = 1500;
+
 // A cart line is not a product: only what the cart shows or charges for.
 // The price is a snapshot from the moment of adding — that is what the visitor agreed to.
 // Both identifiers, doing different jobs: the id keys the line, the handle builds the link.
@@ -29,6 +33,15 @@ export const cart = () => ({
   
   get subtotal() {
     return this.items.reduce((total, item) => total + item.price * item.qty, 0);
+  },
+
+  // An empty cart ships nothing; anything else goes out as one parcel.
+  get shipping() {
+    return this.items.length ? SHIPPING : 0;
+  },
+
+  get total() {
+    return this.subtotal + this.shipping;
   },
 
   get currency() {
