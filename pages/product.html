@@ -52,7 +52,7 @@
             <button
               type="button"
               class="aspect-square w-16 overflow-hidden rounded-lg border bg-gray-100 transition-colors"
-              :class="index === shown ? 'border-gray-900' : 'border-gray-200 hover:border-gray-400'"
+              :class="index === shown ? 'border-brand' : 'border-gray-200 hover:border-gray-400'"
               :aria-label="'Show picture ' + (index + 1) + ' of ' + product.images.length"
               :aria-current="index === shown"
               @click="shown = index"

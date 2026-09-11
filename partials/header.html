@@ -7,7 +7,7 @@
       <a
         href="/"
         class="transition-colors hover:text-gray-900"
-        :class="$router.context.path === '/' ? 'font-medium text-gray-900' : 'text-gray-500'"
+        :class="$router.context.path === '/' ? 'font-medium text-brand-text' : 'text-gray-500'"
       >Products</a>
     </nav>
 
@@ -16,7 +16,7 @@
       <!-- The icon shows where a click goes: the moon on the light page, the sun on the dark. -->
       <button
         type="button"
-        class="rounded-lg p-1.5 text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+        class="rounded-lg p-1.5 text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2"
         :aria-label="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
         @click="$store.theme.toggle()"
       >
@@ -34,8 +34,8 @@
 
       <a
         href="/cart"
-        class="relative rounded-lg p-1.5 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
-        :class="$router.context.path === '/cart' ? 'text-gray-900' : 'text-gray-500'"
+        class="relative rounded-lg p-1.5 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2"
+        :class="$router.context.path === '/cart' ? 'text-brand-text' : 'text-gray-500'"
         :aria-label="`Cart, ${$store.cart.count} ${$store.cart.count === 1 ? 'item' : 'items'}`"
       >
         <!-- Inline, not <img>: only this way does the icon follow currentColor. -->
@@ -52,7 +52,7 @@
           x-show="$store.cart.count > 0"
           x-text="$store.cart.count"
           x-transition.scale.duration.200ms
-          class="badge-count badge-ink absolute -right-0.5 -top-0.5"
+          class="badge-count badge-brand absolute -right-0.5 -top-0.5"
         ></span>
       </a>
 
@@ -61,7 +61,7 @@
           <a
             href="/account"
             class="muted hidden transition-colors hover:text-gray-900 sm:inline"
-            :class="$router.context.path === '/account' && 'font-medium text-gray-900'"
+            :class="$router.context.path === '/account' && 'font-medium text-brand-text'"
             x-text="$store.session.user.name"
           ></a>
           <button type="button" class="btn btn-ghost btn-sm" @click="signOut()">Sign out</button>
