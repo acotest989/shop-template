@@ -84,6 +84,8 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 **Routing.** Route templates are fetched by the router and rendered into `#page`. Links are plain `<a href>`; the router intercepts clicks itself, which keeps Ctrl+click and keyboard behaviour intact. Scroll reset, focus movement and page titles are handled on router events, since the router does none of them.
 
+**Dark mode is a palette, not a set of classes.** Tailwind's colours are CSS variables, so `assets/theme.css` gives `.dark` on `<html>` a second set of values for the same names — the pale end of each scale trades places with the deep end — and no template carries a `dark:` twin beside its colours, or needs one to join in. Two kinds of block keep the light palette in both themes, marked `light-palette`: the footer, a dark band already, and product photos, whose cut-out pictures of black watches and phones would vanish into a dark ground. The class is set before the first paint by a few lines at the top of `index.html`, from the visitor's choice or, until they make one, the system setting; `stores/theme.js` takes over from there, behind the switch in the header.
+
 ## Not done yet
 
 Cash on delivery is what the checkout offers, and it is not simulated: such an order is genuinely unpaid. Nothing here talks to a courier either, so an order's progress is set by hand in the dashboard as the courier reports it — `shipped`, then `delivered`, or `returned` when the parcel is refused at the door — and `paid` is ticked once the courier pays the money over.

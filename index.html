@@ -6,6 +6,20 @@
   <title>Shop</title>
   <meta name="description" content="A small demo storefront built with Alpine and Tailwind — no framework, no build step.">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+  <!-- Runs before the first paint, so a visitor who chose dark, or whose system is dark and
+       who has not chosen, never sees the light page first. The key is storageKey('theme')
+       from lib/storage.js; nothing that could import it loads this early. -->
+  <script>
+    {
+      let saved = null;
+      try { saved = localStorage.getItem('shop_theme'); } catch (err) { /* blocked: follow the system */ }
+      if (saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+  </script>
+
   <link rel="stylesheet" href="/assets/main.css">
   <link rel="preload" href="/assets/theme.css" as="fetch" crossorigin>
 

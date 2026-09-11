@@ -9,3 +9,11 @@
 button:not(:disabled) {
   cursor: pointer;
 }
+
+/* The first paint comes before Tailwind has compiled a single class, so without this a dark
+   visitor sees white until it has. The colour is the dark page, gray-50 in theme.css;
+   color-scheme turns scrollbars and native controls dark along with it. */
+html.dark {
+  color-scheme: dark;
+  background-color: oklch(29% 0.014 264);
+}

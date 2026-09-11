@@ -3,6 +3,7 @@ import { createApp } from 'alpineshell';
 import { app } from './app.js';
 import { session } from './stores/session.js';
 import { cart } from './stores/cart.js';
+import { theme } from './stores/theme.js';
 import { homePage } from './pages/home.js';
 import { productPage } from './pages/product.js';
 import { loginPage } from './pages/login.js';
@@ -48,7 +49,7 @@ createApp({
     reset: 'Set a new password',
     'confirm-email': 'Confirm your new email',
   },
-  stores: { session, cart }, // register new store here
+  stores: { session, cart, theme }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
   partials: ['card', 'toast', 'scrolltop'],
   // register new page data here
