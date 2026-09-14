@@ -28,6 +28,24 @@
   outline: none;
 }
 
+/* On a phone the product page's buttons are a bar fixed to the bottom of the screen. The page
+   keeps that much room under its footer, so the bar never covers the last of it, and
+   back-to-top steps up above the bar. 48rem is where md starts. */
+@media (width < 48rem) {
+  #page:has(.buy-bar) {
+    padding-bottom: 4rem;
+  }
+  #app:has(.buy-bar) .scroll-top {
+    bottom: 5rem;
+  }
+
+  /* The chat's panel covers the page on a phone, so the page stops scrolling under it. On a
+     wider screen the panel is a window in the corner, and the page beside it still scrolls. */
+  html.chat-open {
+    overflow: hidden;
+  }
+}
+
 /* The search field carries its own clear button; WebKit's would be a second one. */
 input[type="search"]::-webkit-search-cancel-button {
   display: none;

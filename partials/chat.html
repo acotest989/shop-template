@@ -1,0 +1,123 @@
+<!-- The chat on a product page: the shop's own questions to pick from, and a box for anything
+     they do not answer. Its component is chatWidget in partials/chat.js. The button sits with
+     the page's actions, and the panel is fixed to the corner so it stays on screen while the
+     visitor scrolls. The panel comes after the button, so Tab walks from one into the other. -->
+<div x-data="chatWidget" @keydown.escape.window="open && close()">
+
+  <button
+    type="button"
+    x-ref="launcher"
+    @click="toggle()"
+    :aria-expanded="open"
+    aria-controls="chat-panel"
+    class="btn btn-ghost w-full"
+  >
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
+    </svg>
+    <span class="max-md:sr-only">Ask a question</span>
+  </button>
+
+  <section
+    id="chat-panel"
+    x-show="open"
+    x-transition.opacity
+    role="dialog"
+    aria-labelledby="chat-title"
+    class="card fixed inset-x-4 bottom-4 z-30 flex h-[min(36rem,calc(100dvh_-_2rem))] flex-col overflow-hidden shadow-xl sm:left-auto sm:w-96"
+  >
+    <header class="flex items-start gap-3 border-b border-gray-200 p-4">
+      <div class="min-w-0 flex-1">
+        <p class="eyebrow">Ask about</p>
+        <h2 id="chat-title" class="truncate text-sm font-semibold text-gray-900" x-text="product.title"></h2>
+      </div>
+      <button
+        type="button"
+        @click="close()"
+        aria-label="Close chat"
+        class="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- overscroll-contain: reaching either end of the conversation does not carry on
+         into the page behind it. -->
+    <div x-ref="log" class="flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-4" aria-live="polite">
+      <p class="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-gray-100 px-3 py-2 text-sm text-gray-900">
+        Hi! Pick a question below, or write your own.
+      </p>
+
+      <template x-for="(line, index) in lines" :key="index">
+        <p
+          class="max-w-[85%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm"
+          :class="line.from === 'visitor'
+            ? 'self-end rounded-br-md bg-brand text-brand-ink'
+            : 'self-start rounded-bl-md bg-gray-100 text-gray-900'"
+          x-text="line.text"
+        ></p>
+      </template>
+
+      <!-- Hidden from screen readers: the reply itself is announced when it shows. -->
+      <div x-show="typing" class="flex gap-1 self-start rounded-2xl rounded-bl-md bg-gray-100 px-3 py-3.5" aria-hidden="true">
+        <span class="h-1.5 w-1.5 rounded-full bg-gray-400 motion-safe:animate-bounce"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-gray-400 motion-safe:animate-bounce [animation-delay:150ms]"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-gray-400 motion-safe:animate-bounce [animation-delay:300ms]"></span>
+      </div>
+
+      <div class="mt-2 flex flex-wrap justify-end gap-2" x-show="unasked.length && !typing">
+        <template x-for="faq in unasked" :key="faq.id">
+          <button
+            type="button"
+            @click="pick(faq)"
+            class="rounded-full border border-gray-300 bg-white px-3 py-1 text-left text-xs text-gray-700 transition-colors hover:border-brand-focus hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus"
+            x-text="faq.question"
+          ></button>
+        </template>
+      </div>
+    </div>
+
+    <form x-show="canWrite" class="border-t border-gray-200 p-3" @submit.prevent="send()" novalidate>
+      <label for="chat-draft" class="sr-only">Your question</label>
+      <!-- Enter sends and Shift+Enter breaks the line, as in every chat; not while an input
+           method is still composing a character. -->
+      <textarea
+        id="chat-draft"
+        rows="2"
+        placeholder="Write your question…"
+        x-model="draft"
+        :maxlength="$store.chat.maxLength"
+        :disabled="pending"
+        @input="error = ''"
+        @keydown.enter="if (!$event.shiftKey && !$event.isComposing) { $event.preventDefault(); send(); }"
+        class="input resize-none"
+      ></textarea>
+
+      <p x-show="error" x-text="error" role="alert" class="mt-2 text-xs text-red-600"></p>
+
+      <div class="mt-2 flex items-center gap-3">
+        <p
+          class="min-w-0 flex-1 text-xs text-gray-500"
+          x-text="guest ? $store.chat.visitor.left + ' of ' + $store.chat.guestQuestions + ' questions left' : ''"
+        ></p>
+        <span class="text-xs tabular-nums text-gray-400" x-text="draft.length + '/' + $store.chat.maxLength"></span>
+        <button
+          type="submit"
+          class="btn btn-primary btn-sm"
+          :disabled="pending || typing || !draft.trim()"
+          x-text="pending ? 'Sending…' : 'Send'"
+        ></button>
+      </div>
+    </form>
+
+    <p x-show="guest" class="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-600">
+      <span x-show="!canWrite" x-text="'You have asked all ' + $store.chat.guestQuestions + ' questions.'"></span>
+      <a href="/register" class="font-medium text-brand-text underline underline-offset-2">Create an account</a>
+      or <a href="/login" class="font-medium text-brand-text underline underline-offset-2">sign in</a>
+      <span x-text="canWrite ? 'to read our replies and chat with us.' : 'to read the replies and keep asking.'"></span>
+    </p>
+  </section>
+
+</div>

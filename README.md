@@ -88,6 +88,8 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 
 **The accent is one attribute.** Primary buttons, the cart count, the active link, the chosen payment option and focus draw on five `brand` roles in `assets/theme.css`, and each defaults to the ink the shop has always worn. `data-accent` on `<html>` in `index.html` — `violet`, `indigo`, `teal`, `orange` or `lime` — swaps a colour in, for both themes. Text, prices and the badges that report an order's state keep their own colours, so a state never passes for decoration: amber still means something is owed, green that something worked.
 
+**A guest's conversation is the shop's, not theirs to fetch.** The chat on a product page offers the questions in the `faqs` collection, edited in the dashboard, and a box for whatever they do not answer: 500 characters a question, three questions for a guest, no count for a customer. Every browser names itself once with `crypto.randomUUID()` and keeps the id in `localStorage`, so the shop sees the same visitor come back. The id travels with every question and is never taken as proof of anything. `threads` and `messages` refuse every read and write from a browser, `server/pb_hooks/chat.pb.js` is the only way in, and nothing hands a conversation back. What a guest sees is what the tab kept in `sessionStorage`, and a transcript written under another id is dropped. A new id buys three more questions, so the route has a rate limit of its own, looser than an order's because picks from the list go through it too.
+
 ## Not done yet
 
 Cash on delivery is what the checkout offers, and it is not simulated: such an order is genuinely unpaid. Nothing here talks to a courier either, so an order's progress is set by hand in the dashboard as the courier reports it — `shipped`, then `delivered`, or `returned` when the parcel is refused at the door — and `paid` is ticked once the courier pays the money over.
@@ -95,6 +97,8 @@ Cash on delivery is what the checkout offers, and it is not simulated: such an o
 Shipping is one flat rate per order, 15 in whatever currency the shop prices in, and free for an order worth 300 or more that weighs no more than 20 kg — `SHIPPING`, `FREE_FROM` and `FREE_UP_TO` in the hook and in `stores/cart.js`. Every product carries its packed weight in grams, and the collection requires one; the demo catalogue's are estimates by category, so real products need real ones. The courier charges by weight, and pricing by weight would start from the same field.
 
 Card is off — the radio is disabled and `server/pb_hooks/orders.pb.js` refuses one, because a disabled radio is only a suggestion and a POST naming `card` would otherwise walk away with an order marked paid. Nothing underneath it was removed: the collection still keeps the value, the hook still has the line that marks such an order paid, and the mail still has its sentence. Turning it on is `CARD_PAYMENT` in the hook and `cardPayment` in `pages/checkout.js` — and that line marking it paid is where a real provider goes.
+
+The chat takes questions, and nothing in the shop answers them yet: they are read in the dashboard, under `threads` and `messages`. Replies, a live conversation for customers, an inbox for the shop and a mail when somebody writes come next.
 
 On the accounts side, what is left is optional: OAuth2 providers.
 

@@ -113,37 +113,56 @@
           </template>
         </div>
 
-        <div class="mt-8 flex flex-wrap items-center gap-3">
-          <div class="flex items-center rounded-lg border border-gray-300" x-show="product.available">
+        <!-- On a phone the gallery pushes these below the first screen, so there they are a bar
+             fixed to the bottom of it, in one row: Back goes, since the phone has its own, and
+             the chat keeps only its icon. From md up they sit in the page, in two rows.
+             `buy-bar` is what makes room for the bar, in assets/theme.css. -->
+        <div
+          class="buy-bar flex items-center gap-3
+                 max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:border-t max-md:border-gray-200 max-md:bg-white max-md:p-3
+                 md:mt-8 md:grid md:grid-cols-2"
+        >
+          <div class="flex min-w-0 flex-1 items-center gap-3 md:col-span-2">
+            <div class="flex items-center rounded-lg border border-gray-300" x-show="product.available">
+              <button
+                type="button"
+                class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
+                :disabled="!inCart && qty <= 1"
+                aria-label="Decrease quantity"
+                @click="step(-1)"
+              >&minus;</button>
+
+              <span class="w-8 text-center text-sm font-medium" x-text="shownQty"></span>
+
+              <button
+                type="button"
+                class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
+                :disabled="shownQty >= $store.cart.maxQty(product)"
+                aria-label="Increase quantity"
+                @click="step(1)"
+              >+</button>
+            </div>
+
+            <!-- One button, three states. Once the cart holds this product the stepper writes
+                 to it directly, so adding again would say nothing the count does not. -->
             <button
               type="button"
-              class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
-              :disabled="!inCart && qty <= 1"
-              aria-label="Decrease quantity"
-              @click="step(-1)"
-            >&minus;</button>
-
-            <span class="w-8 text-center text-sm font-medium" x-text="shownQty"></span>
-
-            <button
-              type="button"
-              class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
-              :disabled="shownQty >= $store.cart.maxQty(product)"
-              aria-label="Increase quantity"
-              @click="step(1)"
-            >+</button>
+              class="btn btn-primary flex-1"
+              :disabled="!product.available"
+              x-text="!product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
+              @click="inCart ? goTo('/cart') : addToCart()"
+            ></button>
           </div>
 
-          <!-- One button, three states. Once the cart holds this product the stepper writes
-               to it directly, so adding again would say nothing the count does not. -->
-          <button
-            type="button"
-            class="btn btn-primary flex-1"
-            :disabled="!product.available"
-            x-text="!product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
-            @click="inCart ? goTo('/cart') : addToCart()"
-          ></button>
-          <button type="button" class="btn btn-ghost" @click="goBack()">Back</button>
+          <!-- The two quiet actions, under the one that sells. Asking stays when the product
+               is sold out, which is when a visitor most wants to know more. -->
+          <button type="button" class="btn btn-ghost max-md:hidden" @click="goBack()">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            Back
+          </button>
+          <div class="shrink-0" x-html="partials.chat"></div>
         </div>
       </div>
     </div>
