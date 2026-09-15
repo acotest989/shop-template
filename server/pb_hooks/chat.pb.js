@@ -167,6 +167,27 @@ routerAdd('POST', '/api/shop/chat', (e) => {
   return e.json(200, { left: left, message: sent });
 });
 
+// The customer has the shop's latest reply about a product on screen, so the mail about it is
+// not needed: the job in inbox.pb.js mails only replies still unseen after five minutes.
+routerAdd('POST', '/api/shop/chat/seen', (e) => {
+  const productId = String((e.requestInfo().body || {}).product || '');
+
+  let thread;
+  try {
+    thread = $app.findFirstRecordByFilter('threads', 'user = {:user} && product = {:product}', { user: e.auth.id, product: productId });
+  } catch (err) {
+    return e.json(200, { seen: false }); // nothing asked about this product, so nothing to see
+  }
+
+  if (thread.getString('reply_unseen_since')) {
+    thread.set('reply_unseen_since', '');
+    thread.set('reply_mailed', false);
+    $app.save(thread);
+  }
+
+  return e.json(200, { seen: true });
+}, $apis.requireAuth('users'));
+
 // A guest's conversations become the account's once there is an account: after signing in,
 // after registering, or on the first page a signed-in browser opens after asking as a guest.
 // The browser's id is all that ties them together, which is why a shared computer hands them

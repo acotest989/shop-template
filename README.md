@@ -104,7 +104,7 @@ Shipping is one flat rate per order, 15 in whatever currency the shop prices in,
 
 Card is off — the radio is disabled and `server/pb_hooks/orders.pb.js` refuses one, because a disabled radio is only a suggestion and a POST naming `card` would otherwise walk away with an order marked paid. Nothing underneath it was removed: the collection still keeps the value, the hook still has the line that marks such an order paid, and the mail still has its sentence. Turning it on is `CARD_PAYMENT` in the hook and `cardPayment` in `pages/checkout.js` — and that line marking it paid is where a real provider goes.
 
-The chat is answered at `/admin/inbox`, once `admin` is ticked on your account under **users** in the dashboard; sign out and in again for the page to see it. The shop gets a mail, at the address it sends from, when a conversation starts waiting on it: once per question, however many messages follow before the reply. A customer is not told about a reply yet.
+The chat is answered at `/admin/inbox`, once `admin` is ticked on your account under **users** in the dashboard; sign out and in again for the page to see it. The shop gets a mail, at the address it sends from, when a conversation starts waiting on it: once per question, however many messages follow before the reply. A customer who has the chat open when the shop replies gets no mail. One who does not see the reply within five minutes gets a single mail, whatever else the shop adds before they come back, with a link that opens the product with the chat open. A job in `server/pb_hooks/inbox.pb.js` checks every minute, so the mail leaves between five and six minutes after the reply. A guest has no address, and gets nothing.
 
 On the accounts side, what is left is optional: OAuth2 providers.
 

@@ -8,17 +8,24 @@ export const chatWidget = () => ({
   draft: '',
   pending: false,
   error: '',
-  seen: 0, // lines on screen the last time the panel was open
+  readCount: 0, // lines on screen the last time the panel was open
 
   init() {
     // On a phone the panel covers the page, so the page stops scrolling under it. The rule that
     // reads this class is in assets/theme.css.
     this.$watch('open', (open) => document.documentElement.classList.toggle('chat-open', open));
 
-    // Whatever appears at the end is scrolled to, the shop's replies included.
+    // Whatever appears at the end is scrolled to, the shop's replies included, and a reply that
+    // shows in the open panel counts as seen, so no mail follows it.
     this.$watch('lines.length', (length) => {
-      if (this.open) this.seen = length;
+      if (this.open) {
+        this.readCount = length;
+        this.$store.chat.seen(this.product.id);
+      }
       this.scrollDown();
+    });
+    this.$watch('loading', (loading) => {
+      if (!loading && this.open) this.$store.chat.seen(this.product.id);
     });
     this.$watch('typing', () => this.scrollDown());
 
@@ -26,6 +33,9 @@ export const chatWidget = () => ({
     this.$watch('guest', (guest) => {
       if (!guest && this.open) this.follow();
     });
+
+    // The link in the mail about a reply opens the conversation straight away: /products/…?chat
+    if (new URLSearchParams(location.search).has('chat')) this.toggle();
   },
 
   // Leaving the page must not leave the next one unable to scroll, or keep listening for
@@ -51,7 +61,7 @@ export const chatWidget = () => ({
 
   // Something arrived while the panel was closed: a reply from the shop, most likely.
   get unread() {
-    return !this.open && this.lines.length > this.seen;
+    return !this.open && this.lines.length > this.readCount;
   },
 
   // Asked once, gone from the list, so the list only ever offers something new.
@@ -77,9 +87,10 @@ export const chatWidget = () => ({
     this.open = !this.open;
     if (!this.open) return;
 
-    this.seen = this.lines.length;
+    this.readCount = this.lines.length;
     this.$store.chat.loadFaqs().catch((err) => console.error(err)); // the box still works without the list
     if (!this.guest) this.follow();
+    this.$store.chat.seen(this.product.id); // reopened on a conversation already loaded
     this.scrollDown();
   },
 

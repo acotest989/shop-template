@@ -43,6 +43,14 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
     thread.set('last_message', new DateTime());
     thread.set('preview', text.replace(/\s+/g, ' ').slice(0, 200));
     thread.set('waiting', false);
+
+    // A customer is mailed about a reply they have not seen in five minutes, by the job below.
+    // The clock starts at the first unseen reply, so replying twice does not push it back.
+    // A guest has no address to mail.
+    if (thread.getString('user') && !thread.getString('reply_unseen_since')) {
+      thread.set('reply_unseen_since', new DateTime());
+      thread.set('reply_mailed', false);
+    }
     tx.save(thread);
 
     // The fields the inbox reads, so the reply shows without waiting for realtime.
@@ -80,3 +88,66 @@ routerAdd('POST', '/api/shop/inbox/answered', (e) => {
 
   return e.json(200, { waiting: false });
 }, $apis.requireAuth('users'));
+
+// Every minute, one mail to each customer with a reply they have not seen for five minutes.
+// Seen means the chat on the product page showed it, and said so to /api/shop/chat/seen.
+cronAdd('chat_reply_mail', '* * * * *', () => {
+  const DELAY_MINUTES = 5;
+
+  // The shop writes the reply and the customer their own name; both end up inside markup.
+  const esc = (value) => String(value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  // Dates are stored as text in this very format, so they compare as text.
+  const cutoff = new Date(Date.now() - DELAY_MINUTES * 60 * 1000).toISOString().replace('T', ' ');
+
+  const threads = $app.findRecordsByFilter(
+    'threads',
+    'reply_unseen_since != "" && reply_unseen_since <= {:cutoff} && reply_mailed = false && user != ""',
+    'reply_unseen_since',
+    50,
+    0,
+    { cutoff: cutoff },
+  );
+  if (!threads.length) return;
+
+  const meta = $app.settings().meta;
+
+  for (const thread of threads) {
+    // Marked before the mail goes: a mail server that keeps failing would otherwise mail the
+    // same customer every minute. A failure is logged, and the reply still waits on the page.
+    thread.set('reply_mailed', true);
+    $app.save(thread);
+
+    try {
+      const user = $app.findRecordById('users', thread.getString('user'));
+      const latest = $app.findRecordsByFilter('messages', 'thread = {:thread} && author = "shop"', '-created', 1, 0, { thread: thread.id });
+
+      // Straight into the conversation, with the chat open. A product that is gone has no page
+      // to open it on, and the shop's front page is the nearest thing.
+      let link = meta.appURL + '/';
+      try {
+        link = meta.appURL + '/products/' + $app.findRecordById('products', thread.getString('product')).getString('handle') + '?chat';
+      } catch (err) {
+        // out of the catalogue since the question was asked
+      }
+
+      const name = user.getString('name');
+
+      $app.newMailClient().send(new MailerMessage({
+        from: { address: meta.senderAddress, name: meta.senderName },
+        to: [{ address: user.getString('email'), name: name }],
+        subject: 'We replied to your question about ' + thread.getString('subject'),
+        html:
+          '<p>Hi' + (name ? ' ' + esc(name) : '') + ',</p>' +
+          '<p>We replied to your question about ' + esc(thread.getString('subject')) + ':</p>' +
+          (latest.length
+            ? '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(latest[0].getString('body')).replace(/\n/g, '<br>') + '</p>'
+            : '') +
+          '<p><a href="' + link + '">Read the conversation</a></p>',
+      }));
+    } catch (err) {
+      $app.logger().error('reply mail failed', 'thread', thread.id, 'error', String(err));
+    }
+  }
+});

@@ -6,6 +6,7 @@ import {
   fetchConversation,
   subscribeToConversation,
   claimConversations,
+  markSeen,
 } from '../services/chat.js';
 
 // GUEST_QUESTIONS and MAX_LENGTH in server/pb_hooks/chat.pb.js. The hook's are the ones
@@ -153,7 +154,7 @@ export const chat = () => ({
   async follow(productId) {
     if (this.conversations[productId]) return;
 
-    this.conversations[productId] = { messages: [], loaded: false, unsubscribe: null };
+    this.conversations[productId] = { messages: [], loaded: false, unsubscribe: null, reported: null };
     const conversation = this.conversations[productId];
     const current = () => this.conversations[productId] === conversation;
 
@@ -174,6 +175,22 @@ export const chat = () => ({
       if (current()) this.unfollow(productId); // so opening the panel again tries again
       throw err;
     }
+  },
+
+  // The customer has the conversation on screen. Said once per reply from the shop, so the
+  // server can drop the mail it would otherwise send about it.
+  seen(productId) {
+    const conversation = this.conversations[productId];
+    if (!conversation?.loaded) return;
+
+    const reply = conversation.messages.findLast((message) => message.from === 'shop');
+    if (!reply || conversation.reported === reply.id) return;
+
+    conversation.reported = reply.id;
+    markSeen(productId).catch((err) => {
+      conversation.reported = null; // the next look tries again
+      console.error(err);
+    });
   },
 
   unfollow(productId) {

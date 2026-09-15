@@ -48,6 +48,14 @@ export function subscribeToConversation(productId, onChange) {
   );
 }
 
+// The shop's latest reply about this product is on the customer's screen.
+export async function markSeen(productId) {
+  await pb.send('/api/shop/chat/seen', {
+    method: 'POST',
+    body: { product: productId },
+  });
+}
+
 export async function claimConversations(visitor) {
   await pb.send('/api/shop/chat/claim', {
     method: 'POST',
