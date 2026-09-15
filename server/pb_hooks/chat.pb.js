@@ -37,8 +37,13 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     throw new BadRequestError('A question can be at most ' + MAX_LENGTH + ' characters.');
   }
 
+  // The visitor writes these, and they end up inside markup the shop mails to itself.
+  const esc = (value) => String(value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
   let left = null;
   let sent = null;
+  let notice = null; // set when this question leaves the shop owing an answer it did not owe before
 
   $app.runInTransaction((tx) => {
     let product;
@@ -96,6 +101,17 @@ routerAdd('POST', '/api/shop/chat', (e) => {
       thread.set('visitor', visitor);
       if (user) thread.set('user', user.id);
     }
+    // The shop hears about a conversation once per question it owes an answer to. A follow-up
+    // written before the reply is part of the same question, and waits in the inbox with it.
+    if (text && !thread.getBool('waiting')) {
+      notice = {
+        subject: thread.getString('subject'),
+        from: user ? user.getString('name') || user.getString('email') : 'A guest',
+        email: user ? user.getString('email') : '',
+        text: text,
+      };
+    }
+
     // What the inbox lists without opening the conversation. A pick from the list is answered
     // already; only a written question leaves the shop owing a reply.
     thread.set('last_message', new DateTime());
@@ -112,6 +128,7 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     tx.save(message);
 
     if (!user && text) left -= 1;
+    if (notice) notice.thread = thread.id;
 
     // The fields a customer's chat reads, so the question shows without waiting for realtime.
     sent = {
@@ -123,6 +140,28 @@ routerAdd('POST', '/api/shop/chat', (e) => {
       created: message.getString('created'),
     };
   });
+
+  // After the transaction, and outside it: the question stands whether or not the mail goes,
+  // and a mail server that stalls must not cost the visitor what they wrote. To the address
+  // the shop sends from, as with orders, so there is nothing else to configure.
+  if (notice) {
+    try {
+      const meta = $app.settings().meta;
+      $app.newMailClient().send(new MailerMessage({
+        from: { address: meta.senderAddress, name: meta.senderName },
+        to: [{ address: meta.senderAddress }],
+        subject: 'Question about ' + notice.subject,
+        html:
+          '<p><strong>' + esc(notice.from) + '</strong>' +
+          (notice.email ? ' &lt;' + esc(notice.email) + '&gt;' : '') +
+          ' asks about ' + esc(notice.subject) + ':</p>' +
+          '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(notice.text).replace(/\n/g, '<br>') + '</p>' +
+          '<p><a href="' + meta.appURL + '/admin/inbox?thread=' + notice.thread + '">Answer in the inbox</a></p>',
+      }));
+    } catch (err) {
+      $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
+    }
+  }
 
   // Only a guest has questions left; a customer's count is null.
   return e.json(200, { left: left, message: sent });
