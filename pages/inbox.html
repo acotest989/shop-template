@@ -1,12 +1,5 @@
 <main class="mx-auto w-full max-w-6xl p-4" x-data="inboxPage">
 
-  <template x-if="!allowed">
-    <div class="card p-8 text-center">
-      <p class="muted">This page is for the people who answer the shop's chat.</p>
-      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Back to products</button>
-    </div>
-  </template>
-
   <template x-if="allowed">
     <div>
       <div class="mb-4 flex items-center gap-3">

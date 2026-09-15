@@ -14,9 +14,12 @@ export async function placeOrder({ customer, payment, items, shipping }) {
   return fromOrder(placed);
 }
 
-// No filter here on purpose: the collection's list rule already narrows this to the
-// signed-in visitor's own orders, and a rule cannot be forgotten the way a filter can.
+// The signed-in visitor's own orders. Named in the filter, not left to the rule: the rule
+// also lets an admin read every order, and an admin's account page lists only theirs.
 export async function fetchOrders() {
-  const records = await pb.collection('orders').getFullList({ sort: '-created' });
+  const records = await pb.collection('orders').getFullList({
+    filter: pb.filter('user = {:user}', { user: pb.authStore.record?.id ?? '' }),
+    sort: '-created',
+  });
   return records.map(fromOrder);
 }

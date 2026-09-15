@@ -1,0 +1,167 @@
+<main class="mx-auto w-full max-w-6xl p-4" x-data="ordersPage">
+
+  <template x-if="$store.session.user?.admin">
+    <div>
+      <div class="mb-4 flex flex-wrap items-center gap-3">
+        <h1 class="text-xl font-semibold text-gray-900">Orders</h1>
+        <span x-show="!pending && !error" class="muted" x-text="total === 1 ? '1 order' : total + ' orders'"></span>
+
+        <label for="orders-status" class="sr-only">Show orders with status</label>
+        <!-- Options written out: a select fills its value before an x-for could add them. -->
+        <select id="orders-status" x-model="status" class="input ml-auto w-auto">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="returned">Returned</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
+
+      <div x-show="pending" class="flex flex-col gap-3" aria-hidden="true">
+        <template x-for="row in 5" :key="row">
+          <div class="card flex items-center gap-4 p-4">
+            <div class="flex-1">
+              <div class="skeleton h-3 w-32"></div>
+              <div class="skeleton mt-2 h-2 w-48"></div>
+            </div>
+            <div class="skeleton h-4 w-16 rounded-full"></div>
+          </div>
+        </template>
+      </div>
+
+      <p
+        x-show="!pending && !error && !orders.length"
+        class="card muted p-8 text-center"
+        x-text="status ? 'No ' + status + ' orders.' : 'No orders yet.'"
+      ></p>
+
+      <ul class="flex flex-col gap-3" x-show="!pending && orders.length">
+        <template x-for="order in orders" :key="order.id">
+          <li class="card overflow-hidden">
+            <button
+              type="button"
+              class="flex w-full flex-wrap items-center gap-x-4 gap-y-2 p-4 text-left transition-colors hover:bg-gray-50"
+              :aria-expanded="openId === order.id"
+              @click="toggle(order)"
+            >
+              <span class="min-w-0 flex-1 basis-48">
+                <span class="block font-mono text-sm text-gray-900" x-text="order.reference"></span>
+                <span
+                  class="muted block truncate text-xs"
+                  x-text="order.customer.name + ' · ' + formatDate(order.placedAt, { dateStyle: 'medium', timeStyle: 'short' })"
+                ></span>
+              </span>
+
+              <span class="flex items-center gap-2">
+                <span class="badge capitalize" :class="statusBadge(order)" x-text="order.status"></span>
+                <!-- Whether the money arrived, which only the shop knows: the courier pays a cash
+                     order over some days after delivering it. -->
+                <span
+                  x-show="order.status !== 'cancelled' && order.status !== 'returned'"
+                  class="badge"
+                  :class="order.paid ? 'badge-good' : 'badge-warn'"
+                  x-text="order.paid ? 'Paid' : 'Not paid'"
+                ></span>
+              </span>
+
+              <span class="w-24 text-right text-sm font-semibold tabular-nums text-gray-900" x-text="money(order.total, order.currency)"></span>
+
+              <svg
+                class="h-4 w-4 shrink-0 text-gray-400 transition-transform"
+                :class="openId === order.id && 'rotate-180'"
+                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+
+            <div x-show="openId === order.id" class="grid gap-6 border-t border-gray-200 p-4 md:grid-cols-2">
+              <div class="flex flex-col gap-4 text-sm">
+                <div>
+                  <p class="label">Customer</p>
+                  <p class="mt-1 text-gray-900" x-text="order.customer.name"></p>
+                  <a :href="'mailto:' + order.customer.email" class="block text-gray-600 underline underline-offset-2 hover:text-gray-900" x-text="order.customer.email"></a>
+                  <a :href="'tel:' + order.customer.phone.replace(/\s+/g, '')" class="block text-gray-600 underline underline-offset-2 hover:text-gray-900" x-text="order.customer.phone"></a>
+                </div>
+                <div>
+                  <p class="label">Ships to</p>
+                  <p class="mt-1 text-gray-900" x-text="order.customer.address"></p>
+                </div>
+                <div>
+                  <p class="label">Payment</p>
+                  <p class="mt-1 text-gray-900" x-text="order.payment === 'cod' ? 'Cash on delivery' : 'Card'"></p>
+                </div>
+              </div>
+
+              <div>
+                <p class="label">Items</p>
+                <ul class="mt-1 flex flex-col gap-1 text-sm">
+                  <template x-for="line in order.lines" :key="line.id">
+                    <li class="flex gap-2">
+                      <a :href="'/products/' + line.handle" class="min-w-0 flex-1 truncate text-gray-900 hover:underline" x-text="line.title"></a>
+                      <span class="muted shrink-0" x-text="'×' + line.qty"></span>
+                      <span class="w-20 shrink-0 text-right tabular-nums text-gray-900" x-text="money(line.price * line.qty, order.currency)"></span>
+                    </li>
+                  </template>
+                </ul>
+
+                <div class="mt-2 flex flex-col gap-1 border-t border-gray-200 pt-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="muted">Shipping</span>
+                    <span class="tabular-nums text-gray-900" x-text="order.shipping ? money(order.shipping, order.currency) : 'Free'"></span>
+                  </div>
+                  <div class="flex justify-between font-semibold text-gray-900">
+                    <span>Total</span>
+                    <span class="tabular-nums" x-text="money(order.total, order.currency)"></span>
+                  </div>
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg bg-gray-50 p-3">
+                  <div>
+                    <label :for="'status-' + order.id" class="label">Status</label>
+                    <select
+                      :id="'status-' + order.id"
+                      class="input mt-1 w-auto"
+                      :value="order.status"
+                      :disabled="saving === order.id"
+                      @change="change(order, { status: $event.target.value })"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="returned">Returned</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+
+                  <label class="flex items-center gap-2 pb-2.5 text-sm text-gray-900">
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 accent-brand"
+                      :checked="order.paid"
+                      :disabled="saving === order.id"
+                      @change="change(order, { paid: $event.target.checked })"
+                    >
+                    Paid
+                  </label>
+                </div>
+
+                <p class="muted mt-2 text-xs">Returned and cancelled put the items back in stock; moving an order off either takes them out again.</p>
+              </div>
+            </div>
+          </li>
+        </template>
+      </ul>
+
+      <div x-show="totalPages > 1" class="mt-4 flex items-center justify-center gap-3">
+        <button type="button" class="btn btn-ghost btn-sm" :disabled="page <= 1" @click="goToPage(page - 1)">Previous</button>
+        <span class="muted" x-text="'Page ' + page + ' of ' + totalPages"></span>
+        <button type="button" class="btn btn-ghost btn-sm" :disabled="page >= totalPages" @click="goToPage(page + 1)">Next</button>
+      </div>
+    </div>
+  </template>
+
+</main>

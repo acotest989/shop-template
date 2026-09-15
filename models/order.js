@@ -27,7 +27,7 @@ export function fromOrder(raw) {
   return {
     id: raw.id, // a record has one; a receipt straight off the wire does not
     reference: raw.reference,
-    customer: { name: raw.name, email: raw.email },
+    customer: { name: raw.name, email: raw.email, phone: raw.phone, address: raw.address },
     lines: raw.lines,
     currency: raw.currency,
     subtotal: raw.subtotal,

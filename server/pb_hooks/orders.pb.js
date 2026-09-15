@@ -282,12 +282,48 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   return e.json(200, placed);
 });
 
+// An order's progress, set by an admin from /admin/orders: where it is, and whether the money
+// arrived. Saving it runs the stock rules below, so a status that puts goods back or takes
+// them again does so here too, and a reopening the shelf cannot cover is refused.
+routerAdd('POST', '/api/shop/admin/orders/update', (e) => {
+  const STATUSES = ['pending', 'shipped', 'delivered', 'returned', 'cancelled'];
+
+  if (!e.auth.getBool('admin')) {
+    throw new ForbiddenError('Only the shop can change an order.');
+  }
+
+  const body = e.requestInfo().body || {};
+
+  let order;
+  try {
+    order = $app.findRecordById('orders', String(body.order || ''));
+  } catch (err) {
+    throw new NotFoundError('This order no longer exists.');
+  }
+
+  if (body.status !== undefined) {
+    const status = String(body.status);
+    if (STATUSES.indexOf(status) === -1) {
+      throw new BadRequestError('That is not a status an order can have.');
+    }
+    order.set('status', status);
+  }
+
+  if (body.paid !== undefined) {
+    order.set('paid', body.paid === true);
+  }
+
+  $app.save(order);
+
+  return e.json(200, order);
+}, $apis.requireAuth('users'));
+
 // Cancelled and returned put the goods back: one before they left, the other once the
 // courier has brought them back. The route above only ever moves stock one way, so
 // without this such an order would keep a shelf empty on nobody's behalf, and go on
 // counting as a sale. Moving an order off either again, to correct a status set by
-// mistake, takes the goods once more. Fires for the dashboard too, which is the only
-// place an order's status changes today.
+// mistake, takes the goods once more. Fires for every save: the route above, and the
+// dashboard as well.
 onRecordUpdate((e) => {
   const shelved = (status) => status === 'cancelled' || status === 'returned';
   const before = shelved(e.record.original().getString('status'));

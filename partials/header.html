@@ -11,11 +11,7 @@
       >Products</a>
 
       <template x-if="$store.session.user?.admin">
-        <a
-          href="/admin/inbox"
-          class="transition-colors hover:text-gray-900"
-          :class="$router.context.path === '/admin/inbox' ? 'font-medium text-brand-text' : 'text-gray-500'"
-        >Inbox</a>
+        <a href="/admin" class="text-gray-500 transition-colors hover:text-gray-900">Admin</a>
       </template>
     </nav>
 

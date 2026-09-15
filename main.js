@@ -16,7 +16,9 @@ import { resetPage } from './pages/reset.js';
 import { accountPage } from './pages/account.js';
 import { confirmEmailPage } from './pages/confirm-email.js';
 import { checkoutPage } from './pages/checkout.js';
+import { adminPage } from './pages/admin.js';
 import { inboxPage } from './pages/inbox.js';
+import { ordersPage } from './pages/orders.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
@@ -39,11 +41,18 @@ createApp({
     '/products/:handle': 'product',
     '/cart': 'cart',
     '/checkout': 'checkout',
-    '/admin/inbox': 'inbox',
+    // The admin area wears its own header, with the tabs, and no footer.
+    '/admin': { page: 'admin', header: 'admin-header', footer: false },
+    '/admin/inbox': { page: 'inbox', header: 'admin-header', footer: false },
+    '/admin/orders': { page: 'orders', header: 'admin-header', footer: false },
   },
-  // A session is all the guard checks. Whether the account may use /admin is the page's to
-  // say and the server's to enforce.
-  protected: ['/account', '/admin'], // register protected route here
+  protected: ['/account'], // register protected route here
+  // More than a session. Signed out, /admin goes to the login page like any protected route;
+  // signed in without `admin`, home, before anything of it renders. What an account may read
+  // or change there is still the server's to refuse.
+  allow: {
+    '/admin': (session) => session.user?.admin === true,
+  },
   // Overrides only — a page with no entry gets its own name as the title.
   titles: {
     404: 'Page not found',
@@ -54,6 +63,7 @@ createApp({
     forgot: 'Reset your password',
     reset: 'Set a new password',
     'confirm-email': 'Confirm your new email',
+    admin: 'Admin',
   },
   stores: { session, cart, theme, chat }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
@@ -61,7 +71,8 @@ createApp({
   // register new page data here, and the component of a partial that has one
   pages: {
     homePage, productPage, loginPage, registerPage, verifyPage,
-    forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage, inboxPage,
+    forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage,
+    adminPage, inboxPage, ordersPage,
     chatWidget,
   },
   // Defaults in effect — uncomment to change:

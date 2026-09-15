@@ -25,9 +25,14 @@ export async function sendQuestion(question) {
   };
 }
 
-// No filter on the customer: the collection's rules already narrow these to the signed-in
-// visitor's own threads, the way they do for orders.
-const aboutProduct = (productId) => pb.filter('thread.product = {:product}', { product: productId });
+// The signed-in customer's own conversation, named in the filter rather than left to the
+// rules: those also let an admin read everyone's, and an admin asking about a product on its
+// page is a customer like any other.
+const aboutProduct = (productId) =>
+  pb.filter('thread.user = {:user} && thread.product = {:product}', {
+    user: pb.authStore.record?.id ?? '',
+    product: productId,
+  });
 
 export async function fetchConversation(productId) {
   const records = await pb.collection('messages').getFullList({
