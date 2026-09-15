@@ -1,0 +1,194 @@
+<main class="mx-auto w-full max-w-6xl p-4" x-data="inboxPage">
+
+  <template x-if="!allowed">
+    <div class="card p-8 text-center">
+      <p class="muted">This page is for the people who answer the shop's chat.</p>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Back to products</button>
+    </div>
+  </template>
+
+  <template x-if="allowed">
+    <div>
+      <div class="mb-4 flex items-center gap-3">
+        <h1 class="text-xl font-semibold text-gray-900">Inbox</h1>
+        <span x-show="waitingCount" class="badge badge-warn" x-text="waitingCount + ' waiting'"></span>
+      </div>
+
+      <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
+
+      <!-- Two panes from md up. Below that the list and the conversation take turns, and the
+           address says which: a conversation is open while ?thread= is there. -->
+      <div class="grid gap-4 md:grid-cols-[20rem_1fr]">
+
+        <section
+          class="card flex h-[calc(100dvh_-_10rem)] min-h-96 flex-col overflow-hidden"
+          :class="selectedId && 'max-md:hidden'"
+          aria-label="Conversations"
+        >
+          <div class="flex gap-1 border-b border-gray-200 p-2">
+            <button
+              type="button"
+              class="btn btn-sm flex-1"
+              :class="filter === 'waiting' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'"
+              :aria-pressed="filter === 'waiting'"
+              @click="filter = 'waiting'"
+            >Waiting</button>
+            <button
+              type="button"
+              class="btn btn-sm flex-1"
+              :class="filter === 'all' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'"
+              :aria-pressed="filter === 'all'"
+              @click="filter = 'all'"
+            >All</button>
+          </div>
+
+          <div x-show="pending" class="flex flex-col gap-4 p-3" aria-hidden="true">
+            <template x-for="row in 5" :key="row">
+              <div class="flex gap-3">
+                <div class="skeleton h-10 w-10 rounded-lg"></div>
+                <div class="flex-1">
+                  <div class="skeleton h-3 w-1/2"></div>
+                  <div class="skeleton mt-2 h-2 w-3/4"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <p
+            x-show="!pending && !shown.length"
+            class="muted m-auto p-6 text-center"
+            x-text="filter === 'waiting' ? 'Nothing is waiting for an answer.' : 'No conversations yet.'"
+          ></p>
+
+          <ul class="flex-1 divide-y divide-gray-200 overflow-y-auto overscroll-contain" x-show="!pending && shown.length">
+            <template x-for="thread in shown" :key="thread.id">
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full gap-3 px-3 py-3 text-left transition-colors hover:bg-gray-50"
+                  :class="thread.id === selectedId && 'bg-gray-50'"
+                  :aria-current="thread.id === selectedId"
+                  @click="open(thread.id)"
+                >
+                  <span class="light-palette h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    <img x-show="thread.product" :src="thread.product?.image" alt="" width="40" height="40" loading="lazy" class="h-full w-full object-cover">
+                  </span>
+
+                  <span class="min-w-0 flex-1">
+                    <span class="flex items-baseline gap-2">
+                      <span class="truncate text-sm font-medium text-gray-900" x-text="thread.customer?.name ?? 'Guest'"></span>
+                      <span class="ml-auto shrink-0 text-xs text-gray-400" x-text="when(thread.lastMessageAt)"></span>
+                    </span>
+                    <span class="block truncate text-xs text-gray-500" x-text="thread.subject"></span>
+                    <span class="mt-0.5 flex items-center gap-2">
+                      <span
+                        class="min-w-0 flex-1 truncate text-xs"
+                        :class="thread.waiting ? 'font-medium text-gray-900' : 'text-gray-500'"
+                        x-text="thread.preview"
+                      ></span>
+                      <span x-show="thread.waiting" class="h-2 w-2 shrink-0 rounded-full bg-amber-500"></span>
+                      <span x-show="thread.waiting" class="sr-only">Waiting for an answer</span>
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </template>
+          </ul>
+        </section>
+
+        <section
+          class="card flex h-[calc(100dvh_-_10rem)] min-h-96 flex-col overflow-hidden"
+          :class="!selectedId && 'max-md:hidden'"
+          aria-label="Conversation"
+        >
+          <p x-show="!selected" class="muted m-auto p-6 text-center">Pick a conversation from the list.</p>
+
+          <template x-if="selected">
+            <div class="flex min-h-0 flex-1 flex-col">
+              <header class="flex items-center gap-3 border-b border-gray-200 p-3">
+                <button type="button" class="btn btn-ghost btn-sm md:hidden" aria-label="Back to the conversations" @click="open('')">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-semibold text-gray-900">
+                    <span x-text="selected.customer?.name ?? 'Guest'"></span>
+                    <span x-show="selected.customer" class="font-normal text-gray-500" x-text="selected.customer?.email"></span>
+                  </p>
+                  <p class="truncate text-xs text-gray-500">
+                    <a
+                      x-show="selected.product"
+                      :href="'/products/' + selected.product?.handle"
+                      class="underline underline-offset-2 transition-colors hover:text-gray-900"
+                      x-text="selected.subject"
+                    ></a>
+                    <span x-show="!selected.product" x-text="selected.subject + ', no longer sold'"></span>
+                    <!-- The first characters of the browser's id: the same code on two conversations
+                         is the same browser. -->
+                    · browser <span class="font-mono" x-text="selected.visitor.slice(0, 8)"></span>
+                    <span x-show="sameBrowser(selected)" x-text="'· ' + sameBrowser(selected) + ' more from it'"></span>
+                  </p>
+                </div>
+
+                <button x-show="selected.waiting" type="button" class="btn btn-ghost btn-sm shrink-0" @click="answered()">Mark as answered</button>
+              </header>
+
+              <div id="inbox-log" class="flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain p-4" aria-live="polite">
+                <p x-show="loadingMessages" class="self-center py-2 text-xs text-gray-400">Loading the conversation…</p>
+                <p x-show="messagesError" x-text="messagesError" role="alert" class="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600"></p>
+
+                <template x-for="message in messages" :key="message.id">
+                  <div class="flex max-w-[80%] flex-col" :class="message.from === 'shop' ? 'items-end self-end' : 'items-start self-start'">
+                    <p
+                      class="whitespace-pre-line rounded-2xl px-3 py-2 text-sm"
+                      :class="message.from === 'shop' ? 'rounded-br-md bg-brand text-brand-ink' : 'rounded-bl-md bg-gray-100 text-gray-900'"
+                      x-text="message.text"
+                    ></p>
+                    <!-- A pick was answered by the list on the spot, so it is marked rather than
+                         left looking like a question nobody took up. -->
+                    <span class="mt-1 text-[11px] text-gray-400" x-text="(message.faq ? 'Picked from the list · ' : '') + when(message.sentAt)"></span>
+                  </div>
+                </template>
+              </div>
+
+              <form class="border-t border-gray-200 p-3" @submit.prevent="send()" novalidate>
+                <p x-show="!selected.customer" class="mb-2 text-xs text-gray-500">
+                  A guest reads this after signing in or creating an account in the same browser.
+                </p>
+
+                <label for="inbox-draft" class="sr-only">Your reply</label>
+                <textarea
+                  id="inbox-draft"
+                  rows="3"
+                  placeholder="Write a reply…"
+                  x-model="draft"
+                  :maxlength="maxLength"
+                  :disabled="sending"
+                  @input="sendError = ''"
+                  @keydown.enter="if (!$event.shiftKey && !$event.isComposing) { $event.preventDefault(); send(); }"
+                  class="input resize-none"
+                ></textarea>
+
+                <p x-show="sendError" x-text="sendError" role="alert" class="mt-2 text-xs text-red-600"></p>
+
+                <div class="mt-2 flex items-center justify-end gap-3">
+                  <span class="text-xs tabular-nums text-gray-400" x-text="draft.length + '/' + maxLength"></span>
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    :disabled="sending || !draft.trim()"
+                    x-text="sending ? 'Sending…' : 'Send'"
+                  ></button>
+                </div>
+              </form>
+            </div>
+          </template>
+        </section>
+
+      </div>
+    </div>
+  </template>
+
+</main>

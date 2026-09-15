@@ -8,14 +8,15 @@
         We sent a verification link to <span class="font-medium text-gray-900" x-text="values.email"></span>.
         You can shop right away; confirming it just proves the address is yours.
       </p>
-      <button type="button" class="btn btn-primary mt-6 w-full" @click="start()">Start shopping</button>
+      <button type="button" class="btn btn-primary mt-6 w-full" @click="start()" x-text="returning ? 'Continue' : 'Start shopping'"></button>
     </div>
   </template>
 
   <template x-if="!registered">
     <div class="card w-full max-w-sm p-6">
       <h1 class="text-lg font-semibold text-gray-900">Create an account</h1>
-      <p class="muted mt-1">Already have one? <a href="/login" class="font-medium text-gray-900 underline underline-offset-2">Sign in</a>.</p>
+      <!-- location.search carries ?next= across, so switching forms keeps the way back. -->
+      <p class="muted mt-1">Already have one? <a :href="'/login' + location.search" class="font-medium text-gray-900 underline underline-offset-2">Sign in</a>.</p>
 
       <form class="mt-5 flex flex-col gap-4" @submit.prevent="submit()" novalidate>
         <div>

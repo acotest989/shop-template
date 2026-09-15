@@ -8,20 +8,31 @@ export const chatWidget = () => ({
   draft: '',
   pending: false,
   error: '',
+  seen: 0, // lines on screen the last time the panel was open
 
   init() {
     // On a phone the panel covers the page, so the page stops scrolling under it. The rule that
     // reads this class is in assets/theme.css.
     this.$watch('open', (open) => document.documentElement.classList.toggle('chat-open', open));
 
-    // Whatever appears at the end is scrolled to, the shop's delayed replies included.
-    this.$watch('lines.length', () => this.scrollDown());
+    // Whatever appears at the end is scrolled to, the shop's replies included.
+    this.$watch('lines.length', (length) => {
+      if (this.open) this.seen = length;
+      this.scrollDown();
+    });
     this.$watch('typing', () => this.scrollDown());
+
+    // Signing in with the panel open, in another tab say, turns it into the customer's own.
+    this.$watch('guest', (guest) => {
+      if (!guest && this.open) this.follow();
+    });
   },
 
-  // Leaving the page with the chat open must not leave the next one unable to scroll.
+  // Leaving the page must not leave the next one unable to scroll, or keep listening for
+  // replies about a product nobody is looking at.
   destroy() {
     document.documentElement.classList.remove('chat-open');
+    this.$store.chat.unfollow(this.product.id);
   },
 
   get lines() {
@@ -32,6 +43,15 @@ export const chatWidget = () => ({
   // above the reply once it shows.
   get typing() {
     return this.$store.chat.typing(this.product.id);
+  },
+
+  get loading() {
+    return this.$store.chat.loading(this.product.id);
+  },
+
+  // Something arrived while the panel was closed: a reply from the shop, most likely.
+  get unread() {
+    return !this.open && this.lines.length > this.seen;
   },
 
   // Asked once, gone from the list, so the list only ever offers something new.
@@ -48,11 +68,18 @@ export const chatWidget = () => ({
     return !this.guest || this.$store.chat.visitor.left > 0;
   },
 
+  // Where signing in or creating an account brings the visitor back to: this product.
+  get back() {
+    return '?next=' + encodeURIComponent(location.pathname);
+  },
+
   toggle() {
     this.open = !this.open;
     if (!this.open) return;
 
+    this.seen = this.lines.length;
     this.$store.chat.loadFaqs().catch((err) => console.error(err)); // the box still works without the list
+    if (!this.guest) this.follow();
     this.scrollDown();
   },
 
@@ -62,9 +89,26 @@ export const chatWidget = () => ({
     this.$refs.launcher.focus();
   },
 
-  pick(faq) {
-    if (this.typing) return;
-    this.$store.chat.pick(this.product, faq);
+  follow() {
+    this.error = '';
+    this.$store.chat.follow(this.product.id).catch((err) => {
+      console.error(err);
+      this.error = errorMessage(err, 'The conversation could not be loaded. Close the chat and open it again.');
+    });
+  },
+
+  async pick(faq) {
+    if (this.pending || this.typing) return;
+
+    this.pending = true;
+    this.error = '';
+    try {
+      await this.$store.chat.pick(this.product, faq);
+    } catch (err) {
+      this.error = errorMessage(err, 'That question could not be sent. Try again.');
+    } finally {
+      this.pending = false;
+    }
   },
 
   async send() {

@@ -1,8 +1,9 @@
 /// <reference path="../pb_data/types.d.ts" />
 
 // A question from the chat on a product page: one of the shop's own, picked from the list,
-// or one the visitor wrote. The chat collections are closed, so this route is the only way
-// in, and nothing here reads a conversation back.
+// or one the visitor wrote. The chat collections refuse every write, so this route is the
+// only way in. A customer reads their conversations through the collection rules; a guest
+// reads nothing back.
 //
 // Everything lives inside the handler, for the reason given in orders.pb.js.
 routerAdd('POST', '/api/shop/chat', (e) => {
@@ -37,6 +38,7 @@ routerAdd('POST', '/api/shop/chat', (e) => {
   }
 
   let left = null;
+  let sent = null;
 
   $app.runInTransaction((tx) => {
     let product;
@@ -94,7 +96,11 @@ routerAdd('POST', '/api/shop/chat', (e) => {
       thread.set('visitor', visitor);
       if (user) thread.set('user', user.id);
     }
+    // What the inbox lists without opening the conversation. A pick from the list is answered
+    // already; only a written question leaves the shop owing a reply.
     thread.set('last_message', new DateTime());
+    thread.set('preview', (faq ? faq.getString('question') : text).replace(/\s+/g, ' ').slice(0, 200));
+    if (text) thread.set('waiting', true);
     tx.save(thread);
 
     const message = new Record(tx.findCollectionByNameOrId('messages'));
@@ -106,8 +112,80 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     tx.save(message);
 
     if (!user && text) left -= 1;
+
+    // The fields a customer's chat reads, so the question shows without waiting for realtime.
+    sent = {
+      id: message.id,
+      thread: thread.id,
+      author: 'visitor',
+      body: message.getString('body'),
+      faq: message.getString('faq'),
+      created: message.getString('created'),
+    };
   });
 
   // Only a guest has questions left; a customer's count is null.
-  return e.json(200, { left: left });
+  return e.json(200, { left: left, message: sent });
 });
+
+// A guest's conversations become the account's once there is an account: after signing in,
+// after registering, or on the first page a signed-in browser opens after asking as a guest.
+// The browser's id is all that ties them together, which is why a shared computer hands them
+// to whoever signs in on it next.
+routerAdd('POST', '/api/shop/chat/claim', (e) => {
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+  const visitor = String((e.requestInfo().body || {}).visitor || '').toLowerCase();
+  if (!UUID.test(visitor)) {
+    throw new BadRequestError('This browser has no visitor id. Reload the page and try again.');
+  }
+
+  const user = e.auth;
+  let claimed = 0;
+
+  $app.runInTransaction((tx) => {
+    const threads = tx.findRecordsByFilter('threads', 'visitor = {:visitor} && user = ""', '', 0, 0, { visitor: visitor });
+
+    for (const thread of threads) {
+      const product = thread.getString('product');
+
+      // The account may already have a conversation about the same product, begun while signed
+      // in. One product, one conversation: the guest's messages join it. A thread whose product
+      // is gone has nothing to be matched on, and is simply taken over.
+      let own = null;
+      if (product) {
+        try {
+          own = tx.findFirstRecordByFilter('threads', 'user = {:user} && product = {:product}', { user: user.id, product: product });
+        } catch (err) {
+          // none yet, which is the ordinary case
+        }
+      }
+
+      if (!own) {
+        thread.set('user', user.id);
+        tx.save(thread);
+        claimed++;
+        continue;
+      }
+
+      for (const message of tx.findRecordsByFilter('messages', 'thread = {:thread}', '', 0, 0, { thread: thread.id })) {
+        message.set('thread', own.id);
+        tx.save(message);
+      }
+
+      // The later of the two says what the inbox shows; dates in this format sort as text. An
+      // unanswered question in either leaves the merged one waiting.
+      if (thread.getString('last_message') > own.getString('last_message')) {
+        own.set('last_message', thread.getString('last_message'));
+        own.set('preview', thread.getString('preview'));
+      }
+      if (thread.getBool('waiting')) own.set('waiting', true);
+      tx.save(own);
+
+      tx.delete(thread);
+      claimed++;
+    }
+  });
+
+  return e.json(200, { claimed: claimed });
+}, $apis.requireAuth('users'));

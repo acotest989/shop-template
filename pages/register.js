@@ -1,5 +1,6 @@
 import { register } from '../services/auth.js';
 import { form, consumeRedirect } from 'alpineshell';
+import { nextPath } from '../lib/next.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8; // PocketBase's own minimum for the users collection
@@ -8,6 +9,8 @@ export const registerPage = () => ({
   ...form({ name: '', email: '', password: '', passwordConfirm: '' }),
 
   registered: false, // the account exists and the session is open; show the notice
+
+  returning: nextPath() !== null, // came from a page that wants them back, the chat on a product
 
   // Everything only the browser can decide. That an address is already taken is
   // the server's to say, and form() puts that answer back on the field.
@@ -28,8 +31,8 @@ export const registerPage = () => ({
   },
 
   // Whoever the guard bounced to /login may have come here instead; the destination
-  // it remembered is still theirs.
+  // it remembered is still theirs. So is the one a link named.
   start() {
-    this.goTo(consumeRedirect() ?? '/');
+    this.goTo(consumeRedirect() ?? nextPath() ?? '/');
   },
 });

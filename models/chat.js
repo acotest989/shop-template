@@ -18,3 +18,17 @@ export function toFaq(raw) {
     answer: raw.answer,
   };
 }
+
+// A message as the chat draws it: who said it, and what. The thread stays behind, since a
+// product page shows one conversation and never needs to know how it is stored.
+export function toMessage(raw) {
+  return {
+    id: raw.id,
+    from: raw.author, // 'visitor' or 'shop'
+    text: raw.body,
+    faq: raw.faq || '',
+
+    // The date and the time with a T between them, as in the order model.
+    sentAt: raw.created ? raw.created.replace(' ', 'T') : '',
+  };
+}

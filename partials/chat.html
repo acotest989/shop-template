@@ -10,12 +10,14 @@
     @click="toggle()"
     :aria-expanded="open"
     aria-controls="chat-panel"
-    class="btn btn-ghost w-full"
+    class="btn btn-ghost relative w-full"
   >
     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
     </svg>
     <span class="max-md:sr-only">Ask a question</span>
+    <span x-show="unread" class="sr-only">, new reply</span>
+    <span x-show="unread" class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-brand ring-2 ring-white" aria-hidden="true"></span>
   </button>
 
   <section
@@ -50,6 +52,8 @@
         Hi! Pick a question below, or write your own.
       </p>
 
+      <p x-show="loading && !error" class="self-center py-2 text-xs text-gray-400">Loading the conversation…</p>
+
       <template x-for="(line, index) in lines" :key="index">
         <p
           class="max-w-[85%] whitespace-pre-line rounded-2xl px-3 py-2 text-sm"
@@ -72,6 +76,7 @@
           <button
             type="button"
             @click="pick(faq)"
+            :disabled="pending"
             class="rounded-full border border-gray-300 bg-white px-3 py-1 text-left text-xs text-gray-700 transition-colors hover:border-brand-focus hover:text-brand-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus"
             x-text="faq.question"
           ></button>
@@ -114,8 +119,8 @@
 
     <p x-show="guest" class="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-600">
       <span x-show="!canWrite" x-text="'You have asked all ' + $store.chat.guestQuestions + ' questions.'"></span>
-      <a href="/register" class="font-medium text-brand-text underline underline-offset-2">Create an account</a>
-      or <a href="/login" class="font-medium text-brand-text underline underline-offset-2">sign in</a>
+      <a :href="'/register' + back" class="font-medium text-brand-text underline underline-offset-2">Create an account</a>
+      or <a :href="'/login' + back" class="font-medium text-brand-text underline underline-offset-2">sign in</a>
       <span x-text="canWrite ? 'to read our replies and chat with us.' : 'to read the replies and keep asking.'"></span>
     </p>
   </section>

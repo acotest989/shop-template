@@ -9,6 +9,14 @@
         class="transition-colors hover:text-gray-900"
         :class="$router.context.path === '/' ? 'font-medium text-brand-text' : 'text-gray-500'"
       >Products</a>
+
+      <template x-if="$store.session.user?.admin">
+        <a
+          href="/admin/inbox"
+          class="transition-colors hover:text-gray-900"
+          :class="$router.context.path === '/admin/inbox' ? 'font-medium text-brand-text' : 'text-gray-500'"
+        >Inbox</a>
+      </template>
     </nav>
 
     <div class="ml-auto flex items-center gap-3">

@@ -16,6 +16,7 @@ import { resetPage } from './pages/reset.js';
 import { accountPage } from './pages/account.js';
 import { confirmEmailPage } from './pages/confirm-email.js';
 import { checkoutPage } from './pages/checkout.js';
+import { inboxPage } from './pages/inbox.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
@@ -38,8 +39,11 @@ createApp({
     '/products/:handle': 'product',
     '/cart': 'cart',
     '/checkout': 'checkout',
+    '/admin/inbox': 'inbox',
   },
-  protected: ['/account'], // register protected route here
+  // A session is all the guard checks. Whether the account may use /admin is the page's to
+  // say and the server's to enforce.
+  protected: ['/account', '/admin'], // register protected route here
   // Overrides only — a page with no entry gets its own name as the title.
   titles: {
     404: 'Page not found',
@@ -57,7 +61,7 @@ createApp({
   // register new page data here, and the component of a partial that has one
   pages: {
     homePage, productPage, loginPage, registerPage, verifyPage,
-    forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage,
+    forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage, inboxPage,
     chatWidget,
   },
   // Defaults in effect — uncomment to change:
