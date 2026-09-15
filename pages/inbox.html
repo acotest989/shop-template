@@ -94,6 +94,42 @@
               </li>
             </template>
           </ul>
+
+          <!-- At the foot of the list, however many conversations scroll above it. The question
+               says how much goes, and how much of it nobody has answered, before anything does. -->
+          <div x-show="!pending && threads.length" class="mt-auto border-t border-gray-200 p-2">
+            <button
+              x-show="!confirmingClear"
+              type="button"
+              class="btn btn-ghost btn-sm w-full text-gray-500 hover:border-red-300 hover:text-red-600"
+              @click="confirmingClear = true"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+              </svg>
+              Clear inbox
+            </button>
+
+            <div x-show="confirmingClear" class="rounded-lg bg-red-50 p-2">
+              <p class="text-sm text-red-700">
+                <span
+                  class="font-medium"
+                  x-text="'Delete ' + (threads.length === 1 ? 'the one conversation' : 'all ' + threads.length + ' conversations') + ' and every message in them, for good?'"
+                ></span>
+                <span x-show="waitingCount" x-text="waitingCount + ' of them ' + (waitingCount === 1 ? 'is' : 'are') + ' still waiting for an answer.'"></span>
+              </p>
+              <div class="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  class="btn btn-sm flex-1 bg-red-600 text-white hover:bg-red-500"
+                  :disabled="clearing"
+                  @click="clear()"
+                  x-text="clearing ? 'Deleting…' : 'Yes, delete them all'"
+                ></button>
+                <button type="button" class="btn btn-ghost btn-sm flex-1" :disabled="clearing" @click="confirmingClear = false">Cancel</button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section
@@ -133,7 +169,32 @@
                 </div>
 
                 <button x-show="selected.waiting" type="button" class="btn btn-ghost btn-sm shrink-0" @click="answered()">Mark as answered</button>
+
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm shrink-0 px-2 text-gray-500 hover:border-red-300 hover:text-red-600"
+                  aria-label="Delete conversation"
+                  :aria-expanded="confirmingDelete"
+                  @click="confirmingDelete = !confirmingDelete"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
               </header>
+
+              <!-- Nothing brings a deleted conversation back, so the button only asks. -->
+              <div x-show="confirmingDelete" class="flex flex-wrap items-center gap-3 border-b border-red-200 bg-red-50 px-3 py-2">
+                <p class="min-w-0 flex-1 text-sm font-medium text-red-700">Delete this conversation and every message in it, for good?</p>
+                <button
+                  type="button"
+                  class="btn btn-sm bg-red-600 text-white hover:bg-red-500"
+                  :disabled="deleting"
+                  @click="remove()"
+                  x-text="deleting ? 'Deleting…' : 'Yes, delete it'"
+                ></button>
+                <button type="button" class="btn btn-ghost btn-sm" :disabled="deleting" @click="confirmingDelete = false">Cancel</button>
+              </div>
 
               <div id="inbox-log" class="flex flex-1 flex-col gap-3 overflow-y-auto overscroll-contain p-4" aria-live="polite">
                 <p x-show="loadingMessages" class="self-center py-2 text-xs text-gray-400">Loading the conversation…</p>
@@ -148,7 +209,7 @@
                     ></p>
                     <!-- A pick was answered by the list on the spot, so it is marked rather than
                          left looking like a question nobody took up. -->
-                    <span class="mt-1 text-[11px] text-gray-400" x-text="(message.faq ? 'Picked from the list · ' : '') + when(message.sentAt)"></span>
+                    <span class="mt-1 text-[11px] text-gray-400" x-text="(message.faq ? 'Picked from the list · ' : '') + timeOf(message.sentAt)"></span>
                   </div>
                 </template>
               </div>

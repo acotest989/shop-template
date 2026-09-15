@@ -89,6 +89,55 @@ routerAdd('POST', '/api/shop/inbox/answered', (e) => {
   return e.json(200, { waiting: false });
 }, $apis.requireAuth('users'));
 
+// A conversation and every message in it, for good: the messages go with the thread, since
+// their relation to it cascades. Realtime tells the inbox, and a customer's open chat, as the
+// records go. A guest's tab keeps its own copy until it closes, which is all a guest ever had.
+routerAdd('POST', '/api/shop/inbox/delete', (e) => {
+  if (!e.auth.getBool('admin')) {
+    throw new ForbiddenError('Only the shop can delete a conversation.');
+  }
+
+  const threadId = String((e.requestInfo().body || {}).thread || '');
+
+  let thread;
+  try {
+    thread = $app.findRecordById('threads', threadId);
+  } catch (err) {
+    throw new NotFoundError('This conversation no longer exists.');
+  }
+
+  $app.delete(thread);
+
+  return e.json(200, { deleted: true });
+}, $apis.requireAuth('users'));
+
+// Every conversation at once, and every message in them. The page sends the newest moment it
+// had on screen, and only what is no newer goes: a question that lands while the shop is
+// confirming is not swept away unread with the rest.
+routerAdd('POST', '/api/shop/inbox/clear', (e) => {
+  if (!e.auth.getBool('admin')) {
+    throw new ForbiddenError('Only the shop can clear the inbox.');
+  }
+
+  // The page has it as 2026-09-15T13:05:00.123Z; stored dates put a space where the T is.
+  const before = String((e.requestInfo().body || {}).before || '').replace('T', ' ');
+  if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(before)) {
+    throw new BadRequestError('Reload the inbox and try again.');
+  }
+
+  let deleted = 0;
+
+  // All or nothing: an inbox half cleared by a failure would be harder to read than either.
+  $app.runInTransaction((tx) => {
+    for (const thread of tx.findRecordsByFilter('threads', 'last_message <= {:before}', '', 0, 0, { before: before })) {
+      tx.delete(thread);
+      deleted++;
+    }
+  });
+
+  return e.json(200, { deleted: deleted });
+}, $apis.requireAuth('users'));
+
 // Every minute, one mail to each customer with a reply they have not seen for five minutes.
 // Seen means the chat on the product page showed it, and said so to /api/shop/chat/seen.
 cronAdd('chat_reply_mail', '* * * * *', () => {

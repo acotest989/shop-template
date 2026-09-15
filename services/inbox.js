@@ -60,6 +60,23 @@ export async function sendReply(threadId, text) {
   return toMessage(answer.message);
 }
 
+export async function deleteThread(threadId) {
+  await pb.send('/api/shop/inbox/delete', {
+    method: 'POST',
+    body: { thread: threadId },
+  });
+}
+
+// Everything no newer than `before`, the newest conversation the page had on screen. Answers
+// with how many went.
+export async function clearInbox(before) {
+  const answer = await pb.send('/api/shop/inbox/clear', {
+    method: 'POST',
+    body: { before },
+  });
+  return answer.deleted;
+}
+
 export async function markAnswered(threadId) {
   await pb.send('/api/shop/inbox/answered', {
     method: 'POST',

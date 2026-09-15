@@ -6,6 +6,8 @@ import {
   subscribeToMessages,
   sendReply,
   markAnswered,
+  deleteThread,
+  clearInbox,
 } from '../services/inbox.js';
 
 // MAX_LENGTH in server/pb_hooks/inbox.pb.js, which is the one that counts.
@@ -31,6 +33,12 @@ export const inboxPage = () => ({
   sending: false,
   sendError: '',
   maxLength: MAX_LENGTH,
+
+  confirmingDelete: false,
+  deleting: false,
+
+  confirmingClear: false,
+  clearing: false,
 
   stopThreads: null,
   stopMessages: null,
@@ -113,6 +121,7 @@ export const inboxPage = () => ({
     this.messagesError = '';
     this.sendError = '';
     this.draft = '';
+    this.confirmingDelete = false;
 
     // Kept in the address, so a reload or a shared link opens the same conversation.
     history.replaceState(history.state, '', threadId ? `/admin/inbox?thread=${encodeURIComponent(threadId)}` : '/admin/inbox');
@@ -176,17 +185,67 @@ export const inboxPage = () => ({
     }
   },
 
+  // Asked first on the page, since nothing brings a deleted conversation back.
+  async remove() {
+    const thread = this.selected;
+    if (!thread || this.deleting) return;
+
+    this.deleting = true;
+    try {
+      await deleteThread(thread.id);
+      this.receiveThread('delete', thread); // realtime says the same a moment later
+      this.notify('Conversation deleted.', 'success');
+    } catch (err) {
+      console.error(err);
+      this.notify(errorMessage(err, 'Could not delete the conversation.'), 'error');
+    } finally {
+      this.deleting = false;
+      this.confirmingDelete = false;
+    }
+  },
+
+  // Everything the list shows, up to its newest conversation. One that arrives while the shop
+  // is confirming is newer than that, and stays.
+  async clear() {
+    const before = this.threads[0]?.lastMessageAt; // the list is newest first
+    if (!before || this.clearing) return;
+
+    this.clearing = true;
+    try {
+      const deleted = await clearInbox(before);
+      for (const thread of this.threads.filter((entry) => entry.lastMessageAt <= before)) {
+        this.receiveThread('delete', thread); // realtime says the same a moment later
+      }
+      this.notify(deleted === 1 ? '1 conversation deleted.' : `${deleted} conversations deleted.`, 'success');
+    } catch (err) {
+      console.error(err);
+      this.notify(errorMessage(err, 'Could not clear the inbox.'), 'error');
+    } finally {
+      this.clearing = false;
+      this.confirmingClear = false;
+    }
+  },
+
   // Other conversations from the same browser: a guest who came back, or a customer who asked
   // as a guest before signing in.
   sameBrowser(thread) {
     return this.threads.filter((entry) => entry.id !== thread.id && entry.visitor === thread.visitor).length;
   },
 
-  // Today's by the clock, anything older by the date.
+  // For the list, where room is short: today's by the clock, anything older by the date.
   when(value) {
     if (!value) return '';
-    const today = new Date(value).toDateString() === new Date().toDateString();
-    return this.formatDate(value, today ? { timeStyle: 'short' } : { dateStyle: 'medium' });
+    return this.formatDate(value, this.today(value) ? { timeStyle: 'short' } : { dateStyle: 'medium' });
+  },
+
+  // For a message: always the date and the time, today's included.
+  timeOf(value) {
+    if (!value) return '';
+    return this.formatDate(value, { dateStyle: 'medium', timeStyle: 'short' });
+  },
+
+  today(value) {
+    return new Date(value).toDateString() === new Date().toDateString();
   },
 
   scrollDown() {
