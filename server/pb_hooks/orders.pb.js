@@ -284,6 +284,19 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     $app.logger().error('order mail failed', 'reference', placed.reference, 'error', String(err));
   }
 
+  // The owner's phone as well, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
+  try {
+    require(__hooks + '/telegram.js').send(
+      'New order ' + placed.reference + ': ' + money(placed.total, placed.currency) + '\n' +
+      placed.name + ', ' + placed.phone + '\n\n' +
+      placed.lines.map((line) => line.title + ' × ' + line.qty).join('\n') + '\n\n' +
+      (placed.paid ? 'Paid by card' : 'Cash on delivery') + '\n' +
+      $app.settings().meta.appURL + '/admin/orders',
+    );
+  } catch (err) {
+    $app.logger().error('telegram message failed', 'reference', placed.reference, 'error', String(err));
+  }
+
   return e.json(200, placed);
 });
 

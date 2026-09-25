@@ -164,6 +164,18 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     } catch (err) {
       $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
     }
+
+    // The owner's phone as well, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
+    try {
+      require(__hooks + '/telegram.js').send(
+        'Question about ' + notice.subject + '\n' +
+        notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
+        notice.text + '\n\n' +
+        'Answer: ' + $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread,
+      );
+    } catch (err) {
+      $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
+    }
   }
 
   // Only a guest has questions left; a customer's count is null.
