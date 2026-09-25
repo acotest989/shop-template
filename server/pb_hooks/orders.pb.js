@@ -178,6 +178,11 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       const title = product.getString('title');
       const price = product.getInt('price_cents');
 
+      // Hidden in the admin area while it sat in somebody's cart.
+      if (product.getBool('hidden')) {
+        throw new BadRequestError(title + ' is no longer sold. Remove it from the cart to order the rest.');
+      }
+
       // The cart's price is sent to be checked, never to be charged. Somebody who
       // agreed to one number must not be billed another without being told.
       if (Number(item.price) !== price) {
@@ -340,7 +345,15 @@ onRecordUpdate((e) => {
 
   // Every line is settled before any is written, so a refusal leaves each shelf as it was.
   for (const line of JSON.parse(e.record.getString('lines'))) {
-    const product = e.app.findRecordById('products', line.id);
+    // A product deleted from the dashboard has no shelf left to put anything on, and must not
+    // keep its order stuck in the status it has. The admin area hides products instead.
+    let product;
+    try {
+      product = e.app.findRecordById('products', line.id);
+    } catch (err) {
+      continue;
+    }
+
     const stock = product.getInt('stock') + direction * line.qty;
     if (stock < 0) {
       throw new BadRequestError('Not enough ' + product.getString('title') + ' left to reopen this order.');

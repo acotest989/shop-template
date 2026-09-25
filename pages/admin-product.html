@@ -1,0 +1,306 @@
+<main class="mx-auto w-full max-w-6xl p-4" x-data="adminProductPage">
+
+  <a href="/admin/products" class="muted inline-flex items-center gap-1 transition-colors hover:text-gray-900">
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+    </svg>
+    All products
+  </a>
+
+  <p x-show="loadError" x-text="loadError" role="alert" class="mt-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
+
+  <div x-show="loading" class="mt-4 grid gap-4 md:grid-cols-[1fr_20rem]" aria-hidden="true">
+    <div class="card p-4">
+      <div class="skeleton h-3 w-1/4"></div>
+      <div class="skeleton mt-3 h-9 w-full rounded-lg"></div>
+      <div class="skeleton mt-6 h-3 w-1/4"></div>
+      <div class="skeleton mt-3 h-24 w-full rounded-lg"></div>
+    </div>
+    <div class="card p-4">
+      <div class="skeleton h-3 w-1/3"></div>
+      <div class="skeleton mt-3 h-9 w-full rounded-lg"></div>
+    </div>
+  </div>
+
+  <template x-if="!loading && !loadError">
+    <form class="mt-3" @submit.prevent="send()" novalidate>
+
+      <div class="mb-4 flex flex-wrap items-center gap-3">
+        <h1 class="min-w-0 truncate text-xl font-semibold text-gray-900" x-text="product ? product.title : 'New product'"></h1>
+        <span x-show="product?.hidden" class="badge badge-soft">Hidden</span>
+        <!-- An admin can open a hidden product's page too, which is how it is checked before it
+             goes on sale. -->
+        <a
+          x-show="product"
+          :href="'/products/' + product?.handle"
+          class="btn btn-ghost btn-sm ml-auto"
+          x-text="product?.hidden ? 'Preview in the shop' : 'View in the shop'"
+        ></a>
+      </div>
+
+      <div class="grid items-start gap-4 md:grid-cols-[1fr_20rem]">
+
+        <div class="flex flex-col gap-4">
+          <section class="card flex flex-col gap-4 p-4">
+            <div>
+              <label for="product-title" class="label">Name</label>
+              <input
+                id="product-title"
+                type="text"
+                x-init="!product && $el.focus()"
+                x-model="values.title"
+                @input="clear('title')"
+                :disabled="pending"
+                :aria-invalid="!!errors.title"
+                class="input mt-1"
+                :class="errors.title && 'border-red-400'"
+              >
+              <p x-show="errors.title" x-text="errors.title" class="mt-1 text-xs text-red-600"></p>
+              <p x-show="!errors.title && !product" class="muted mt-1 text-xs">Its address in the shop is made from the name once, and kept.</p>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="product-brand" class="label">Brand</label>
+                <input
+                  id="product-brand"
+                  type="text"
+                  x-model="values.brand"
+                  @input="clear('brand')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.brand"
+                  class="input mt-1"
+                  :class="errors.brand && 'border-red-400'"
+                >
+                <p x-show="errors.brand" x-text="errors.brand" class="mt-1 text-xs text-red-600"></p>
+              </div>
+
+              <div>
+                <label for="product-category" class="label">Category</label>
+                <input
+                  id="product-category"
+                  type="text"
+                  list="product-categories"
+                  autocomplete="off"
+                  x-model="values.category"
+                  @input="clear('category')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.category"
+                  class="input mt-1"
+                  :class="errors.category && 'border-red-400'"
+                >
+                <datalist id="product-categories">
+                  <template x-for="category in categories" :key="category">
+                    <option :value="category" x-text="humanize(category)"></option>
+                  </template>
+                </datalist>
+                <p x-show="errors.category" x-text="errors.category" class="mt-1 text-xs text-red-600"></p>
+                <p x-show="!errors.category" class="muted mt-1 text-xs">Pick one, or type a new one.</p>
+              </div>
+            </div>
+
+            <div>
+              <label for="product-description" class="label">Description</label>
+              <textarea
+                id="product-description"
+                rows="6"
+                x-model="values.description"
+                @input="clear('description')"
+                :disabled="pending"
+                :aria-invalid="!!errors.description"
+                class="input mt-1"
+                :class="errors.description && 'border-red-400'"
+              ></textarea>
+              <p x-show="errors.description" x-text="errors.description" class="mt-1 text-xs text-red-600"></p>
+            </div>
+
+            <div>
+              <label for="product-tags" class="label">Tags</label>
+              <input
+                id="product-tags"
+                type="text"
+                placeholder="lamp, living room, gift"
+                x-model="values.tags"
+                @input="clear('tags')"
+                :disabled="pending"
+                :aria-invalid="!!errors.tags"
+                class="input mt-1"
+                :class="errors.tags && 'border-red-400'"
+              >
+              <p x-show="errors.tags" x-text="errors.tags" class="mt-1 text-xs text-red-600"></p>
+              <p x-show="!errors.tags" class="muted mt-1 text-xs">Separated by commas. Search finds them, and each is a link on the product page.</p>
+            </div>
+          </section>
+
+          <section class="card flex flex-col gap-4 p-4">
+            <h2 class="label">Pictures</h2>
+
+            <div class="flex gap-3">
+              <!-- x-if, not x-show: a half-typed address would still be fetched as a src. -->
+              <span class="light-palette h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                <template x-if="isPicture(values.image)">
+                  <img :src="values.image.trim()" alt="" width="64" height="64" class="h-full w-full object-cover">
+                </template>
+              </span>
+              <div class="min-w-0 flex-1">
+                <label for="product-image" class="label">Card picture</label>
+                <input
+                  id="product-image"
+                  type="url"
+                  placeholder="https://…"
+                  x-model="values.image"
+                  @input="clear('image')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.image"
+                  class="input mt-1"
+                  :class="errors.image && 'border-red-400'"
+                >
+                <p x-show="errors.image" x-text="errors.image" class="mt-1 text-xs text-red-600"></p>
+                <p x-show="!errors.image" class="muted mt-1 text-xs">On the product's card in the grid, and in the cart.</p>
+              </div>
+            </div>
+
+            <div>
+              <label for="product-images" class="label">Gallery</label>
+              <textarea
+                id="product-images"
+                rows="4"
+                placeholder="https://…"
+                x-model="values.images"
+                @input="clear('images')"
+                :disabled="pending"
+                :aria-invalid="!!errors.images"
+                class="input mt-1 font-mono text-xs"
+                :class="errors.images && 'border-red-400'"
+              ></textarea>
+              <p x-show="errors.images" x-text="errors.images" class="mt-1 text-xs text-red-600"></p>
+              <p x-show="!errors.images" class="muted mt-1 text-xs">One address per line, in the order the product page shows them. Left empty, the page shows the card picture.</p>
+
+              <div x-show="gallery().length" class="mt-2 flex flex-wrap gap-2">
+                <template x-for="src in gallery()" :key="src">
+                  <span class="light-palette h-12 w-12 overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+                    <img :src="src" alt="" width="48" height="48" loading="lazy" class="h-full w-full object-cover">
+                  </span>
+                </template>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <section class="card flex flex-col gap-4 p-4">
+            <div>
+              <label for="product-price" class="label">Price</label>
+              <div class="relative mt-1">
+                <input
+                  id="product-price"
+                  type="text"
+                  inputmode="decimal"
+                  placeholder="19.99"
+                  x-model="values.price"
+                  @input="clear('price')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.price"
+                  class="input pr-14 tabular-nums"
+                  :class="errors.price && 'border-red-400'"
+                >
+                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-gray-400" x-text="currency"></span>
+              </div>
+              <p x-show="errors.price" x-text="errors.price" class="mt-1 text-xs text-red-600"></p>
+            </div>
+
+            <div>
+              <label for="product-regular-price" class="label">Regular price</label>
+              <div class="relative mt-1">
+                <input
+                  id="product-regular-price"
+                  type="text"
+                  inputmode="decimal"
+                  x-model="values.regularPrice"
+                  @input="clear('regularPrice')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.regularPrice"
+                  class="input pr-14 tabular-nums"
+                  :class="errors.regularPrice && 'border-red-400'"
+                >
+                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-gray-400" x-text="currency"></span>
+              </div>
+              <p x-show="errors.regularPrice" x-text="errors.regularPrice" class="mt-1 text-xs text-red-600"></p>
+              <p x-show="!errors.regularPrice" class="muted mt-1 text-xs">Only for a discount: struck through beside the price. Otherwise leave it empty.</p>
+            </div>
+
+            <div>
+              <label for="product-stock" class="label">In stock</label>
+              <input
+                id="product-stock"
+                type="text"
+                inputmode="numeric"
+                x-model="values.stock"
+                @input="clear('stock')"
+                :disabled="pending"
+                :aria-invalid="!!errors.stock"
+                class="input mt-1 tabular-nums"
+                :class="errors.stock && 'border-red-400'"
+              >
+              <p x-show="errors.stock" x-text="errors.stock" class="mt-1 text-xs text-red-600"></p>
+              <p
+                x-show="!errors.stock"
+                class="muted mt-1 text-xs"
+                x-text="(product ? product.sold + ' sold so far. ' : '') + 'Orders take from this by themselves, and cancelled or returned ones put it back.'"
+              ></p>
+            </div>
+
+            <div>
+              <label for="product-weight" class="label">Weight, packed</label>
+              <div class="relative mt-1">
+                <input
+                  id="product-weight"
+                  type="text"
+                  inputmode="numeric"
+                  x-model="values.weight"
+                  @input="clear('weight')"
+                  :disabled="pending"
+                  :aria-invalid="!!errors.weight"
+                  class="input pr-10 tabular-nums"
+                  :class="errors.weight && 'border-red-400'"
+                >
+                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-gray-400">g</span>
+              </div>
+              <p x-show="errors.weight" x-text="errors.weight" class="mt-1 text-xs text-red-600"></p>
+              <p x-show="!errors.weight" class="muted mt-1 text-xs">In grams: 1.5 kg is 1500. It decides whether an order ships free.</p>
+            </div>
+          </section>
+
+          <section class="card p-4">
+            <label class="flex items-start gap-3">
+              <input type="checkbox" x-model="values.hidden" :disabled="pending" class="mt-0.5 h-4 w-4 accent-brand">
+              <span>
+                <span class="block text-sm font-medium text-gray-900">Hidden from the shop</span>
+                <span class="muted block text-xs">
+                  Out of the catalogue, search and its own page, and nobody can order it. Orders and
+                  conversations about it stay as they are.
+                </span>
+              </span>
+            </label>
+            <!-- Why there is no delete button, said once where somebody would look for one. -->
+            <p class="muted mt-3 border-t border-gray-200 pt-3 text-xs">
+              Products are hidden rather than deleted: a cancelled or returned order puts its goods
+              back on the product, which has to still be there.
+            </p>
+          </section>
+
+          <p x-show="error" x-text="error" role="alert" class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600"></p>
+
+          <button
+            type="submit"
+            class="btn btn-primary w-full"
+            :disabled="pending"
+            x-text="pending ? 'Saving…' : product ? 'Save changes' : 'Add product'"
+          ></button>
+        </div>
+
+      </div>
+    </form>
+  </template>
+
+</main>

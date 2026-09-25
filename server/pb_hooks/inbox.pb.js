@@ -172,11 +172,15 @@ cronAdd('chat_reply_mail', '* * * * *', () => {
       const user = $app.findRecordById('users', thread.getString('user'));
       const latest = $app.findRecordsByFilter('messages', 'thread = {:thread} && author = "shop"', '-created', 1, 0, { thread: thread.id });
 
-      // Straight into the conversation, with the chat open. A product that is gone has no page
-      // to open it on, and the shop's front page is the nearest thing.
+      // Straight into the conversation, with the chat open. A product that is gone or hidden has
+      // no page to open it on, and the shop's front page is the nearest thing; the reply itself
+      // is in the mail either way.
       let link = meta.appURL + '/';
       try {
-        link = meta.appURL + '/products/' + $app.findRecordById('products', thread.getString('product')).getString('handle') + '?chat';
+        const product = $app.findRecordById('products', thread.getString('product'));
+        if (!product.getBool('hidden')) {
+          link = meta.appURL + '/products/' + product.getString('handle') + '?chat';
+        }
       } catch (err) {
         // out of the catalogue since the question was asked
       }

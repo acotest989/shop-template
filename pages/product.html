@@ -64,20 +64,31 @@
       </div>
 
       <div class="flex flex-col">
+        <!-- Only an admin ever sees a hidden product's page. -->
+        <p x-show="product.hidden" class="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+          Hidden from the shop: only an admin can open this page, and nobody can order it.
+          <a :href="'/admin/products/' + product.id" class="font-medium underline underline-offset-2">Edit it</a>
+        </p>
+
         <p class="eyebrow" x-text="product.brand"></p>
         <h1 class="mt-1 text-2xl font-semibold text-gray-900" x-text="product.title"></h1>
 
         <p class="mt-2 flex items-center gap-1.5 text-sm text-gray-500">
-          <!-- One row of stars over another, the top one clipped to the score. -->
-          <span class="relative leading-none" aria-hidden="true">
-            <span class="text-gray-300">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-            <span
-              class="absolute inset-y-0 left-0 overflow-hidden whitespace-nowrap text-amber-400"
-              :style="'width: ' + starPercent(product.rating) + '%'"
-            >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+          <span x-show="product.rating" class="flex items-center gap-1.5">
+            <!-- One row of stars over another, the top one clipped to the score. -->
+            <span class="relative leading-none" aria-hidden="true">
+              <span class="text-gray-300">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span
+                class="absolute inset-y-0 left-0 overflow-hidden whitespace-nowrap text-amber-400"
+                :style="'width: ' + starPercent(product.rating) + '%'"
+              >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            </span>
+            <span x-text="product.rating.toFixed(1)"></span>
+            <span class="sr-only">out of 5</span>
           </span>
-          <span x-text="product.rating.toFixed(1)"></span>
-          <span class="sr-only">out of 5</span>
+          <!-- A product added in the admin area has no score yet, and five empty stars would read
+               as a bad one. -->
+          <span x-show="!product.rating">No ratings yet</span>
           <span x-show="product.sold" x-text="'· ' + product.sold + ' sold'"></span>
         </p>
 
@@ -149,7 +160,7 @@
               type="button"
               class="btn btn-primary flex-1"
               :disabled="!product.available"
-              x-text="!product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
+              x-text="product.hidden ? 'Not for sale' : !product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
               @click="inCart ? goTo('/cart') : addToCart()"
             ></button>
           </div>
@@ -162,7 +173,11 @@
             </svg>
             Back
           </button>
-          <div class="shrink-0" x-html="partials.chat"></div>
+          <!-- Not on a hidden product's page, which only an admin can open: the chat would
+               refuse the question anyway. -->
+          <template x-if="!product.hidden">
+            <div class="shrink-0" x-html="partials.chat"></div>
+          </template>
         </div>
       </div>
     </div>

@@ -52,6 +52,9 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     } catch (err) {
       throw new BadRequestError('This product is no longer sold.');
     }
+    if (product.getBool('hidden')) {
+      throw new BadRequestError('This product is no longer sold.');
+    }
 
     let faq = null;
     if (faqId) {

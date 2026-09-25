@@ -9,7 +9,10 @@ export function toProduct(raw) {
     price: raw.price_cents,
     regularPrice: raw.regular_price_cents,
     currency: raw.currency,
-    available: raw.stock > 0,
+
+    // Only an admin ever gets a hidden one, opening its page; a card never asks for the field.
+    hidden: raw.hidden === true,
+    available: raw.stock > 0 && raw.hidden !== true,
     stock: raw.stock,
     sold: raw.sold,
     weight: raw.weight, // grams, packed: what decides whether an order ships free

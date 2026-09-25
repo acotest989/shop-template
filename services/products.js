@@ -12,8 +12,10 @@ const CARD_FIELDS = 'id,handle,title,brand,price_cents,regular_price_cents,curre
 export async function fetchProducts({ q = '', category = '', page = 1 } = {}) {
   const term = q.trim();
 
-  // Joined with &&, so the term's alternatives need parentheses of their own.
-  const clauses = [];
+  // Joined with &&, so the term's alternatives need parentheses of their own. Hidden products
+  // are asked out by name: the rules keep them from everybody but an admin, and an admin
+  // browsing the shop should see what a customer does.
+  const clauses = ['hidden = false'];
   if (category) clauses.push(pb.filter('category = {:category}', { category }));
   if (term) clauses.push(pb.filter('(title ~ {:term} || brand ~ {:term} || tags ?~ {:term})', { term }));
 
@@ -37,12 +39,15 @@ export async function fetchProducts({ q = '', category = '', page = 1 } = {}) {
 export async function fetchCategories() {
   const records = await pb.collection('products').getFullList({
     fields: 'category',
+    filter: 'hidden = false', // a category of hidden products only is not one the shop has
     sort: 'category',
   });
 
   return [...new Set(records.map((record) => record.category))];
 }
 
+// No hidden filter here: the rules give a customer nothing for a hidden product, and let an
+// admin open its page to see it before it goes on sale.
 export async function fetchProduct(handle) {
   try {
     const record = await pb
