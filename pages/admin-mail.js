@@ -1,8 +1,8 @@
 import { errorMessage } from 'alpineshell';
-import { fetchMails, fetchMailPreview } from '../services/admin.js';
+import { fetchMails, fetchMailPreview, sendTestMail } from '../services/admin.js';
 
 // Every mail the shop sends, and each one as it would arrive, filled with the sample data in
-// server/mail/mails.json. Nothing is sent from here.
+// server/mail/mails.json. The one thing sent from here is a test, to the admin's own address.
 export const adminMailPage = () => ({
   mails: [],
   pending: true,
@@ -13,6 +13,7 @@ export const adminMailPage = () => ({
   loading: false,
   previewError: '',
   width: 'desktop', // or 'phone'
+  sending: false,
 
   async init() {
     try {
@@ -57,6 +58,23 @@ export const adminMailPage = () => ({
   // After a template was edited: the server reads it again for every preview.
   reload() {
     if (this.selected) this.open(this.selected);
+  },
+
+  // The mail on show, as it stands on disk right now, to the admin's own inbox: how it looks in
+  // Gmail or on a phone is something a preview can only guess at.
+  async sendTest() {
+    if (this.sending || !this.selected) return;
+
+    this.sending = true;
+    try {
+      const to = await sendTestMail(this.selected);
+      this.notify(`Sent to ${to}, with [Test] in front of the subject.`, 'success');
+    } catch (err) {
+      console.error(err);
+      this.notify(errorMessage(err, 'The test mail could not be sent.'), 'error');
+    } finally {
+      this.sending = false;
+    }
   },
 
   // A link in the mail opens in a tab of its own rather than inside the frame.

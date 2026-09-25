@@ -68,6 +68,14 @@
             Reload
           </button>
 
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            :disabled="sending || loading || !!previewError"
+            @click="sendTest()"
+            x-text="sending ? 'Sending…' : 'Send test to ' + $store.session.user?.email"
+          ></button>
+
           <!-- Where to change it: the file, and where its sample comes from. -->
           <span class="muted ml-auto text-xs">
             Edit <span class="font-mono" x-text="preview?.file"></span>, sample from <span class="font-mono">server/mail/mails.json</span>

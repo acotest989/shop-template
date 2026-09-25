@@ -1,6 +1,6 @@
 # Mail
 
-Every mail the shop sends is a file here, PocketBase's own account mails included. `/admin/mail` shows each one filled with sample data, at desktop and phone width, and **Reload** there shows a template as it stands after an edit. The files are read on every send, so an edit needs no restart.
+Every mail the shop sends is a file here, PocketBase's own account mails included. `/admin/mail` shows each one filled with sample data, at desktop and phone width, and **Reload** there shows a template as it stands after an edit. **Send test** mails the one on show, filled the same way, to your own address, with `[Test]` in front of its subject: how a mail looks in Gmail or on a phone is something a preview can only guess at. The files are read on every send, so an edit needs no restart.
 
 | File | What it is |
 |---|---|

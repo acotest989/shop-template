@@ -6,7 +6,8 @@
 // customer gets. A template that fails leaves PocketBase's message to go out as it was, and a
 // token missing from the event does too: a link that goes nowhere is worse than a plain mail.
 //
-// Below them, what /admin/mail reads: every mail, and each one filled with its sample.
+// Below them, what /admin/mail reads: every mail, and each one filled with its sample, and
+// the one way it sends anything: a test, to the admin asking for it.
 
 onMailerRecordVerificationSend((e) => {
   const token = e.meta && e.meta.token;
@@ -87,4 +88,37 @@ routerAdd('GET', '/api/shop/admin/mail/{name}', (e) => {
   }
 
   return e.json(200, { name: name, subject: mail.subject, html: mail.html, file: 'server/mail/' + name + '.html' });
+}, $apis.requireAuth('users'));
+
+// The same mail, sent: to the admin's own address alone, filled with its sample, and marked as
+// a test in its subject, so it can be read where the customers read theirs. Nothing else goes
+// anywhere from here.
+routerAdd('POST', '/api/shop/admin/mail/{name}/test', (e) => {
+  if (!e.auth.getBool('admin')) {
+    throw new ForbiddenError('Only the shop can send a test mail.');
+  }
+
+  const mailer = require(__hooks + '/mailer.js');
+  const name = e.request.pathValue('name');
+
+  let mail;
+  try {
+    mail = mailer.preview(name);
+  } catch (err) {
+    throw new BadRequestError('The template could not be filled: ' + (err && err.message ? err.message : String(err)));
+  }
+  if (!mail) {
+    throw new NotFoundError('There is no mail by that name.');
+  }
+
+  const to = e.auth.email();
+
+  try {
+    mailer.deliver({ subject: '[Test] ' + mail.subject, html: mail.html }, [{ address: to }]);
+  } catch (err) {
+    $app.logger().error('test mail failed', 'mail', name, 'error', String(err));
+    throw new BadRequestError('The mail could not be sent. Check Settings → Mail in the dashboard.');
+  }
+
+  return e.json(200, { to: to });
 }, $apis.requireAuth('users'));

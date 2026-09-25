@@ -112,10 +112,9 @@ function render(name, data) {
   return { subject: subject, html: html };
 }
 
-// From the shop's own address, as every mail here is.
-function send(name, data, to) {
+// A mail already filled, { subject, html }, from the shop's own address, as every mail here is.
+function deliver(mail, to) {
   const meta = $app.settings().meta;
-  const mail = render(name, data);
 
   $app.newMailClient().send(new MailerMessage({
     from: { address: meta.senderAddress, name: meta.senderName },
@@ -123,6 +122,10 @@ function send(name, data, to) {
     subject: mail.subject,
     html: mail.html,
   }));
+}
+
+function send(name, data, to) {
+  deliver(render(name, data), to);
 }
 
 // For PocketBase's own account mails: the message it made from the users collection's
@@ -161,4 +164,4 @@ function preview(name) {
   return render(name, data);
 }
 
-module.exports = { render, send, replace, catalogue, preview };
+module.exports = { render, send, deliver, replace, catalogue, preview };

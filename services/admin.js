@@ -147,6 +147,13 @@ export async function fetchMailPreview(name) {
   return toMailPreview(await pb.send(`/api/shop/admin/mail/${encodeURIComponent(name)}`, { method: 'GET' }));
 }
 
+// That mail, filled with its sample, sent to the signed-in admin's own address with [Test] in
+// front of its subject. Answers with the address it went to.
+export async function sendTestMail(name) {
+  const answer = await pb.send(`/api/shop/admin/mail/${encodeURIComponent(name)}/test`, { method: 'POST' });
+  return answer.to;
+}
+
 // Put the server's complaints on the form's fields. One the form has no field for, a handle
 // taken in the same instant say, becomes a plain sentence rather than nothing at all.
 function productError(err) {
