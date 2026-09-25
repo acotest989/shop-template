@@ -144,37 +144,50 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     };
   });
 
-  // After the transaction, and outside it: the question stands whether or not the mail goes,
-  // and a mail server that stalls must not cost the visitor what they wrote. To the address
-  // the shop sends from, as with orders, so there is nothing else to configure.
+  // After the transaction, and outside it: the question stands whether or not the owner hears
+  // of it, and a mail server that stalls must not cost the visitor what they wrote. Mail, a
+  // Telegram message or both, as the switches in `shop_settings` say: server/pb_hooks/settings.js.
   if (notice) {
+    let settings = null;
     try {
-      const meta = $app.settings().meta;
-      $app.newMailClient().send(new MailerMessage({
-        from: { address: meta.senderAddress, name: meta.senderName },
-        to: [{ address: meta.senderAddress }],
-        subject: 'Question about ' + notice.subject,
-        html:
-          '<p><strong>' + esc(notice.from) + '</strong>' +
-          (notice.email ? ' &lt;' + esc(notice.email) + '&gt;' : '') +
-          ' asks about ' + esc(notice.subject) + ':</p>' +
-          '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(notice.text).replace(/\n/g, '<br>') + '</p>' +
-          '<p><a href="' + meta.appURL + '/admin/inbox?thread=' + notice.thread + '">Answer in the inbox</a></p>',
-      }));
+      settings = require(__hooks + '/settings.js');
     } catch (err) {
-      $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
+      $app.logger().error('settings unreadable', 'error', String(err));
+    }
+    const on = (name) => !settings || settings.on(name); // unreadable switches count as on
+
+    // To the address the shop sends from, as with orders, so there is nothing else to configure.
+    if (on('mail_questions')) {
+      try {
+        const meta = $app.settings().meta;
+        $app.newMailClient().send(new MailerMessage({
+          from: { address: meta.senderAddress, name: meta.senderName },
+          to: [{ address: meta.senderAddress }],
+          subject: 'Question about ' + notice.subject,
+          html:
+            '<p><strong>' + esc(notice.from) + '</strong>' +
+            (notice.email ? ' &lt;' + esc(notice.email) + '&gt;' : '') +
+            ' asks about ' + esc(notice.subject) + ':</p>' +
+            '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(notice.text).replace(/\n/g, '<br>') + '</p>' +
+            '<p><a href="' + meta.appURL + '/admin/inbox?thread=' + notice.thread + '">Answer in the inbox</a></p>',
+        }));
+      } catch (err) {
+        $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
+      }
     }
 
-    // The owner's phone as well, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
-    try {
-      require(__hooks + '/telegram.js').send(
-        'Question about ' + notice.subject + '\n' +
-        notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
-        notice.text + '\n\n' +
-        'Answer: ' + $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread,
-      );
-    } catch (err) {
-      $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
+    // The owner's phone, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
+    if (on('telegram_questions')) {
+      try {
+        require(__hooks + '/telegram.js').send(
+          'Question about ' + notice.subject + '\n' +
+          notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
+          notice.text + '\n\n' +
+          'Answer: ' + $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread,
+        );
+      } catch (err) {
+        $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
+      }
     }
   }
 

@@ -97,7 +97,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     }
   };
 
-  const sendMail = (order, token) => {
+  const sendMail = (order, token, shopCopy) => {
     const meta = $app.settings().meta;
     const from = { address: meta.senderAddress, name: meta.senderName };
 
@@ -132,14 +132,17 @@ routerAdd('POST', '/api/shop/orders', (e) => {
         '</strong>.</p>' + summary + settled + welcome,
     }), 'buyer', order.reference);
 
-    // To the address the shop already sends from, so there is nothing extra to configure.
-    post(new MailerMessage({
-      from: from,
-      to: [{ address: meta.senderAddress }],
-      subject: 'New order ' + order.reference + ' — ' + money(order.total, order.currency),
-      html: '<p>' + esc(order.name) + ' &lt;' + esc(order.email) + '&gt;, ' + esc(order.phone) + '</p>' +
-        summary + '<p>Paying by ' + (order.payment === 'cod' ? 'cash on delivery' : 'card') + '.</p>',
-    }), 'shop', order.reference);
+    // To the address the shop already sends from, so there is nothing extra to configure, and
+    // only while its switch is on. The buyer's letter above goes either way.
+    if (shopCopy) {
+      post(new MailerMessage({
+        from: from,
+        to: [{ address: meta.senderAddress }],
+        subject: 'New order ' + order.reference + ' — ' + money(order.total, order.currency),
+        html: '<p>' + esc(order.name) + ' &lt;' + esc(order.email) + '&gt;, ' + esc(order.phone) + '</p>' +
+          summary + '<p>Paying by ' + (order.payment === 'cod' ? 'cash on delivery' : 'card') + '.</p>',
+      }), 'shop', order.reference);
+    }
   };
 
   let placed = null;
@@ -277,24 +280,36 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   });
 
   // Mail is not part of the sale. A shop that refuses an order because its mail server
-  // stalled is worse than one that misses a letter, so this can only be logged.
+  // stalled is worse than one that misses a letter, so this can only be logged. How the owner
+  // hears of it, mail, Telegram or both, is up to the switches in `shop_settings`:
+  // server/pb_hooks/settings.js.
+  let settings = null;
   try {
-    sendMail(placed, resetToken);
+    settings = require(__hooks + '/settings.js');
+  } catch (err) {
+    $app.logger().error('settings unreadable', 'error', String(err));
+  }
+  const on = (name) => !settings || settings.on(name); // unreadable switches count as on
+
+  try {
+    sendMail(placed, resetToken, on('mail_orders'));
   } catch (err) {
     $app.logger().error('order mail failed', 'reference', placed.reference, 'error', String(err));
   }
 
-  // The owner's phone as well, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
-  try {
-    require(__hooks + '/telegram.js').send(
-      'New order ' + placed.reference + ': ' + money(placed.total, placed.currency) + '\n' +
-      placed.name + ', ' + placed.phone + '\n\n' +
-      placed.lines.map((line) => line.title + ' × ' + line.qty).join('\n') + '\n\n' +
-      (placed.paid ? 'Paid by card' : 'Cash on delivery') + '\n' +
-      $app.settings().meta.appURL + '/admin/orders',
-    );
-  } catch (err) {
-    $app.logger().error('telegram message failed', 'reference', placed.reference, 'error', String(err));
+  // The owner's phone, when the shop has a Telegram bot: server/pb_hooks/telegram.js.
+  if (on('telegram_orders')) {
+    try {
+      require(__hooks + '/telegram.js').send(
+        'New order ' + placed.reference + ': ' + money(placed.total, placed.currency) + '\n' +
+        placed.name + ', ' + placed.phone + '\n\n' +
+        placed.lines.map((line) => line.title + ' × ' + line.qty).join('\n') + '\n\n' +
+        (placed.paid ? 'Paid by card' : 'Cash on delivery') + '\n' +
+        $app.settings().meta.appURL + '/admin/orders',
+      );
+    } catch (err) {
+      $app.logger().error('telegram message failed', 'reference', placed.reference, 'error', String(err));
+    }
   }
 
   return e.json(200, placed);

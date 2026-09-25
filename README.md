@@ -112,6 +112,8 @@ The admin area opens at `/admin` once `admin` is ticked on your account under **
 
 The owner's phone can hear of it too, through a Telegram bot: one message for every question that starts waiting and every order placed, sent by `server/pb_hooks/telegram.js`. Make the bot with @BotFather (`/newbot`), press Start in a chat with it, and open `https://api.telegram.org/bot<token>/getUpdates`: the number after `"chat":{"id":` is the chat. Both go into the one record of `shop_settings` in the dashboard, never into this repository, since the token is the bot's password. Left empty, nothing is sent; a message that fails is logged under **Logs**, and the question or the order stands.
 
+Four switches in the same record decide which of the two tells the owner what — `mail_questions`, `mail_orders`, `telegram_questions`, `telegram_orders` — all on to begin with. They cover the owner's notices only: the buyer's confirmation and the mail about a chat reply go to customers either way.
+
 On the accounts side, what is left is optional: OAuth2 providers.
 
 What is not optional is the trusted proxy header, under **Settings → Application**, before any of this is public. Every rate limit here counts per IP address, placing an order included, and behind a proxy every visitor arrives from the proxy's own: the shop would take five orders every ten minutes from the whole world. Which header depends on the host — `Fly-Client-IP` on Fly.io, `CF-Connecting-IP` behind Cloudflare — so no migration sets it. A header the proxy does not overwrite is one any visitor can write, and every limit would count whatever address they claim.
