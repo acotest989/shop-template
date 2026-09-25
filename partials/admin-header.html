@@ -1,5 +1,6 @@
 <!-- The admin area's chrome, in place of the shop's header on every /admin route (main.js).
-     The tabs are drawn for an admin only; the pages under them say no to anybody else. -->
+     Only an admin gets this far: `allow` in main.js sends anybody else away before any of it
+     renders, and the tabs are drawn for an admin only in case the session changes meanwhile. -->
 <header class="sticky top-0 z-20 border-b border-gray-200 bg-white/90 backdrop-blur">
   <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
 

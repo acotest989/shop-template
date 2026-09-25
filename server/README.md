@@ -38,9 +38,9 @@ None of this matters on `127.0.0.1`, and all of it matters the day the URL is re
 - **Trusted proxy headers** (Settings → Application). Behind a reverse proxy every request appears to come from the proxy, so the rate limiter would count the whole world as one client and one flood would lock everybody out.
 - **Restrict the superuser** to your own IP or subnet, and turn on MFA for it.
 - **Backups to S3-compatible storage** on a schedule. A single-node SQLite database is exactly as durable as the disk under it.
-- **`{APP_URL}` under Settings → Application.** A fresh install sets it to `http://localhost:8090`, and every mail template builds its link from it — so locally nothing ever complains, and in production every verification and reset link sends your customers to their own machine. Nothing fails loudly; you find out from the first real account.
+- **`{APP_URL}` under Settings → Application.** A fresh install sets it to `http://localhost:8090`, and every mail template builds its link from it — so locally nothing ever complains, and in production every verification and reset link sends your customers to their own machine. Nothing fails loudly; you find out from the first real account. The **Application name** beside it is what every mail signs with, and it ships as Acme.
 - **SMTP on the real domain**, with SPF and DKIM, or the verification and reset mail lands in spam.
-- **`--publicDir`** must point at the frontend only. Serving the repository root would publish `server/pb_data/data.db`.
+- **`--publicDir`** must point at the frontend only. `pb_hooks/private.pb.js` keeps the repository root from giving away `server/pb_data/data.db`, but that is a guard for the dev command, not a way to deploy.
 - **Pin the version** — see below — and read the changelog before upgrading.
 
 ## Deploying
