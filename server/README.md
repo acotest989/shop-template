@@ -12,7 +12,7 @@ The binary is not in git: ~33 MB, one build per platform, and the deploy uses th
 
 `--publicDir=..` makes PocketBase serve the shop as well as the API: one origin, no CORS, and `--indexFallback` (on by default) sends unknown paths to `index.html`, which is the SPA fallback the router needs. There is no Live Server in the loop, so nothing reloads the page when a write lands in the database.
 
-The trade is that `..` is the whole repository, so `/server/pb_data/data.db` would be downloadable. That is bound to `127.0.0.1` here, but the deploy must never do it: the image copies only the frontend into `pb_public/` and leaves the server folder out.
+The trade is that `..` is the whole repository, `/server/pb_data/data.db` included. `pb_hooks/private.pb.js` refuses everything under `/server/` and every name that starts with a dot, `.git` among them, so the command above gives none of it away, even on a machine where somebody runs it facing the internet. The deploy does not lean on that: the image copies only the frontend into `pb_public/` and leaves the server folder out.
 
 The dashboard is at `/_/`. The demo account the app signs in with is a record in the `users` collection — `demo@shop.test` / `test1234`.
 
