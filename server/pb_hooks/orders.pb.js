@@ -82,67 +82,47 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   // Money as a person reads it. The app has toLocaleString; this engine does not.
   const money = (cents, currency) => (cents / 100).toFixed(2) + ' ' + currency;
 
-  // The buyer writes their own name and address, and both end up inside markup we send
-  // to ourselves. An unescaped angle bracket breaks the mail; a tag would do worse.
-  const esc = (value) => String(value)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-  // Each letter stands alone: an address that bounces must not take the other one
-  // down with it, and the shop's copy is the one nobody else is watching for.
-  const post = (message, letter, reference) => {
-    try {
-      $app.newMailClient().send(message);
-    } catch (err) {
-      $app.logger().error('order mail failed', 'letter', letter, 'reference', reference, 'error', String(err));
-    }
-  };
-
+  // The buyer's letter and the shop's copy: order-confirmation.html and shop-new-order.html in
+  // server/mail/, filled by server/pb_hooks/mailer.js. This only gathers what they show.
   const sendMail = (order, token, shopCopy) => {
-    const meta = $app.settings().meta;
-    const from = { address: meta.senderAddress, name: meta.senderName };
+    const mailer = require(__hooks + '/mailer.js');
 
-    const rows = order.lines.map((line) =>
-      '<tr><td>' + esc(line.title) + ' &times; ' + line.qty + '</td>' +
-      '<td align="right">' + money(line.price * line.qty, order.currency) + '</td></tr>'
-    ).join('');
+    const data = {
+      reference: order.reference,
+      name: order.name,
+      email: order.email,
+      phone: order.phone,
+      address: order.address,
+      lines: order.lines.map((line) => ({
+        title: line.title,
+        qty: line.qty,
+        amount: money(line.price * line.qty, order.currency),
+      })),
+      shipping: order.shipping ? money(order.shipping, order.currency) : 'Free',
+      total: money(order.total, order.currency),
+      paid: order.paid,
+      cod: order.payment === 'cod',
 
-    const summary =
-      '<table cellpadding="4" style="border-collapse:collapse">' + rows +
-      '<tr><td>Shipping</td><td align="right">' + (order.shipping ? money(order.shipping, order.currency) : 'Free') + '</td></tr>' +
-      '<tr><td><strong>Total</strong></td><td align="right"><strong>' +
-      money(order.total, order.currency) + '</strong></td></tr></table>' +
-      '<p>Shipping to ' + esc(order.address) + '.</p>';
+      // Only for an account nobody asked for: it exists so this order can be found again,
+      // and the link is the only way into it. No password is ever sent.
+      passwordLink: token ? $app.settings().meta.appURL + '/reset-password/' + token : '',
+    };
 
-    const settled = order.paid
-      ? '<p>Paid by card. Nothing is owed on delivery.</p>'
-      : '<p>Please have ' + money(order.total, order.currency) + ' ready for the courier.</p>';
+    // Each letter stands alone: an address that bounces must not take the other one
+    // down with it, and the shop's copy is the one nobody else is watching for.
+    const post = (name, to) => {
+      try {
+        mailer.send(name, data, to);
+      } catch (err) {
+        $app.logger().error('order mail failed', 'mail', name, 'reference', order.reference, 'error', String(err));
+      }
+    };
 
-    // Only for an account nobody asked for: it exists so this order can be found again,
-    // and the link is the only way into it. No password is ever sent.
-    const welcome = token
-      ? '<p>We have opened an account for ' + esc(order.email) + ' so you can find this order later. ' +
-        '<a href="' + meta.appURL + '/reset-password/' + token + '">Choose a password</a>.</p>'
-      : '';
-
-    post(new MailerMessage({
-      from: from,
-      to: [{ address: order.email, name: order.name }],
-      subject: 'Order ' + order.reference,
-      html: '<p>Thank you, ' + esc(order.name) + '.</p><p>Reference <strong>' + order.reference +
-        '</strong>.</p>' + summary + settled + welcome,
-    }), 'buyer', order.reference);
+    post('order-confirmation', [{ address: order.email, name: order.name }]);
 
     // To the address the shop already sends from, so there is nothing extra to configure, and
     // only while its switch is on. The buyer's letter above goes either way.
-    if (shopCopy) {
-      post(new MailerMessage({
-        from: from,
-        to: [{ address: meta.senderAddress }],
-        subject: 'New order ' + order.reference + ' — ' + money(order.total, order.currency),
-        html: '<p>' + esc(order.name) + ' &lt;' + esc(order.email) + '&gt;, ' + esc(order.phone) + '</p>' +
-          summary + '<p>Paying by ' + (order.payment === 'cod' ? 'cash on delivery' : 'card') + '.</p>',
-      }), 'shop', order.reference);
-    }
+    if (shopCopy) post('shop-new-order', [{ address: $app.settings().meta.senderAddress }]);
   };
 
   let placed = null;

@@ -1,0 +1,99 @@
+{
+  "order-confirmation": {
+    "title": "Order confirmation",
+    "to": "The buyer",
+    "when": "The moment an order is placed. The account part only when checkout opened an account for the address.",
+    "sample": {
+      "reference": "SH-MG2K7Q1XAB",
+      "name": "Ada Lovelace",
+      "email": "ada@example.com",
+      "phone": "+387 61 000 000",
+      "address": "Maršala Tita 12, 71000 Sarajevo",
+      "lines": [
+        { "title": "Table Lamp", "qty": 1, "amount": "49.99 EUR" },
+        { "title": "Plant Pot", "qty": 2, "amount": "29.98 EUR" }
+      ],
+      "shipping": "15.00 EUR",
+      "total": "94.97 EUR",
+      "paid": false,
+      "cod": true,
+      "passwordLink": "/reset-password/sample-token"
+    }
+  },
+  "shop-new-order": {
+    "title": "New order",
+    "to": "You, at the shop's address",
+    "when": "The moment an order is placed, while mail_orders is on.",
+    "sample": {
+      "reference": "SH-MG2K7Q1XAB",
+      "name": "Ada Lovelace",
+      "email": "ada@example.com",
+      "phone": "+387 61 000 000",
+      "address": "Maršala Tita 12, 71000 Sarajevo",
+      "lines": [
+        { "title": "Table Lamp", "qty": 1, "amount": "49.99 EUR" },
+        { "title": "Plant Pot", "qty": 2, "amount": "29.98 EUR" }
+      ],
+      "shipping": "15.00 EUR",
+      "total": "94.97 EUR",
+      "paid": false,
+      "cod": true
+    }
+  },
+  "shop-new-question": {
+    "title": "New question",
+    "to": "You, at the shop's address",
+    "when": "When a chat question starts waiting for an answer, while mail_questions is on.",
+    "sample": {
+      "product": "Table Lamp",
+      "from": "Ada Lovelace",
+      "email": "ada@example.com",
+      "text": "Does it come with a bulb?\nAnd is the cable long enough to reach the floor from a bedside table?",
+      "inboxLink": "/admin/inbox"
+    }
+  },
+  "chat-reply": {
+    "title": "Reply to a question",
+    "to": "The customer who asked",
+    "when": "Five minutes after the shop replies, if the customer has not seen the reply by then.",
+    "sample": {
+      "name": "Ada Lovelace",
+      "product": "Table Lamp",
+      "reply": "Yes, a warm white bulb is in the box.\nThe cable is 1.8 m, which reaches the floor from any bedside table.",
+      "link": "/products/table-lamp?chat"
+    }
+  },
+  "verify-email": {
+    "title": "Verify email",
+    "to": "A new customer",
+    "when": "On registering, and whenever a customer asks for a new link from their account.",
+    "sample": {
+      "link": "/verify/sample-token"
+    }
+  },
+  "reset-password": {
+    "title": "Reset password",
+    "to": "A customer who forgot it",
+    "when": "When somebody asks for it on /forgot-password.",
+    "sample": {
+      "link": "/reset-password/sample-token"
+    }
+  },
+  "confirm-email-change": {
+    "title": "Confirm new email",
+    "to": "The new address",
+    "when": "When a customer changes their email address on /account.",
+    "sample": {
+      "link": "/confirm-email/sample-token",
+      "newEmail": "ada.lovelace@example.com"
+    }
+  },
+  "login-alert": {
+    "title": "Login from a new location",
+    "to": "The account's owner",
+    "when": "When an account signs in from a device or place it has not used before.",
+    "sample": {
+      "info": "Chrome on Windows, from 203.0.113.7"
+    }
+  }
+}

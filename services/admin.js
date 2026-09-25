@@ -1,7 +1,7 @@
 import { pb } from './pb.js';
 import { fieldError } from 'alpineshell';
 import { fromOrder } from '../models/order.js';
-import { toStockItem, toAdminProduct, toProductBody, productField } from '../models/admin.js';
+import { toStockItem, toAdminProduct, toProductBody, productField, toMail, toMailPreview } from '../models/admin.js';
 
 // A product at or under this many left counts as running low, on the overview and in the
 // products list.
@@ -133,6 +133,18 @@ export async function saveProduct(product, { stockWas } = {}) {
   } catch (err) {
     throw productError(err);
   }
+}
+
+// Every mail the shop sends, from server/mail/mails.json by way of server/pb_hooks/mail.pb.js.
+export async function fetchMails() {
+  const mails = await pb.send('/api/shop/admin/mail', { method: 'GET' });
+  return mails.map(toMail);
+}
+
+// One mail as it would go out, filled with its sample. The server reads the template from disk
+// each time, so asking again after an edit shows the edit.
+export async function fetchMailPreview(name) {
+  return toMailPreview(await pb.send(`/api/shop/admin/mail/${encodeURIComponent(name)}`, { method: 'GET' }));
 }
 
 // Put the server's complaints on the form's fields. One the form has no field for, a handle

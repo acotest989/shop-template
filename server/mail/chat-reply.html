@@ -1,0 +1,9 @@
+<title>We replied to your question about {{product}}</title>
+<!-- To a customer whose reply from the shop sat unseen for five minutes: the job in
+     server/pb_hooks/inbox.pb.js. Once per round of replies, however many the shop wrote, so the
+     one quoted is the latest. The link opens the product with the chat open, or the shop's
+     front page when the product is gone. -->
+<p>Hi{{#name}} {{name}}{{/name}},</p>
+<p>We replied to your question about {{product}}:</p>
+{{#reply}}<p style="border-left:3px solid #d1d5db;padding-left:12px;">{{reply}}</p>{{/reply}}
+<p><a href="{{link}}" style="color:#111827;">Read the conversation</a></p>

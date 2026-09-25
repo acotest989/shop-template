@@ -1,0 +1,7 @@
+<title>Question about {{product}}</title>
+<!-- To the shop's own address when a chat question starts waiting for an answer, while the
+     mail_questions switch in shop_settings is on: server/pb_hooks/chat.pb.js. A guest has no
+     address, so for one the part in angle brackets is left out. -->
+<p><strong>{{from}}</strong>{{#email}} &lt;{{email}}&gt;{{/email}} asks about {{product}}:</p>
+<p style="border-left:3px solid #d1d5db;padding-left:12px;">{{text}}</p>
+<p><a href="{{inboxLink}}" style="color:#111827;">Answer in the inbox</a></p>

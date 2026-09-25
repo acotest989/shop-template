@@ -23,6 +23,10 @@ COPY --from=download /pb/pocketbase /pb/pocketbase
 COPY server/pb_migrations /pb/pb_migrations
 COPY server/pb_hooks /pb/pb_hooks
 
+# The mail templates, beside pb_hooks as in the repository: pb_hooks/mailer.js reads them
+# from ../mail on every send.
+COPY server/mail /pb/mail
+
 # The frontend, named file by file. Copying the repository and deleting server/ would
 # work until somebody forgot, and then pb_data/data.db would be a public download.
 COPY index.html main.js app.js favicon.svg /pb/pb_public/

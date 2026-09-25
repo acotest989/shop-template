@@ -28,7 +28,7 @@ The whole surface is real, not stubbed: register, email verification, password r
 
 Checkout is deliberately not one of them. Ordering as a guest opens an account for the address given, and the confirmation carries the link for choosing a password — no password is ever sent. Every order therefore has an owner, which is what lets `/account` list them and what keeps one visitor from reading another's.
 
-Three of those arrive by email, and PocketBase's stock templates link to its own dashboard rather than to this app. The migrations rewrite them, so there is nothing to click — the token is the only required part of each URL:
+Three of those arrive by email, and PocketBase's stock templates link to its own dashboard rather than to this app. These come from files in `server/mail/` instead, like every mail the shop sends, and link to the app — the token is the only required part of each URL:
 
 | | |
 |---|---|
@@ -36,7 +36,7 @@ Three of those arrive by email, and PocketBase's stock templates link to its own
 | Password reset | `{APP_URL}/reset-password/{TOKEN}` |
 | Email change | `{APP_URL}/confirm-email/{TOKEN}` |
 
-What a migration cannot carry is application settings, so two things stay manual: `{APP_URL}` under **Settings → Application**, and SMTP under **Settings → Mail** — the built-in sendmail will not deliver.
+What a file cannot carry is application settings, so two things stay manual: the application's URL and name under **Settings → Application** — every link in a mail starts with the one, and every mail signs with the other, which PocketBase ships as Acme — and SMTP under **Settings → Mail**, since the built-in sendmail will not deliver.
 
 Two behaviours worth knowing before they surprise you. Changing a password or an email invalidates every token the account has, so the app signs itself out on purpose. And `/forgot-password` answers the same way whether or not the address has an account, because the honest answer would tell a stranger who is registered here.
 
@@ -97,6 +97,8 @@ That boundary has been tested twice rather than asserted. Sign-in moved from a h
 **The admin area is part of the shop, not the dashboard.** Its routes wear their own header, `partials/admin-header.html`, with a tab for each page: an overview of what wants attention (conversations waiting, orders today, orders not shipped, products running low), the inbox, the orders, where status and payment are set in place, and the products. `allow` in `main.js` keeps it out of sight: signed out, `/admin` goes to the login page like any protected route; signed in without `admin`, home, before a single template of it is fetched. The server refuses such an account the data regardless, and has to, since the page files themselves are as public as any. With `admin` reaching every order and conversation, the customer's own lists name the account in their filter, so an admin shopping as a customer sees only their own.
 
 **The inbox is a page of the shop, not the dashboard.** `/admin/inbox` lists every conversation, newest first, with the ones waiting on an answer apart, and realtime keeps the list and the open conversation current. It opens for an account with `admin` ticked, and the dashboard is the only place to tick it: the users rules refuse the field from a browser, in a signup as in a profile update. An admin reads every thread and message through the collection rules, but writes only through `server/pb_hooks/inbox.pb.js`, so a reply is the one thing the account can add. A written question leaves its thread waiting and a reply clears it; a conversation that needs no answer can be marked answered without one, and any conversation can be deleted, with every message in it, for good, or the whole inbox at once.
+
+**Every mail is a file.** Eight of them, and each is an HTML template in `server/mail/` with its subject as the `<title>`, framed by one `layout.html`: the order confirmation and the shop's copy, the chat question and the reply, and PocketBase's four account mails, whose text `server/pb_hooks/mail.pb.js` swaps for ours as they go. `server/pb_hooks/mailer.js` fills them, reading the files on every send, so an edit is live without a restart. `/admin/mail` lists them all with who gets each and when, and shows each one filled with the sample data in `mails.json`, at desktop and at phone width. The syntax is in `server/mail/README.md`.
 
 **A product is hidden, never deleted.** `/admin/products` lists the whole catalogue and edits every field of a product, through `server/pb_hooks/products.pb.js`; a new one gets its address from its name, once, so links already shared keep working. Taking a product out of the shop is `hidden`: the collection rules keep it from everybody but an admin, the catalogue asks for `hidden = false` by name so an admin browsing the shop sees what a customer does, and checkout and the chat refuse it. Nothing deletes one, because orders and conversations name it and a cancelled or returned order puts its goods back on it. Stock is written only over the number the form opened with: an order placed while the page was open is not undone by saving it, and a changed number that meets one is refused with the stock as it now stands.
 

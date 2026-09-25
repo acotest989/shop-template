@@ -53,6 +53,26 @@ export function toProductBody(product, { stockWas } = {}) {
   };
 }
 
+// One of the mails the shop sends, as /admin/mail lists it: server/mail/mails.json.
+export function toMail(raw) {
+  return {
+    name: raw.name,
+    title: raw.title,
+    to: raw.to,
+    when: raw.when,
+  };
+}
+
+// That mail filled with its sample: the subject, the whole message, and the file it came from.
+export function toMailPreview(raw) {
+  return {
+    name: raw.name,
+    subject: raw.subject,
+    html: raw.html,
+    file: raw.file,
+  };
+}
+
 // Which field of the form a server's complaint belongs to. The hook answers in the form's own
 // names, and PocketBase, when its own checks catch something first, in the record's.
 const FORM_FIELDS = [

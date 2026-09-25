@@ -21,6 +21,7 @@ import { inboxPage } from './pages/inbox.js';
 import { ordersPage } from './pages/orders.js';
 import { adminProductsPage } from './pages/admin-products.js';
 import { adminProductPage } from './pages/admin-product.js';
+import { adminMailPage } from './pages/admin-mail.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
@@ -50,6 +51,7 @@ createApp({
     '/admin/products': { page: 'admin-products', header: 'admin-header', footer: false },
     // 'new' for a product that is not there yet.
     '/admin/products/:id': { page: 'admin-product', header: 'admin-header', footer: false },
+    '/admin/mail': { page: 'admin-mail', header: 'admin-header', footer: false },
   },
   protected: ['/account'], // register protected route here
   // More than a session. Signed out, /admin goes to the login page like any protected route;
@@ -71,6 +73,7 @@ createApp({
     admin: 'Admin',
     'admin-products': 'All products',
     'admin-product': 'Product', // until the product's own name arrives
+    'admin-mail': 'Mail',
   },
   stores: { session, cart, theme, chat }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
@@ -79,7 +82,7 @@ createApp({
   pages: {
     homePage, productPage, loginPage, registerPage, verifyPage,
     forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage,
-    adminPage, inboxPage, ordersPage, adminProductsPage, adminProductPage,
+    adminPage, inboxPage, ordersPage, adminProductsPage, adminProductPage, adminMailPage,
     chatWidget,
   },
   // Defaults in effect — uncomment to change:

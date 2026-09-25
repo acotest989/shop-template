@@ -1,0 +1,6 @@
+<title>New order {{reference}} — {{total}}</title>
+<!-- The shop's own copy of an order, to the address it sends from, while the mail_orders
+     switch in shop_settings is on: server/pb_hooks/orders.pb.js. -->
+<p>{{name}} &lt;{{email}}&gt;, {{phone}}</p>
+{{> order-summary}}
+<p>Paying by {{#cod}}cash on delivery{{/cod}}{{^cod}}card{{/cod}}.</p>

@@ -143,10 +143,6 @@ routerAdd('POST', '/api/shop/inbox/clear', (e) => {
 cronAdd('chat_reply_mail', '* * * * *', () => {
   const DELAY_MINUTES = 5;
 
-  // The shop writes the reply and the customer their own name; both end up inside markup.
-  const esc = (value) => String(value)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
   // Dates are stored as text in this very format, so they compare as text.
   const cutoff = new Date(Date.now() - DELAY_MINUTES * 60 * 1000).toISOString().replace('T', ' ');
 
@@ -187,18 +183,13 @@ cronAdd('chat_reply_mail', '* * * * *', () => {
 
       const name = user.getString('name');
 
-      $app.newMailClient().send(new MailerMessage({
-        from: { address: meta.senderAddress, name: meta.senderName },
-        to: [{ address: user.getString('email'), name: name }],
-        subject: 'We replied to your question about ' + thread.getString('subject'),
-        html:
-          '<p>Hi' + (name ? ' ' + esc(name) : '') + ',</p>' +
-          '<p>We replied to your question about ' + esc(thread.getString('subject')) + ':</p>' +
-          (latest.length
-            ? '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(latest[0].getString('body')).replace(/\n/g, '<br>') + '</p>'
-            : '') +
-          '<p><a href="' + link + '">Read the conversation</a></p>',
-      }));
+      // chat-reply.html in server/mail/.
+      require(__hooks + '/mailer.js').send('chat-reply', {
+        name: name,
+        product: thread.getString('subject'),
+        reply: latest.length ? latest[0].getString('body') : '',
+        link: link,
+      }, [{ address: user.getString('email'), name: name }]);
     } catch (err) {
       $app.logger().error('reply mail failed', 'thread', thread.id, 'error', String(err));
     }

@@ -1,0 +1,20 @@
+<!-- The order as both mails about it show it: what was bought, what it came to, and where it
+     goes. A part, not a mail: order-confirmation.html and shop-new-order.html take it in with
+     {{> order-summary}}. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:16px 0;">
+  {{#lines}}
+  <tr>
+    <td style="padding:6px 0;border-bottom:1px solid #f3f4f6;">{{title}} &times; {{qty}}</td>
+    <td align="right" style="padding:6px 0;border-bottom:1px solid #f3f4f6;white-space:nowrap;">{{amount}}</td>
+  </tr>
+  {{/lines}}
+  <tr>
+    <td style="padding:6px 0;">Shipping</td>
+    <td align="right" style="padding:6px 0;white-space:nowrap;">{{shipping}}</td>
+  </tr>
+  <tr>
+    <td style="padding:6px 0;font-weight:700;color:#111827;">Total</td>
+    <td align="right" style="padding:6px 0;font-weight:700;color:#111827;white-space:nowrap;">{{total}}</td>
+  </tr>
+</table>
+<p>Shipping to {{address}}.</p>

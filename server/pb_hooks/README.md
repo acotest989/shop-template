@@ -17,7 +17,7 @@ A route rather than a create hook, because then the collection can stay closed: 
 
 The engine is goja: ES5 plus most of ES6, CommonJS only (no ES modules without pre-bundling), no `setTimeout`, no `fetch`, no Node APIs. Each handler runs isolated, so variables declared outside one are not visible inside it — a helper defined at the top of the file is missing at call time, which is why everything in `orders.pb.js` sits inside its handler.
 
-Code two hooks share goes in a file without the `.pb.js`, which PocketBase does not load on its own: `settings.js` and `telegram.js` are that, and a handler takes one in with `require(__hooks + '/telegram.js')`, from inside itself like everything else.
+Code two hooks share goes in a file without the `.pb.js`, which PocketBase does not load on its own: `mailer.js`, `settings.js` and `telegram.js` are that, and a handler takes one in with `require(__hooks + '/telegram.js')`, from inside itself like everything else.
 
 Two things that cost an afternoon if nobody says them: the extension really must be `.pb.js`, and routes are registered when the server starts. The file watcher does not reliably restart it, so restart it yourself after adding or renaming a hook.
 

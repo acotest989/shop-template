@@ -37,10 +37,6 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     throw new BadRequestError('A question can be at most ' + MAX_LENGTH + ' characters.');
   }
 
-  // The visitor writes these, and they end up inside markup the shop mails to itself.
-  const esc = (value) => String(value)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
   let left = null;
   let sent = null;
   let notice = null; // set when this question leaves the shop owing an answer it did not owe before
@@ -156,21 +152,18 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     }
     const on = (name) => !settings || settings.on(name); // unreadable switches count as on
 
-    // To the address the shop sends from, as with orders, so there is nothing else to configure.
+    // To the address the shop sends from, as with orders, so there is nothing else to configure:
+    // shop-new-question.html in server/mail/.
     if (on('mail_questions')) {
       try {
         const meta = $app.settings().meta;
-        $app.newMailClient().send(new MailerMessage({
-          from: { address: meta.senderAddress, name: meta.senderName },
-          to: [{ address: meta.senderAddress }],
-          subject: 'Question about ' + notice.subject,
-          html:
-            '<p><strong>' + esc(notice.from) + '</strong>' +
-            (notice.email ? ' &lt;' + esc(notice.email) + '&gt;' : '') +
-            ' asks about ' + esc(notice.subject) + ':</p>' +
-            '<p style="border-left:3px solid #ccc;padding-left:12px">' + esc(notice.text).replace(/\n/g, '<br>') + '</p>' +
-            '<p><a href="' + meta.appURL + '/admin/inbox?thread=' + notice.thread + '">Answer in the inbox</a></p>',
-        }));
+        require(__hooks + '/mailer.js').send('shop-new-question', {
+          product: notice.subject,
+          from: notice.from,
+          email: notice.email,
+          text: notice.text,
+          inboxLink: meta.appURL + '/admin/inbox?thread=' + notice.thread,
+        }, [{ address: meta.senderAddress }]);
       } catch (err) {
         $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
       }

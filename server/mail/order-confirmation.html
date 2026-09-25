@@ -1,0 +1,12 @@
+<title>Order {{reference}}</title>
+<!-- To the buyer, the moment an order is placed: server/pb_hooks/orders.pb.js. The account
+     part shows only when checkout opened an account for the address, and its link is the one
+     way into it; no password is ever sent. -->
+<p>Thank you, {{name}}.</p>
+<p>Reference <strong>{{reference}}</strong>.</p>
+{{> order-summary}}
+{{#paid}}<p>Paid by card. Nothing is owed on delivery.</p>{{/paid}}
+{{^paid}}<p>Please have {{total}} ready for the courier.</p>{{/paid}}
+{{#passwordLink}}
+<p>We have opened an account for {{email}} so you can find this order later. <a href="{{passwordLink}}" style="color:#111827;">Choose a password</a>.</p>
+{{/passwordLink}}

@@ -1,0 +1,99 @@
+<main class="mx-auto w-full max-w-6xl p-4" x-data="adminMailPage">
+
+  <div class="mb-4 flex flex-wrap items-baseline gap-3">
+    <h1 class="text-xl font-semibold text-gray-900">Mail</h1>
+    <span x-show="mails.length" class="muted" x-text="mails.length + ' mails the shop sends'"></span>
+  </div>
+
+  <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
+
+  <div class="grid items-start gap-4 md:grid-cols-[18rem_1fr]">
+
+    <div x-show="pending" class="card divide-y divide-gray-200" aria-hidden="true">
+      <template x-for="row in 6" :key="row">
+        <div class="p-3">
+          <div class="skeleton h-3 w-1/2"></div>
+          <div class="skeleton mt-2 h-2 w-3/4"></div>
+        </div>
+      </template>
+    </div>
+
+    <ul x-show="!pending && mails.length" class="card divide-y divide-gray-200 overflow-hidden">
+      <template x-for="mail in mails" :key="mail.name">
+        <li>
+          <button
+            type="button"
+            class="w-full p-3 text-left transition-colors hover:bg-gray-50"
+            :class="mail.name === selected && 'bg-gray-50'"
+            :aria-current="mail.name === selected"
+            @click="open(mail.name)"
+          >
+            <span class="block text-sm font-medium text-gray-900" x-text="mail.title"></span>
+            <span class="muted block text-xs" x-text="'To ' + mail.to.charAt(0).toLowerCase() + mail.to.slice(1)"></span>
+          </button>
+        </li>
+      </template>
+    </ul>
+
+    <section x-show="selected" class="card overflow-hidden">
+      <header class="flex flex-col gap-3 border-b border-gray-200 p-4">
+        <div>
+          <p class="label">Subject</p>
+          <p class="mt-1 text-sm font-medium text-gray-900" x-text="preview?.subject ?? '…'"></p>
+          <p class="muted mt-1 text-xs" x-text="current?.when"></p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex rounded-lg border border-gray-300 p-0.5" role="group" aria-label="Preview width">
+            <button
+              type="button"
+              class="btn btn-sm"
+              :class="width === 'desktop' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'"
+              :aria-pressed="width === 'desktop'"
+              @click="width = 'desktop'"
+            >Desktop</button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              :class="width === 'phone' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'"
+              :aria-pressed="width === 'phone'"
+              @click="width = 'phone'"
+            >Phone</button>
+          </div>
+
+          <button type="button" class="btn btn-ghost btn-sm" :disabled="loading" @click="reload()">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Reload
+          </button>
+
+          <!-- Where to change it: the file, and where its sample comes from. -->
+          <span class="muted ml-auto text-xs">
+            Edit <span class="font-mono" x-text="preview?.file"></span>, sample from <span class="font-mono">server/mail/mails.json</span>
+          </span>
+        </div>
+      </header>
+
+      <p x-show="previewError" x-text="previewError" role="alert" class="m-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600"></p>
+
+      <!-- The mail in a frame of its own, as a mail program shows it: its own styles and no
+           scripts. Light in either theme, since a mail is. -->
+      <div
+        x-show="preview && !previewError"
+        class="light-palette bg-gray-100 p-4 transition-opacity"
+        :class="loading && 'opacity-60'"
+      >
+        <iframe
+          title="Mail preview"
+          sandbox="allow-popups allow-popups-to-escape-sandbox"
+          :srcdoc="framed()"
+          class="mx-auto block h-[70vh] w-full rounded-lg border border-gray-200 bg-white"
+          :style="{ maxWidth: width === 'phone' ? '375px' : '100%' }"
+        ></iframe>
+      </div>
+    </section>
+
+  </div>
+
+</main>
