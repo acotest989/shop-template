@@ -73,12 +73,39 @@ export function toMailPreview(raw) {
   };
 }
 
-// The settings an admin can change, and the choices there are: languages as codes, en or sr-Latn.
+// The owner's notices, in the app's names and the record's.
+const NOTICES = {
+  mailQuestions: 'mail_questions',
+  mailOrders: 'mail_orders',
+  telegramQuestions: 'telegram_questions',
+  telegramOrders: 'telegram_orders',
+};
+
+// The settings an admin can change, and the choices there are: languages as codes (en,
+// sr-Latn), accents as the names assets/theme.css knows. Whether Telegram can send at all is
+// all the page learns of the bot: its token stays on the server.
 export function toSettings(raw) {
   return {
     language: raw.language,
     languages: raw.languages ?? [],
+    accent: raw.accent ?? 'none',
+    accents: raw.accents ?? [],
+    notices: Object.fromEntries(
+      Object.entries(NOTICES).map(([ours, theirs]) => [ours, raw.notices?.[theirs] ?? true]),
+    ),
+    telegramReady: raw.telegram === true,
   };
+}
+
+// Only what is being changed; the server keeps the rest as it is.
+export function toSettingsBody({ language, accent, notices }) {
+  const body = {};
+  if (language !== undefined) body.language = language;
+  if (accent !== undefined) body.accent = accent;
+  if (notices) {
+    body.notices = Object.fromEntries(Object.entries(notices).map(([ours, on]) => [NOTICES[ours], on]));
+  }
+  return body;
 }
 
 // Which field of the form a server's complaint belongs to. The hook answers in the form's own

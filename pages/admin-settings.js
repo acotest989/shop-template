@@ -1,33 +1,53 @@
 import { errorMessage } from 'alpineshell';
 import { t, locale } from '../lib/i18n.js';
-import { fetchSettings, saveLanguage } from '../services/admin.js';
+import { fetchSettings, saveSettings } from '../services/admin.js';
 
-// The shop's settings: for now its language, which the pages, the mails, the server's messages
-// and Telegram all speak. The server writes it into index.html on every load, so a change shows
-// the moment the page loads again, and this page loads it again at once.
+// The shop's settings, each section saved on its own: the language, which the pages, the mails,
+// the server's messages and Telegram all speak; the accent colour; and how the owner hears of a
+// new question or order. The server writes the language and the colour into index.html on every
+// load, so both reach every visitor with their next page.
 export const adminSettingsPage = () => ({
   pending: true,
   error: '',
-  current: '', // the language the shop speaks
-  chosen: '', // the one picked here
-  languages: [],
-  saving: false,
+  saved: null, // the settings as the server has them
+  saving: '', // the section on its way: 'language', 'accent' or 'notices'
+
+  // What this page has picked, section by section.
+  language: '',
+  accent: '',
+  notices: {},
 
   async init() {
     try {
-      const settings = await fetchSettings();
-      this.current = settings.language;
-      this.chosen = settings.language;
-      this.languages = settings.languages;
+      this.saved = await fetchSettings();
+      this.language = this.saved.language;
+      this.accent = this.saved.accent;
+      this.notices = { ...this.saved.notices };
     } catch (err) {
       console.error(err);
       this.error = errorMessage(err, t('admin.settings.loadError'));
     } finally {
       this.pending = false;
     }
+
+    // A colour shows the moment it is picked, on this page and the admin header around it.
+    this.$watch('accent', (accent) => (document.documentElement.dataset.accent = accent));
   },
 
-  // Each language in its own words, the way a picker of languages shows them: English, srpski
+  // Leaving with a colour tried but not saved puts the saved one back.
+  destroy() {
+    if (this.saved) document.documentElement.dataset.accent = this.saved.accent;
+  },
+
+  changed(section) {
+    if (!this.saved) return false;
+    if (section === 'notices') {
+      return Object.keys(this.notices).some((name) => this.notices[name] !== this.saved.notices[name]);
+    }
+    return this[section] !== this.saved[section];
+  },
+
+  // Each language in its own words, the way a picker of languages shows them: English, Srpski
   // (latinica). The browser knows the names, so no dictionary has to list every language.
   nameOf(code) {
     try {
@@ -47,17 +67,26 @@ export const adminSettingsPage = () => ({
     }
   },
 
-  async save() {
-    if (this.saving || this.chosen === this.current) return;
-    this.saving = true;
+  async save(section) {
+    if (this.saving || !this.changed(section)) return;
+    this.saving = section;
 
     try {
-      await saveLanguage(this.chosen);
-      location.reload(); // the page's own texts are the old language's until it loads again
+      const saved = await saveSettings({ [section]: section === 'notices' ? { ...this.notices } : this[section] });
+
+      // The page's own texts are the old language's until it loads again.
+      if (section === 'language') {
+        location.reload();
+        return;
+      }
+
+      this.saved = saved;
+      this.notify(t('admin.settings.saved'), 'success');
     } catch (err) {
       console.error(err);
       this.notify(errorMessage(err, t('admin.settings.saveError')), 'error');
-      this.saving = false;
     }
+
+    this.saving = '';
   },
 });

@@ -68,6 +68,7 @@
 
   "settings.onlyShop": "Only the shop can change its settings.",
   "settings.noSuchLanguage": "The shop has no such language.",
+  "settings.noSuchAccent": "The shop has no such colour.",
 
   "telegram.order": "New order {reference}: {total}",
   "telegram.paidByCard": "Paid by card",

@@ -216,8 +216,9 @@ input[type="search"]::-webkit-search-cancel-button {
   --tw-ring-offset-color: var(--color-white);
 }
 
-/* Accents. data-accent on <html> in index.html picks one; without it the brand roles stay
-   ink. Tailwind 4.3's own values: 700 for buttons and links in light, dark enough to carry
+/* Accents. data-accent on <html> picks one, written there by server/pb_hooks/site.pb.js from
+   what /admin/settings saved; without it the brand roles stay ink. Any element can carry it,
+   which is how the swatches on that page show each colour. Tailwind 4.3's own values: 700 for buttons and links in light, dark enough to carry
    white text, and 300 in dark, where dark mode's mirror puts 700 and where the text on it is
    the dark surface; 500 for focus in both. Hover moves away from the ground in each theme.
    Lime is the exception: too bright for white text either way, it keeps 400 and dark ink. */

@@ -98,6 +98,7 @@
 
   "settings.onlyShop": "Samo prodavnica može mijenjati svoja podešavanja.",
   "settings.noSuchLanguage": "Prodavnica nema taj jezik.",
+  "settings.noSuchAccent": "Prodavnica nema tu boju.",
 
   "telegram.order": "Nova narudžba {reference}: {total}",
   "telegram.paidByCard": "Plaćeno karticom",

@@ -4,42 +4,153 @@
 
   <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
 
-  <section class="card max-w-xl p-4" x-show="pending || languages.length">
-    <h2 class="text-sm font-semibold text-gray-900" x-text="t('admin.settings.language')"></h2>
-    <p class="muted mt-1 text-sm" x-text="t('admin.settings.languageNote')"></p>
+  <div x-show="pending" class="flex max-w-xl flex-col gap-4" aria-hidden="true">
+    <template x-for="section in 3" :key="section">
+      <div class="card p-4">
+        <div class="skeleton h-3 w-1/4"></div>
+        <div class="skeleton mt-3 h-2 w-3/4"></div>
+        <div class="skeleton mt-4 h-10 w-full"></div>
+      </div>
+    </template>
+  </div>
 
-    <div x-show="pending" class="mt-4 flex flex-col gap-2" aria-hidden="true">
-      <div class="skeleton h-10 w-full"></div>
-      <div class="skeleton h-10 w-full"></div>
+  <!-- Radios rather than selects throughout: the choices arrive with the settings, and a select
+       fills in its value before an x-for could add the options. -->
+  <template x-if="saved">
+    <div class="flex max-w-xl flex-col gap-4">
+
+      <section class="card p-4" aria-labelledby="settings-language">
+        <h2 id="settings-language" class="text-sm font-semibold text-gray-900" x-text="t('admin.settings.language')"></h2>
+        <p class="muted mt-1 text-sm" x-text="t('admin.settings.languageNote')"></p>
+
+        <fieldset class="mt-4 flex flex-col gap-2" :disabled="saving !== ''">
+          <legend class="sr-only" x-text="t('admin.settings.language')"></legend>
+          <template x-for="code in saved.languages" :key="code">
+            <label
+              class="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors"
+              :class="language === code ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
+            >
+              <input type="radio" name="language" :value="code" x-model="language" class="accent-gray-900">
+              <span class="text-sm font-medium text-gray-900" x-text="nameOf(code)"></span>
+              <span class="muted text-xs" x-show="nameHere(code) && nameHere(code).toLowerCase() !== nameOf(code).toLowerCase()" x-text="nameHere(code)"></span>
+              <span x-show="code === saved.language" class="ml-auto rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600" x-text="t('admin.settings.current')"></span>
+            </label>
+          </template>
+        </fieldset>
+
+        <div class="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            class="btn btn-primary"
+            :disabled="saving !== '' || !changed('language')"
+            @click="save('language')"
+            x-text="saving === 'language' ? t('common.saving') : t('common.save')"
+          ></button>
+          <p class="muted text-xs" x-show="changed('language')" x-text="t('admin.settings.reloadNote')"></p>
+        </div>
+      </section>
+
+      <section class="card p-4" aria-labelledby="settings-accent">
+        <h2 id="settings-accent" class="text-sm font-semibold text-gray-900" x-text="t('admin.settings.accent')"></h2>
+        <p class="muted mt-1 text-sm" x-text="t('admin.settings.accentNote')"></p>
+
+        <fieldset class="mt-4 grid gap-2 sm:grid-cols-2" :disabled="saving !== ''">
+          <legend class="sr-only" x-text="t('admin.settings.accent')"></legend>
+          <template x-for="code in saved.accents" :key="code">
+            <label
+              class="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors"
+              :class="accent === code ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
+            >
+              <input type="radio" name="accent" :value="code" x-model="accent" class="accent-gray-900">
+              <!-- The colour itself: theme.css matches data-accent on any element, and .dark with
+                   it gives the dark theme's shade, so each swatch is what the shop would wear. -->
+              <span
+                class="h-5 w-5 shrink-0 rounded-full bg-brand ring-1 ring-gray-900/10"
+                :data-accent="code"
+                :class="$store.theme.dark && 'dark'"
+                aria-hidden="true"
+              ></span>
+              <span class="text-sm font-medium text-gray-900" x-text="t('admin.settings.accentName.' + code)"></span>
+              <span x-show="code === saved.accent" class="ml-auto rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600" x-text="t('admin.settings.current')"></span>
+            </label>
+          </template>
+        </fieldset>
+
+        <div class="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            class="btn btn-primary"
+            :disabled="saving !== '' || !changed('accent')"
+            @click="save('accent')"
+            x-text="saving === 'accent' ? t('common.saving') : t('common.save')"
+          ></button>
+          <p class="muted text-xs" x-show="changed('accent')" x-text="t('admin.settings.accentTry')"></p>
+        </div>
+      </section>
+
+      <section class="card p-4" aria-labelledby="settings-notices">
+        <h2 id="settings-notices" class="text-sm font-semibold text-gray-900" x-text="t('admin.settings.notices')"></h2>
+        <p class="muted mt-1 text-sm" x-text="t('admin.settings.noticesNote')"></p>
+
+        <table class="mt-4 w-full text-sm">
+          <thead>
+            <tr class="text-left">
+              <th scope="col" class="sr-only" x-text="t('admin.settings.notices')"></th>
+              <th scope="col" class="label w-24 pb-2 text-center" x-text="t('admin.settings.byMail')"></th>
+              <th scope="col" class="label w-24 pb-2 text-center" x-text="t('admin.settings.byTelegram')"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <template
+              x-for="row in [
+                { label: 'admin.settings.questions', mail: 'mailQuestions', telegram: 'telegramQuestions' },
+                { label: 'admin.settings.orders', mail: 'mailOrders', telegram: 'telegramOrders' },
+              ]"
+              :key="row.label"
+            >
+              <tr>
+                <th scope="row" class="py-2 text-left font-medium text-gray-900" x-text="t(row.label)"></th>
+                <td class="py-2 text-center">
+                  <input
+                    type="checkbox"
+                    x-model="notices[row.mail]"
+                    :disabled="saving !== ''"
+                    :aria-label="t(row.label) + ', ' + t('admin.settings.byMail')"
+                    class="h-4 w-4 accent-gray-900"
+                  >
+                </td>
+                <td class="py-2 text-center">
+                  <input
+                    type="checkbox"
+                    x-model="notices[row.telegram]"
+                    :disabled="saving !== ''"
+                    :aria-label="t(row.label) + ', ' + t('admin.settings.byTelegram')"
+                    class="h-4 w-4 accent-gray-900"
+                  >
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+
+        <p
+          x-show="!saved.telegramReady"
+          class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800"
+          x-text="t('admin.settings.telegramNotSet')"
+        ></p>
+
+        <div class="mt-4">
+          <button
+            type="button"
+            class="btn btn-primary"
+            :disabled="saving !== '' || !changed('notices')"
+            @click="save('notices')"
+            x-text="saving === 'notices' ? t('common.saving') : t('common.save')"
+          ></button>
+        </div>
+      </section>
+
     </div>
-
-    <!-- Radios rather than a select: the choices arrive with the settings, and a select fills in
-         its value before an x-for could add the options. -->
-    <fieldset x-show="!pending" class="mt-4 flex flex-col gap-2" :disabled="saving">
-      <legend class="sr-only" x-text="t('admin.settings.language')"></legend>
-      <template x-for="code in languages" :key="code">
-        <label
-          class="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors"
-          :class="chosen === code ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
-        >
-          <input type="radio" name="language" :value="code" x-model="chosen" class="accent-gray-900">
-          <span class="text-sm font-medium text-gray-900" x-text="nameOf(code)"></span>
-          <span class="muted text-xs" x-show="nameHere(code) && nameHere(code).toLowerCase() !== nameOf(code).toLowerCase()" x-text="nameHere(code)"></span>
-          <span x-show="code === current" class="ml-auto rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600" x-text="t('admin.settings.current')"></span>
-        </label>
-      </template>
-    </fieldset>
-
-    <div x-show="!pending" class="mt-4 flex items-center gap-3">
-      <button
-        type="button"
-        class="btn btn-primary"
-        :disabled="saving || chosen === current"
-        @click="save()"
-        x-text="saving ? t('common.saving') : t('common.save')"
-      ></button>
-      <p class="muted text-xs" x-show="chosen !== current" x-text="t('admin.settings.reloadNote')"></p>
-    </div>
-  </section>
+  </template>
 
 </main>
