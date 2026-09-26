@@ -93,6 +93,15 @@ createApp({
     adminPage, inboxPage, ordersPage, adminProductsPage, adminProductPage, adminMailPage,
     chatWidget,
   },
+  // What AlpineShell says itself when something breaks, in the shop's language.
+  texts: {
+    error: t('shell.error'),
+    checkForm: t('validation.checkForm'),
+    pageFailed: t('shell.pageFailed'),
+    pageNotLoaded: t('shell.pageNotLoaded'),
+    partialNotLoaded: t('shell.partialNotLoaded'),
+    timedOut: t('shell.timedOut'),
+  },
   // Defaults in effect — uncomment to change:
   // siteName: document.title,   // suffix after the page title
   // loginPath: '/login',        // where the guard sends a signed-out visitor

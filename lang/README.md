@@ -25,7 +25,7 @@ The shop speaks one language at a time, chosen in `index.html`:
 
 The `<title>` and the description in the same file's `<head>` are for search engines and link previews, which read the page as it was served, so they are written there in the shop's language too.
 
-The server never reads `index.html`, so it is told separately: **`language`** in the `shop_settings` record, in the dashboard, set to the same one. That is the language of the mails (`server/mail/`), of what the hooks answer a page with (a product that sold out while in the cart, say), and of the Telegram messages (`server/lang/`). Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in.
+The server never reads `index.html`, so it is told separately: **`language`** in the `shop_settings` record, in the dashboard, set to the same one. That is the language of the mails (`server/mail/`), of what the hooks answer a page with (a product that sold out while in the cart, say), and of the Telegram messages (`server/lang/`). Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in, and the few sentences AlpineShell says itself are the `shell.` keys, handed to it as `texts` in `main.js`.
 
 ## Writing an entry
 

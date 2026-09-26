@@ -46,6 +46,13 @@ export default {
   'common.offline': 'The shop could not be reached. Check your connection and try again.',
   'common.serverError': 'Something went wrong on our side. Please try again in a moment.',
 
+  // What AlpineShell says itself when something breaks: `texts` in main.js.
+  'shell.error': 'Something went wrong. Please try again.',
+  'shell.pageFailed': 'This page could not be opened.',
+  'shell.pageNotLoaded': 'This page could not be loaded. Check your connection and try again.',
+  'shell.partialNotLoaded': 'Part of this page could not be loaded. Reload it to try again.',
+  'shell.timedOut': 'The shop took too long to answer. Please try again.',
+
   'validation.name': 'Please enter your name.',
   'validation.email': 'Please enter a valid email address.',
   'validation.passwordLength': 'At least {n} characters.',

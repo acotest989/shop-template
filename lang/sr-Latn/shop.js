@@ -44,6 +44,12 @@ export default {
   'common.offline': 'Prodavnica nije dostupna. Provjerite internet vezu i pokušajte ponovo.',
   'common.serverError': 'Nešto nije u redu na našoj strani. Pokušajte ponovo za trenutak.',
 
+  'shell.error': 'Nešto nije u redu. Pokušajte ponovo.',
+  'shell.pageFailed': 'Ova stranica se nije mogla otvoriti.',
+  'shell.pageNotLoaded': 'Stranica se nije mogla učitati. Provjerite internet vezu i pokušajte ponovo.',
+  'shell.partialNotLoaded': 'Dio stranice se nije mogao učitati. Osvježite stranicu da pokušate ponovo.',
+  'shell.timedOut': 'Prodavnica predugo ne odgovara. Pokušajte ponovo.',
+
   'validation.name': 'Unesite svoje ime.',
   'validation.email': 'Unesite ispravnu e-mail adresu.',
   'validation.passwordLength': 'Najmanje {n} znakova.',
