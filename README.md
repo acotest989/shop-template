@@ -16,7 +16,7 @@ The repository is a PocketBase app, laid out the way PocketBase looks for one: t
 
 That is the whole shop on `http://127.0.0.1:8090`, with the dashboard at `/_/`: PocketBase answers `/api` and serves `pb_public/` for everything else. Same origin, so there is nothing to configure for CORS and the SDK needs no host — `services/pb.js` points at `/`.
 
-The first `serve` applies everything in `pb_migrations/`: the collections, the rate limits, the chat's ready-made questions and a catalogue of 105 products across 21 categories. There is no seeding step to run.
+The first `serve` applies the three files in `pb_migrations/`: every collection at once, the rate limits, and what a fresh install opens with — a catalogue of 105 products across 21 categories, the chat's ready-made questions and the shop's settings record. There is no seeding step to run, and the seed fills only what is empty, so it never touches a shop that has data of its own.
 
 `--indexFallback` is on by default, and it is the SPA fallback: an unknown path returns `index.html`, so a refresh on `/products/some-handle` still boots the app. Because of it, **all asset paths must start from the root** (`/main.js`, `/assets/theme.css`, `/partials/…`) — a relative path would resolve against the current route and break on any multi-segment URL. ES module imports are the exception: they resolve against the module, not the document, so they stay relative.
 

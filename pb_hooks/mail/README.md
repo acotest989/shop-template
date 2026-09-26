@@ -54,7 +54,7 @@ Nothing else needs writing by hand. `pb_hooks/lib/mailer.js` makes two things fr
 - **a plain-text part**, sent beside the HTML: what a program that shows no HTML shows, and what spam filters expect to find. A link becomes its words and its address, a table row a line. Anything marked `data-html-only` is left out of it — the address under a button, which the button's own line already carries.
 - **the preheader**, the line an inbox shows under the subject: the start of the mail's own text, hidden in the mail itself. Without it, the inbox would show the shop's name from the header.
 
-A mail with a link that runs out says how long it is good for, in `{{validFor}}`: PocketBase's token settings on the users collection (**Options** in the dashboard), written as the shop's language writes time. The order confirmation's password link is a reset token, which this shop keeps good for a day: `pb_migrations/1790295000_password_link_day.js`.
+A mail with a link that runs out says how long it is good for, in `{{validFor}}`: PocketBase's token settings on the users collection (**Options** in the dashboard), written as the shop's language writes time. The order confirmation's password link is a reset token, which this shop keeps good for a day, set on the users collection in `pb_migrations/1790300000_collections.js`.
 
 ## Who sends what
 

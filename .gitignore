@@ -1,7 +1,9 @@
 /pocketbase.exe
 /pocketbase
-/pb_data/
 /*.zip
+
+# The database, and any copy of it beside it: a backup, or a fresh one to try the migrations on.
+/pb_data*/
 
 # A working copy of the framework, for developing it against this app. The import
 # map in pb_public/index.html points here instead of the CDN while that is going on.
