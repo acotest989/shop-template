@@ -1,8 +1,8 @@
-server/pocketbase.exe
-server/pocketbase
-server/pb_data/
-server/*.zip
+/pocketbase.exe
+/pocketbase
+/pb_data/
+/*.zip
 
 # A working copy of the framework, for developing it against this app. The import
-# map in index.html points here instead of the CDN while that is going on.
-alpineshell/
+# map in pb_public/index.html points here instead of the CDN while that is going on.
+pb_public/alpineshell/
