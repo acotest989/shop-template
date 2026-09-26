@@ -111,9 +111,34 @@ const fillNodes = (nodes, scopes, html) => nodes.map((node) => {
 
 const fill = (template, scopes, html) => fillNodes(parse(template), scopes, html);
 
-// { subject, html, file } for one mail. Every template may use the shop's name and address as
-// well as its own data: {{shopName}} and {{appURL}}, from Settings → Application in the
-// dashboard, and {{language}}, which the layout puts on <html>.
+// A filled mail's body as plain text, for the part of the message that is not HTML: a mail
+// program that reads no HTML shows it, and spam filters trust a mail that has both more than one
+// with HTML alone. A link keeps its address after its words, a table row becomes a line, and
+// what is marked data-html-only, the address spelled out under a button, is left out, since the
+// button's own line already carries it.
+const plain = (html) => html
+  .replace(/\r?\n/g, ' ') // a line break in the source is only a space in a mail too
+  .replace(/<([a-z]+)\b[^>]*\bdata-html-only\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+  .replace(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (all, href, words) => {
+    const said = words.replace(/<[^>]+>/g, '').trim();
+    return said && said !== href ? said + ': ' + href : href;
+  })
+  .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<\/tr>/gi, '\n')
+  .replace(/<\/(p|table|div|h\d)>/gi, '\n\n')
+  .replace(/<\/td>/gi, '   ')
+  .replace(/<[^>]+>/g, '')
+  .replace(/&nbsp;/g, ' ').replace(/&times;/g, '×').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"').replace(/&#39;/g, '\'').replace(/&amp;/g, '&')
+  .split('\n').map((line) => line.replace(/\s+/g, ' ').trim()).join('\n')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
+
+// { subject, html, text, file } for one mail. Every template may use the shop's name and address
+// as well as its own data: {{shopName}} and {{appURL}}, from Settings → Application in the
+// dashboard, and {{language}}, which the layout puts on <html>. The layout also gets
+// {{preheader}}: the start of the mail, which an inbox shows under the subject, where it would
+// otherwise show the shop's name in the header.
 function render(name, data) {
   if (!NAME.test(name)) throw new Error('not a mail: ' + name);
 
@@ -125,12 +150,16 @@ function render(name, data) {
   const title = source.match(/<title>([\s\S]*?)<\/title>/i);
   const subject = fill(title ? title[1] : '', scopes, false).replace(/\s+/g, ' ').trim();
   const content = fill(source.replace(/<title>[\s\S]*?<\/title>/i, ''), scopes, true).trim();
-  const html = fill(strip(read('layout.html', lang)), scopes.concat([{ subject: subject, content: content }]), true);
+  const body = plain(content);
+  const preheader = body.replace(/:?\s*https?:\/\/\S+/g, '').replace(/\s+/g, ' ').slice(0, 140);
+  const html = fill(strip(read('layout.html', lang)), scopes.concat([{ subject: subject, content: content, preheader: preheader }]), true);
+  const text = meta.appName + '\n\n' + body + '\n\n-- \n' + meta.appName + ' · ' + meta.appURL;
 
-  return { subject: subject, html: html, file: 'server/mail/' + locate(name + '.html', lang) };
+  return { subject: subject, html: html, text: text, file: 'server/mail/' + locate(name + '.html', lang) };
 }
 
-// A mail already filled, { subject, html }, from the shop's own address, as every mail here is.
+// A mail already filled, { subject, html, text }, from the shop's own address, as every mail
+// here is.
 function deliver(mail, to) {
   const meta = $app.settings().meta;
 
@@ -139,6 +168,7 @@ function deliver(mail, to) {
     to: to,
     subject: mail.subject,
     html: mail.html,
+    text: mail.text || '',
   }));
 }
 
@@ -154,8 +184,21 @@ function replace(e, name, data) {
     const mail = render(name, data);
     e.message.subject = mail.subject;
     e.message.html = mail.html;
+    e.message.text = mail.text;
   } catch (err) {
     $app.logger().error('mail template failed, sent PocketBase\'s own instead', 'mail', name, 'error', String(err));
+  }
+}
+
+// How long the link in one of PocketBase's account mails stays good, in the shop's language: the
+// users collection's token setting, 'verificationToken', 'passwordResetToken' or
+// 'emailChangeToken', changed in the dashboard under the collection's options. Empty when it
+// cannot be read, and the mail then says nothing about it.
+function validFor(record, token) {
+  try {
+    return require(__hooks + '/lang.js').open().duration(record.collection()[token].duration);
+  } catch (err) {
+    return '';
   }
 }
 
@@ -182,4 +225,4 @@ function preview(name) {
   return render(name, data);
 }
 
-module.exports = { render, send, deliver, replace, catalogue, preview };
+module.exports = { render, send, deliver, replace, validFor, catalogue, preview };

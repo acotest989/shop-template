@@ -13,7 +13,7 @@ export const adminMailPage = () => ({
   preview: null,
   loading: false,
   previewError: '',
-  width: 'desktop', // or 'phone'
+  width: 'desktop', // or 'phone', or 'text' for the plain-text part
   sending: false,
 
   async init() {

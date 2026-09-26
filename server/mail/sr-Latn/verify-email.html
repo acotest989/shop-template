@@ -3,5 +3,7 @@
 <p>Hvala što ste otvorili nalog u prodavnici {{shopName}}.</p>
 <p>Kliknite na dugme ispod da potvrdite svoju e-mail adresu.</p>
 <p><a href="{{link}}" style="display:inline-block;padding:10px 18px;border-radius:8px;background-color:#111827;color:#ffffff;font-weight:600;text-decoration:none;">Potvrdi adresu</a></p>
+{{> link-fallback}}
+{{#validFor}}<p>Link važi {{validFor}}. Poslije toga zatražite novi na stranici svog naloga.</p>{{/validFor}}
 <p><i>Ako niste nedavno otvorili nalog, zanemarite ovaj e-mail.</i></p>
 <p>Hvala,<br>tim prodavnice {{shopName}}</p>

@@ -2,6 +2,9 @@
   "number.decimal": ".",
   "number.group": ",",
   "money": "{amount} {currency}",
+  "time.minutes": { "one": "{n} minute", "other": "{n} minutes" },
+  "time.hours": { "one": "{n} hour", "other": "{n} hours" },
+  "time.days": { "one": "{n} day", "other": "{n} days" },
 
   "site.title": "Shop",
   "site.description": "A small demo storefront built with Alpine and Tailwind — no framework, no build step.",

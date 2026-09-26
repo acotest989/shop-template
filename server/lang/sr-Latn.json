@@ -4,6 +4,9 @@
   "money": "{amount} {currency}",
   "currency.EUR": "€",
   "currency.BAM": "KM",
+  "time.minutes": { "one": "{n} minut", "few": "{n} minuta", "other": "{n} minuta" },
+  "time.hours": { "one": "{n} sat", "few": "{n} sata", "other": "{n} sati" },
+  "time.days": { "one": "{n} dan", "few": "{n} dana", "other": "{n} dana" },
 
   "site.title": "Shop",
   "site.description": "Mala demo prodavnica napravljena uz Alpine i Tailwind — bez frameworka, bez build koraka.",

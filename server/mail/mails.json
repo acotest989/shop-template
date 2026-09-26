@@ -17,7 +17,9 @@
       "total": "94.97 EUR",
       "paid": false,
       "cod": true,
-      "passwordLink": "/reset-password/sample-token"
+      "passwordLink": "/reset-password/sample-token",
+      "validFor": "30 minutes",
+      "accountLink": "/account"
     }
   },
   "shop-new-order": {
@@ -37,7 +39,8 @@
       "shipping": "15.00 EUR",
       "total": "94.97 EUR",
       "paid": false,
-      "cod": true
+      "cod": true,
+      "ordersLink": "/admin/orders?status=pending"
     }
   },
   "shop-new-question": {
@@ -68,7 +71,8 @@
     "to": "A new customer",
     "when": "On registering, and whenever a customer asks for a new link from their account.",
     "sample": {
-      "link": "/verify/sample-token"
+      "link": "/verify/sample-token",
+      "validFor": "3 days"
     }
   },
   "reset-password": {
@@ -76,7 +80,8 @@
     "to": "A customer who forgot it",
     "when": "When somebody asks for it on /forgot-password.",
     "sample": {
-      "link": "/reset-password/sample-token"
+      "link": "/reset-password/sample-token",
+      "validFor": "30 minutes"
     }
   },
   "confirm-email-change": {
@@ -85,7 +90,8 @@
     "when": "When a customer changes their email address on /account.",
     "sample": {
       "link": "/confirm-email/sample-token",
-      "newEmail": "ada.lovelace@example.com"
+      "newEmail": "ada.lovelace@example.com",
+      "validFor": "30 minutes"
     }
   },
   "login-alert": {

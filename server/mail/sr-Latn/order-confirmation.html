@@ -1,9 +1,13 @@
-<title>Narudžba {{reference}}</title>
-<p>Hvala, {{name}}.</p>
+<title>Vaša narudžba {{reference}}</title>
+<p>Hvala, {{name}}. Vaša narudžba je primljena.</p>
 <p>Broj narudžbe: <strong>{{reference}}</strong>.</p>
 {{> order-summary}}
 {{#paid}}<p>Plaćeno karticom. Pri preuzimanju ne plaćate ništa.</p>{{/paid}}
 {{^paid}}<p>Molimo Vas da za kurira pripremite {{total}}.</p>{{/paid}}
 {{#passwordLink}}
-<p>Otvorili smo nalog za {{email}}, da ovu narudžbu možete kasnije pronaći. <a href="{{passwordLink}}" style="color:#111827;">Izaberite lozinku</a>.</p>
+<p>Otvorili smo nalog za {{email}}, da ovu narudžbu možete kasnije pronaći. Izaberite lozinku da ga koristite:</p>
+<p><a href="{{passwordLink}}" style="display:inline-block;padding:10px 18px;border-radius:8px;background-color:#111827;color:#ffffff;font-weight:600;text-decoration:none;">Izaberi lozinku</a></p>
+<p data-html-only style="font-size:13px;line-height:1.5;color:#6b7280;">Ako dugme ne radi, otvorite ovu adresu:<br><a href="{{passwordLink}}" style="color:#6b7280;word-break:break-all;">{{passwordLink}}</a></p>
+{{#validFor}}<p>Link važi {{validFor}}. Poslije toga zatražite novi na stranici za prijavu, pod „Zaboravili ste lozinku?“</p>{{/validFor}}
 {{/passwordLink}}
+{{^passwordLink}}<p>Narudžbu možete pratiti pod <a href="{{accountLink}}" style="color:#111827;">Vaše narudžbe</a>.</p>{{/passwordLink}}

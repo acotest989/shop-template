@@ -17,7 +17,9 @@
       "total": "94,97 €",
       "paid": false,
       "cod": true,
-      "passwordLink": "/reset-password/sample-token"
+      "passwordLink": "/reset-password/sample-token",
+      "validFor": "30 minuta",
+      "accountLink": "/account"
     }
   },
   "shop-new-order": {
@@ -37,7 +39,8 @@
       "shipping": "15,00 €",
       "total": "94,97 €",
       "paid": false,
-      "cod": true
+      "cod": true,
+      "ordersLink": "/admin/orders?status=pending"
     }
   },
   "shop-new-question": {
@@ -68,7 +71,8 @@
     "to": "Novi kupac",
     "when": "Pri otvaranju naloga, i kad god kupac zatraži novi link sa stranice naloga.",
     "sample": {
-      "link": "/verify/sample-token"
+      "link": "/verify/sample-token",
+      "validFor": "3 dana"
     }
   },
   "reset-password": {
@@ -76,7 +80,8 @@
     "to": "Kupac koji je zaboravio lozinku",
     "when": "Kad je neko zatraži na /forgot-password.",
     "sample": {
-      "link": "/reset-password/sample-token"
+      "link": "/reset-password/sample-token",
+      "validFor": "30 minuta"
     }
   },
   "confirm-email-change": {
@@ -85,7 +90,8 @@
     "when": "Kad kupac promijeni e-mail adresu na /account.",
     "sample": {
       "link": "/confirm-email/sample-token",
-      "newEmail": "marko.markovic@primjer.ba"
+      "newEmail": "marko.markovic@primjer.ba",
+      "validFor": "30 minuta"
     }
   },
   "login-alert": {

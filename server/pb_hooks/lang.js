@@ -80,7 +80,16 @@ function open() {
     });
   };
 
-  return { language: code, t: t, money: money };
+  // How long a link stays good, from PocketBase's token settings in seconds: 30 minutes, 3 days.
+  // The largest unit that divides it evenly, so 90 minutes stays 90 minutes.
+  const duration = (seconds) => {
+    const s = Number(seconds) || 0;
+    if (s >= 86400 && s % 86400 === 0) return t('time.days', { n: s / 86400 });
+    if (s >= 3600 && s % 3600 === 0) return t('time.hours', { n: s / 3600 });
+    return t('time.minutes', { n: Math.max(1, Math.round(s / 60)) });
+  };
+
+  return { language: code, t: t, money: money, duration: duration };
 }
 
 module.exports = { language, open };

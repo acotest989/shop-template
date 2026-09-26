@@ -61,6 +61,14 @@
               @click="width = 'phone'"
               x-text="t('admin.mail.phone')"
             ></button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              :class="width === 'text' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'"
+              :aria-pressed="width === 'text'"
+              @click="width = 'text'"
+              x-text="t('admin.mail.text')"
+            ></button>
           </div>
 
           <button type="button" class="btn btn-ghost btn-sm" :disabled="loading" @click="reload()">
@@ -95,7 +103,15 @@
         class="light-palette bg-gray-100 p-4 transition-opacity"
         :class="loading && 'opacity-60'"
       >
+        <!-- The plain-text part, for a mail program that reads no HTML: made from the same template
+             by server/pb_hooks/mailer.js. -->
+        <div x-show="width === 'text'" class="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-4">
+          <p class="muted mb-3 text-xs" x-text="t('admin.mail.textNote')"></p>
+          <pre class="whitespace-pre-wrap break-words font-mono text-sm text-gray-800" x-text="preview?.text"></pre>
+        </div>
+
         <iframe
+          x-show="width !== 'text'"
           :title="t('admin.mail.previewTitle')"
           sandbox="allow-popups allow-popups-to-escape-sandbox"
           :srcdoc="framed()"

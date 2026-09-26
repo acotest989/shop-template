@@ -104,8 +104,15 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       cod: order.payment === 'cod',
 
       // Only for an account nobody asked for: it exists so this order can be found again,
-      // and the link is the only way into it. No password is ever sent.
+      // and the link is the only way into it. No password is ever sent. The link is a password
+      // reset token, as short-lived as PocketBase makes those, and the mail says how short.
       passwordLink: token ? $app.settings().meta.appURL + '/reset-password/' + token : '',
+      validFor: token ? lang.duration($app.findCollectionByNameOrId('users').passwordResetToken.duration) : '',
+
+      // Where the buyer finds the order again, and the shop finds it among the rest: a new one is
+      // pending, at the top of that list.
+      accountLink: $app.settings().meta.appURL + '/account',
+      ordersLink: $app.settings().meta.appURL + '/admin/orders?status=pending',
     };
 
     // Each letter stands alone: an address that bounces must not take the other one

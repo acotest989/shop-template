@@ -69,6 +69,7 @@ export function toMailPreview(raw) {
     name: raw.name,
     subject: raw.subject,
     html: raw.html,
+    text: raw.text ?? '',
     file: raw.file,
   };
 }

@@ -9,6 +9,9 @@
   <title>{{subject}}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f3f4f6;">
+  <!-- The line an inbox shows under the subject: the mail's own start, filled in by mailer.js.
+       Hidden in the mail itself. -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f3f4f6;">{{preheader}}</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4f6;">
     <tr>
       <td align="center" style="padding:24px 12px;">

@@ -105,8 +105,11 @@ createApp({
     partialNotLoaded: t('shell.partialNotLoaded'),
     timedOut: t('shell.timedOut'),
   },
+  // The suffix after every page's title. Not document.title, the default: a product's page
+  // arrives titled with the product already (server/pb_hooks/site.pb.js), and the name alone is
+  // in og:site_name beside it.
+  siteName: document.querySelector('meta[property="og:site_name"]')?.content || t('brand.name'),
   // Defaults in effect — uncomment to change:
-  // siteName: document.title,   // suffix after the page title
   // loginPath: '/login',        // where the guard sends a signed-out visitor
   // homePath: '/',              // fallback for redirects and goBack()
   // pagesDir: '/pages',         // '<page>.html' is looked up here

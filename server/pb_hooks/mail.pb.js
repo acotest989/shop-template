@@ -12,8 +12,10 @@
 onMailerRecordVerificationSend((e) => {
   const token = e.meta && e.meta.token;
   if (token) {
-    require(__hooks + '/mailer.js').replace(e, 'verify-email', {
+    const mailer = require(__hooks + '/mailer.js');
+    mailer.replace(e, 'verify-email', {
       link: $app.settings().meta.appURL + '/verify/' + token,
+      validFor: mailer.validFor(e.record, 'verificationToken'),
     });
   }
   e.next();
@@ -22,8 +24,10 @@ onMailerRecordVerificationSend((e) => {
 onMailerRecordPasswordResetSend((e) => {
   const token = e.meta && e.meta.token;
   if (token) {
-    require(__hooks + '/mailer.js').replace(e, 'reset-password', {
+    const mailer = require(__hooks + '/mailer.js');
+    mailer.replace(e, 'reset-password', {
       link: $app.settings().meta.appURL + '/reset-password/' + token,
+      validFor: mailer.validFor(e.record, 'passwordResetToken'),
     });
   }
   e.next();
@@ -32,9 +36,11 @@ onMailerRecordPasswordResetSend((e) => {
 onMailerRecordEmailChangeSend((e) => {
   const token = e.meta && e.meta.token;
   if (token) {
-    require(__hooks + '/mailer.js').replace(e, 'confirm-email-change', {
+    const mailer = require(__hooks + '/mailer.js');
+    mailer.replace(e, 'confirm-email-change', {
       link: $app.settings().meta.appURL + '/confirm-email/' + token,
       newEmail: e.meta.newEmail || '',
+      validFor: mailer.validFor(e.record, 'emailChangeToken'),
     });
   }
   e.next();
@@ -89,7 +95,7 @@ routerAdd('GET', '/api/shop/admin/mail/{name}', (e) => {
     throw new NotFoundError(lang.t('mail.noSuchMail'));
   }
 
-  return e.json(200, { name: name, subject: mail.subject, html: mail.html, file: mail.file });
+  return e.json(200, { name: name, subject: mail.subject, html: mail.html, text: mail.text, file: mail.file });
 }, $apis.requireAuth('users'));
 
 // The same mail, sent: to the admin's own address alone, filled with its sample, and marked as
