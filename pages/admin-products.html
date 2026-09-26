@@ -1,13 +1,13 @@
 <main class="mx-auto w-full max-w-6xl p-4" x-data="adminProductsPage">
 
   <div class="mb-4 flex flex-wrap items-center gap-3">
-    <h1 class="text-xl font-semibold text-gray-900">Products</h1>
-    <span x-show="!pending && !error" class="muted" x-text="total === 1 ? '1 product' : total + ' products'"></span>
+    <h1 class="text-xl font-semibold text-gray-900" x-text="t('admin.products.title')"></h1>
+    <span x-show="!pending && !error" class="muted" x-text="t('home.count', { n: total })"></span>
     <a href="/admin/products/new" class="btn btn-primary btn-sm ml-auto">
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
-      New product
+      <span x-text="t('admin.product.new')"></span>
     </a>
   </div>
 
@@ -16,15 +16,15 @@
       <input
         x-model.debounce.250ms="q"
         type="search"
-        placeholder="Search by name, brand or address…"
-        aria-label="Search products"
+        :placeholder="t('admin.products.searchPlaceholder')"
+        :aria-label="t('home.searchLabel')"
         class="input pr-8"
       >
       <button
         type="button"
         x-show="q"
         @click="q = ''"
-        aria-label="Clear search"
+        :aria-label="t('home.clearSearch')"
         class="absolute inset-y-0 right-0 px-2 text-lg leading-none text-gray-400 transition-colors hover:text-gray-900"
       >&times;</button>
     </div>
@@ -34,20 +34,20 @@
     <select
       x-model="category"
       x-effect="categories.length && ($el.value = category)"
-      aria-label="Filter by category"
+      :aria-label="t('home.filterCategory')"
       class="input w-full sm:w-48"
     >
-      <option value="">All categories</option>
+      <option value="" x-text="t('home.allCategories')"></option>
       <template x-for="option in categories" :key="option.value">
         <option :value="option.value" x-text="option.label"></option>
       </template>
     </select>
 
-    <select x-model="show" aria-label="Which products" class="input w-full sm:w-44">
-      <option value="">All products</option>
-      <option value="listed">In the shop</option>
-      <option value="hidden">Hidden</option>
-      <option value="low">Running low</option>
+    <select x-model="show" :aria-label="t('admin.products.showLabel')" class="input w-full sm:w-44">
+      <option value="" x-text="t('admin.products.showAll')"></option>
+      <option value="listed" x-text="t('admin.products.showListed')"></option>
+      <option value="hidden" x-text="t('admin.products.showHidden')"></option>
+      <option value="low" x-text="t('admin.products.showLow')"></option>
     </select>
   </div>
 
@@ -67,8 +67,8 @@
   </div>
 
   <div x-show="!pending && !error && !products.length" class="card p-8 text-center">
-    <p class="muted" x-text="q ? `No products match “${q}”.` : 'No products here.'"></p>
-    <a x-show="!q && !category && !show" href="/admin/products/new" class="btn btn-primary mt-4">Add the first one</a>
+    <p class="muted" x-text="q ? t('home.noMatch', { q }) : t('admin.products.none')"></p>
+    <a x-show="!q && !category && !show" href="/admin/products/new" class="btn btn-primary mt-4" x-text="t('admin.products.addFirst')"></a>
   </div>
 
   <ul
@@ -89,8 +89,8 @@
           </span>
 
           <span class="flex items-center gap-2">
-            <span x-show="product.hidden" class="badge badge-soft">Hidden</span>
-            <span class="badge" :class="stockBadge(product)" x-text="product.stock === 0 ? 'Sold out' : product.stock + ' in stock'"></span>
+            <span x-show="product.hidden" class="badge badge-soft" x-text="t('admin.products.hidden')"></span>
+            <span class="badge" :class="stockBadge(product)" x-text="product.stock === 0 ? t('product.soldOut') : t('admin.products.inStock', { n: product.stock })"></span>
           </span>
 
           <span class="w-28 text-right text-sm tabular-nums">
@@ -103,9 +103,9 @@
   </ul>
 
   <div x-show="totalPages > 1" class="mt-4 flex items-center justify-center gap-3">
-    <button type="button" class="btn btn-ghost btn-sm" :disabled="page <= 1" @click="goToPage(page - 1)">Previous</button>
-    <span class="muted" x-text="'Page ' + page + ' of ' + totalPages"></span>
-    <button type="button" class="btn btn-ghost btn-sm" :disabled="page >= totalPages" @click="goToPage(page + 1)">Next</button>
+    <button type="button" class="btn btn-ghost btn-sm" :disabled="page <= 1" @click="goToPage(page - 1)" x-text="t('admin.common.previous')"></button>
+    <span class="muted" x-text="t('admin.common.pageOf', { n: page, total: totalPages })"></span>
+    <button type="button" class="btn btn-ghost btn-sm" :disabled="page >= totalPages" @click="goToPage(page + 1)" x-text="t('admin.common.next')"></button>
   </div>
 
 </main>

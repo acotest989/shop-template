@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!-- The accent: data-accent="violet", "indigo", "teal", "orange" or "lime" on <html> turns it
-     on; "none", or no attribute at all, leaves the shop in ink. The colours are in assets/theme.css. -->
+     on; "none", or no attribute at all, leaves the shop in ink. The colours are in assets/theme.css.
+     The language: lang on <html>, and the two lang/ entries in the import map below, point at
+     the same one of the folders in /lang/ — en, or sr-Latn for Serbian. -->
 <html lang="en" data-accent="none">
 <head>
   <meta charset="UTF-8">
@@ -27,12 +29,16 @@
 
   <!-- Every dependency of this app and its version, in one place. A bare specifier
        can only resolve one way, so no file can load a second copy by accident.
-       Swap the framework URL for /alpineshell/index.js to work on it locally. -->
+       Swap the framework URL for /alpineshell/index.js to work on it locally.
+       lang/shop and lang/admin are the shop's language: lib/i18n.js imports the one and
+       fetches the other for an admin. -->
   <script type="importmap">
   {
     "imports": {
       "alpineshell": "https://cdn.jsdelivr.net/gh/acotest989/alpineshell@v0.5.4/index.js",
-      "pocketbase": "https://cdn.jsdelivr.net/npm/pocketbase@0.27.3/dist/pocketbase.es.mjs"
+      "pocketbase": "https://cdn.jsdelivr.net/npm/pocketbase@0.27.3/dist/pocketbase.es.mjs",
+      "lang/shop": "/lang/en/shop.js",
+      "lang/admin": "/lang/en/admin.js"
     }
   }
   </script>

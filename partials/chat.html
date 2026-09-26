@@ -15,8 +15,8 @@
     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z" />
     </svg>
-    <span class="max-md:sr-only">Ask a question</span>
-    <span x-show="unread" class="sr-only">, new reply</span>
+    <span class="max-md:sr-only" x-text="t('chat.ask')"></span>
+    <span x-show="unread" class="sr-only" x-text="t('chat.newReply')"></span>
     <span x-show="unread" class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-brand ring-2 ring-white" aria-hidden="true"></span>
   </button>
 
@@ -30,13 +30,13 @@
   >
     <header class="flex items-start gap-3 border-b border-gray-200 p-4">
       <div class="min-w-0 flex-1">
-        <p class="eyebrow">Ask about</p>
+        <p class="eyebrow" x-text="t('chat.askAbout')"></p>
         <h2 id="chat-title" class="truncate text-sm font-semibold text-gray-900" x-text="product.title"></h2>
       </div>
       <button
         type="button"
         @click="close()"
-        aria-label="Close chat"
+        :aria-label="t('chat.close')"
         class="shrink-0 rounded-lg p-1 text-gray-400 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus"
       >
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -48,11 +48,9 @@
     <!-- overscroll-contain: reaching either end of the conversation does not carry on
          into the page behind it. -->
     <div x-ref="log" class="flex flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-4" aria-live="polite">
-      <p class="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-gray-100 px-3 py-2 text-sm text-gray-900">
-        Hi! Pick a question below, or write your own.
-      </p>
+      <p class="max-w-[85%] self-start rounded-2xl rounded-bl-md bg-gray-100 px-3 py-2 text-sm text-gray-900" x-text="t('chat.greeting')"></p>
 
-      <p x-show="loading && !error" class="self-center py-2 text-xs text-gray-400">Loading the conversation…</p>
+      <p x-show="loading && !error" class="self-center py-2 text-xs text-gray-400" x-text="t('chat.loading')"></p>
 
       <template x-for="(line, index) in lines" :key="index">
         <p
@@ -85,13 +83,13 @@
     </div>
 
     <form x-show="canWrite" class="border-t border-gray-200 p-3" @submit.prevent="send()" novalidate>
-      <label for="chat-draft" class="sr-only">Your question</label>
+      <label for="chat-draft" class="sr-only" x-text="t('chat.yourQuestion')"></label>
       <!-- Enter sends and Shift+Enter breaks the line, as in every chat; not while an input
            method is still composing a character. -->
       <textarea
         id="chat-draft"
         rows="2"
-        placeholder="Write your question…"
+        :placeholder="t('chat.placeholder')"
         x-model="draft"
         :maxlength="$store.chat.maxLength"
         :disabled="pending"
@@ -105,23 +103,24 @@
       <div class="mt-2 flex items-center gap-3">
         <p
           class="min-w-0 flex-1 text-xs text-gray-500"
-          x-text="guest ? $store.chat.visitor.left + ' of ' + $store.chat.guestQuestions + ' questions left' : ''"
+          x-text="guest ? t('chat.questionsLeft', { n: $store.chat.visitor.left, total: $store.chat.guestQuestions }) : ''"
         ></p>
         <span class="text-xs tabular-nums text-gray-400" x-text="draft.length + '/' + $store.chat.maxLength"></span>
         <button
           type="submit"
           class="btn btn-primary btn-sm"
           :disabled="pending || typing || !draft.trim()"
-          x-text="pending ? 'Sending…' : 'Send'"
+          x-text="pending ? t('common.sending') : t('common.send')"
         ></button>
       </div>
     </form>
 
     <p x-show="guest" class="border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-600">
-      <span x-show="!canWrite" x-text="'You have asked all ' + $store.chat.guestQuestions + ' questions.'"></span>
-      <a :href="'/register' + back" class="font-medium text-brand-text underline underline-offset-2">Create an account</a>
-      or <a :href="'/login' + back" class="font-medium text-brand-text underline underline-offset-2">sign in</a>
-      <span x-text="canWrite ? 'to read our replies and chat with us.' : 'to read the replies and keep asking.'"></span>
+      <span x-show="!canWrite" x-text="t('chat.allAsked', { n: $store.chat.guestQuestions })"></span>
+      <a :href="'/register' + back" class="font-medium text-brand-text underline underline-offset-2" x-text="t('chat.createAccount')"></a>
+      <span x-text="t('chat.or')"></span>
+      <a :href="'/login' + back" class="font-medium text-brand-text underline underline-offset-2" x-text="t('chat.signIn')"></a>
+      <span x-text="canWrite ? t('chat.toReadReplies') : t('chat.toKeepAsking')"></span>
     </p>
   </section>
 

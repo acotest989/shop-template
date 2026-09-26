@@ -8,6 +8,7 @@ import {
 } from '../services/auth.js';
 import { fetchOrders } from '../services/orders.js';
 import { errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8;
@@ -34,7 +35,7 @@ export const accountPage = () => ({
       this.orders.items = await fetchOrders();
     } catch (err) {
       console.error(err);
-      this.orders.error = errorMessage(err, 'Could not load your orders.');
+      this.orders.error = errorMessage(err, t('account.ordersError'));
     } finally {
       this.orders.pending = false;
     }
@@ -47,7 +48,7 @@ export const accountPage = () => ({
     section.error = '';
 
     if (section.name.trim().length < 2) {
-      section.error = 'Please enter your name.';
+      section.error = t('validation.name');
       return;
     }
 
@@ -55,10 +56,10 @@ export const accountPage = () => ({
 
     try {
       await updateName(section.name);
-      this.notify('Name saved.', 'success');
+      this.notify(t('account.nameSaved'), 'success');
     } catch (err) {
       console.error(err);
-      section.error = err.fields?.name ?? errorMessage(err, 'Could not save your name.');
+      section.error = err.fields?.name ?? errorMessage(err, t('account.nameError'));
     } finally {
       section.pending = false;
     }
@@ -68,10 +69,10 @@ export const accountPage = () => ({
     try {
       await requestVerification(this.$store.session.user.email);
       this.resent = true;
-      this.notify('A new verification link is on its way.');
+      this.notify(t('account.linkOnItsWay'));
     } catch (err) {
       console.error(err);
-      this.notify('Could not send the link. Try again in a minute.', 'error');
+      this.notify(t('account.linkError'), 'error');
     }
   },
 
@@ -82,7 +83,7 @@ export const accountPage = () => ({
     section.error = '';
 
     if (!EMAIL.test(section.email.trim())) {
-      section.error = 'Please enter a valid email address.';
+      section.error = t('validation.email');
       return;
     }
 
@@ -93,7 +94,7 @@ export const accountPage = () => ({
       section.sent = true;
     } catch (err) {
       console.error(err);
-      section.error = err.fields?.newEmail ?? errorMessage(err, 'Could not send the confirmation.');
+      section.error = err.fields?.newEmail ?? errorMessage(err, t('account.emailChangeError'));
     } finally {
       section.pending = false;
     }
@@ -105,9 +106,9 @@ export const accountPage = () => ({
 
     section.error = '';
     section.errors = {
-      next: section.next.length < MIN_PASSWORD ? `At least ${MIN_PASSWORD} characters.` : '',
-      confirm: section.confirm === section.next ? '' : 'The passwords do not match.',
-      old: section.old ? '' : 'Enter your current password.',
+      next: section.next.length < MIN_PASSWORD ? t('validation.passwordLength', { n: MIN_PASSWORD }) : '',
+      confirm: section.confirm === section.next ? '' : t('validation.passwordMatch'),
+      old: section.old ? '' : t('account.currentPasswordMissing'),
     };
 
     if (Object.values(section.errors).some(Boolean)) return;
@@ -122,9 +123,9 @@ export const accountPage = () => ({
       console.error(err);
       if (err.fields) {
         section.errors = { ...section.errors, old: err.fields.oldPassword ?? '', next: err.fields.password ?? '' };
-        section.error = err.fields.oldPassword ? '' : 'Please check the form.';
+        section.error = err.fields.oldPassword ? '' : t('validation.checkForm');
       } else {
-        section.error = errorMessage(err, 'Could not change the password.');
+        section.error = errorMessage(err, t('account.passwordError'));
       }
     } finally {
       section.pending = false;
@@ -142,7 +143,7 @@ export const accountPage = () => ({
       this.goTo('/');
     } catch (err) {
       console.error(err);
-      this.danger.error = errorMessage(err, 'Could not delete the account.');
+      this.danger.error = errorMessage(err, t('account.deleteError'));
       this.danger.pending = false;
     }
   },

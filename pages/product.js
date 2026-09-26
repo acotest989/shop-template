@@ -1,5 +1,6 @@
 import { fetchProduct } from '../services/products.js';
 import { setPageTitle, errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 export const productPage = () => ({
   product: null,
@@ -33,18 +34,18 @@ export const productPage = () => ({
 
   addToCart() {
     this.$store.cart.add(this.product, this.qty);
-    this.notify(`${this.product.title} added to cart.`, 'success');
+    this.notify(t('cart.added', { title: this.product.title }), 'success');
     this.qty = 1; // the next click starts over, or a second one silently doubles the order
   },
 
   async init() {
     try {
       this.product = await fetchProduct(this.$params.handle);
-      if (!this.product) this.error = 'This product does not exist.';
-      setPageTitle(this.product?.title ?? 'Product not found'); // the generic title is set before the fetch
+      if (!this.product) this.error = t('product.notFound');
+      setPageTitle(this.product?.title ?? t('title.productNotFound')); // the generic title is set before the fetch
     } catch (err) {
       console.error(err);
-      this.error = errorMessage(err, 'Could not load the product.');
+      this.error = errorMessage(err, t('product.loadError'));
     } finally {
       this.pending = false;
     }

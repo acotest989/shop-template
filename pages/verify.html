@@ -10,19 +10,19 @@
 
     <template x-if="!pending && !error">
       <div>
-        <p class="eyebrow">Email verified</p>
-        <h1 class="mt-2 text-lg font-semibold text-gray-900">That address is yours.</h1>
-        <p class="muted mt-2">Nothing else to do — the account is confirmed.</p>
-        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/')">Continue shopping</button>
+        <p class="eyebrow" x-text="t('verify.done')"></p>
+        <h1 class="mt-2 text-lg font-semibold text-gray-900" x-text="t('verify.yours')"></h1>
+        <p class="muted mt-2" x-text="t('verify.confirmed')"></p>
+        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/')" x-text="t('checkout.continue')"></button>
       </div>
     </template>
 
     <template x-if="error">
       <div>
-        <p class="eyebrow">Verification failed</p>
+        <p class="eyebrow" x-text="t('verify.failed')"></p>
         <h1 class="mt-2 text-lg font-semibold text-gray-900" x-text="error"></h1>
-        <p class="muted mt-2">Signing in and asking for a new link from your account page will send a fresh one.</p>
-        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/login')">Sign in</button>
+        <p class="muted mt-2" x-text="t('verify.newLink')"></p>
+        <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/login')" x-text="t('nav.signIn')"></button>
       </div>
     </template>
 

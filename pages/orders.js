@@ -1,4 +1,5 @@
 import { errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 import { fetchAllOrders, subscribeToOrders, updateOrder } from '../services/admin.js';
 
 // Every status an order can have, as the collection and the hook know them.
@@ -69,7 +70,7 @@ export const ordersPage = () => ({
     } catch (err) {
       if (token !== this.latest) return;
       console.error(err);
-      this.error = errorMessage(err, 'Could not load the orders.');
+      this.error = errorMessage(err, t('admin.orders.loadError'));
     } finally {
       if (token === this.latest) this.pending = false;
     }
@@ -124,10 +125,10 @@ export const ordersPage = () => ({
     try {
       const saved = await updateOrder(order.id, changes);
       this.receive('update', saved);
-      this.notify(`${saved.reference} saved.`, 'success');
+      this.notify(t('admin.orders.saved', { reference: saved.reference }), 'success');
     } catch (err) {
       console.error(err);
-      this.notify(errorMessage(err, 'Could not save the order.'), 'error');
+      this.notify(errorMessage(err, t('admin.orders.saveError')), 'error');
       this.receive('update', { ...order });
     } finally {
       this.saving = '';

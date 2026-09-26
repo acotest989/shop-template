@@ -15,7 +15,7 @@
   <template x-if="error">
     <div class="p-8 text-center">
       <p class="rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600" x-text="error"></p>
-      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Back to products</button>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')" x-text="t('product.backToProducts')"></button>
     </div>
   </template>
 
@@ -53,7 +53,7 @@
               type="button"
               class="aspect-square w-16 overflow-hidden rounded-lg border bg-gray-100 transition-colors"
               :class="index === shown ? 'border-brand' : 'border-gray-200 hover:border-gray-400'"
-              :aria-label="'Show picture ' + (index + 1) + ' of ' + product.images.length"
+              :aria-label="t('product.showPicture', { n: index + 1, total: product.images.length })"
               :aria-current="index === shown"
               @click="shown = index"
             >
@@ -66,8 +66,8 @@
       <div class="flex flex-col">
         <!-- Only an admin ever sees a hidden product's page. -->
         <p x-show="product.hidden" class="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
-          Hidden from the shop: only an admin can open this page, and nobody can order it.
-          <a :href="'/admin/products/' + product.id" class="font-medium underline underline-offset-2">Edit it</a>
+          <span x-text="t('product.hiddenNotice')"></span>
+          <a :href="'/admin/products/' + product.id" class="font-medium underline underline-offset-2" x-text="t('product.editIt')"></a>
         </p>
 
         <p class="eyebrow" x-text="product.brand"></p>
@@ -84,12 +84,12 @@
               >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
             </span>
             <span x-text="product.rating.toFixed(1)"></span>
-            <span class="sr-only">out of 5</span>
+            <span class="sr-only" x-text="t('product.outOf5')"></span>
           </span>
           <!-- A product added in the admin area has no score yet, and five empty stars would read
                as a bad one. -->
-          <span x-show="!product.rating">No ratings yet</span>
-          <span x-show="product.sold" x-text="'· ' + product.sold + ' sold'"></span>
+          <span x-show="!product.rating" x-text="t('product.noRatings')"></span>
+          <span x-show="product.sold" x-text="'· ' + t('product.sold', { n: product.sold })"></span>
         </p>
 
         <div class="mt-4 flex items-baseline gap-3">
@@ -104,7 +104,7 @@
         <p
           x-show="product.available && product.stock <= 3"
           class="badge badge-warn mt-3 self-start"
-          x-text="'Only ' + product.stock + ' left'"
+          x-text="t('product.onlyLeft', { n: product.stock })"
         ></p>
 
         <p
@@ -117,7 +117,7 @@
           <template x-for="tag in product.tags" :key="tag">
             <a
               :href="'/?q=' + encodeURIComponent(tag)"
-              :aria-label="'Search for ' + tag"
+              :aria-label="t('product.searchFor', { tag })"
               class="tag"
               x-text="tag"
             ></a>
@@ -139,7 +139,7 @@
                 type="button"
                 class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
                 :disabled="!inCart && qty <= 1"
-                aria-label="Decrease quantity"
+                :aria-label="t('product.decrease')"
                 @click="step(-1)"
               >&minus;</button>
 
@@ -149,7 +149,7 @@
                 type="button"
                 class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
                 :disabled="shownQty >= $store.cart.maxQty(product)"
-                aria-label="Increase quantity"
+                :aria-label="t('product.increase')"
                 @click="step(1)"
               >+</button>
             </div>
@@ -160,7 +160,7 @@
               type="button"
               class="btn btn-primary flex-1"
               :disabled="!product.available"
-              x-text="product.hidden ? 'Not for sale' : !product.available ? 'Sold out' : inCart ? `View cart (${$store.cart.count})` : 'Add to cart'"
+              x-text="product.hidden ? t('product.notForSale') : !product.available ? t('product.soldOut') : inCart ? t('product.viewCart', { n: $store.cart.count }) : t('product.addToCart')"
               @click="inCart ? goTo('/cart') : addToCart()"
             ></button>
           </div>
@@ -171,7 +171,7 @@
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
-            Back
+            <span x-text="t('common.back')"></span>
           </button>
           <!-- Not on a hidden product's page, which only an admin can open: the chat would
                refuse the question anyway. -->

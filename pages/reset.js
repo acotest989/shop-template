@@ -1,5 +1,6 @@
 import { confirmPasswordReset } from '../services/auth.js';
 import { form } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 const MIN_PASSWORD = 8;
 
@@ -10,9 +11,9 @@ export const resetPage = () => ({
 
   validate() {
     return {
-      password: this.values.password.length < MIN_PASSWORD ? `At least ${MIN_PASSWORD} characters.` : '',
+      password: this.values.password.length < MIN_PASSWORD ? t('validation.passwordLength', { n: MIN_PASSWORD }) : '',
       passwordConfirm:
-        this.values.passwordConfirm === this.values.password ? '' : 'The passwords do not match.',
+        this.values.passwordConfirm === this.values.password ? '' : t('validation.passwordMatch'),
     };
   },
 

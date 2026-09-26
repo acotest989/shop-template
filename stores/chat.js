@@ -1,4 +1,5 @@
 import { storageKey } from '../lib/storage.js';
+import { t } from '../lib/i18n.js';
 import { currentUser, onAuthChange } from '../services/auth.js';
 import {
   fetchFaqs,
@@ -145,7 +146,7 @@ export const chat = () => ({
     this.visitor.asked = true;
     this.count(answer.left);
     this.say(product.id, { from: 'visitor', text: text.trim() });
-    this.reply(product.id, 'Thanks, we have your question.');
+    this.reply(product.id, t('chat.received'));
   },
 
   // Opens a customer's conversation about a product: what was already said, and from then on

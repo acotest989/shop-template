@@ -1,16 +1,17 @@
 import { requestPasswordReset } from '../services/auth.js';
 import { form } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export const forgotPage = () => ({
-  ...form({ email: '' }, { fallback: 'Could not send the link.' }),
+  ...form({ email: '' }, { fallback: t('forgot.error') }),
 
   sent: false,
 
   validate() {
     return {
-      email: EMAIL.test(this.values.email.trim()) ? '' : 'Please enter a valid email address.',
+      email: EMAIL.test(this.values.email.trim()) ? '' : t('validation.email'),
     };
   },
 

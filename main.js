@@ -1,6 +1,7 @@
 import { createApp } from 'alpineshell';
 
 import { app } from './app.js';
+import { t, i18n } from './lib/i18n.js';
 import { session } from './stores/session.js';
 import { cart } from './stores/cart.js';
 import { theme } from './stores/theme.js';
@@ -60,22 +61,29 @@ createApp({
   allow: {
     '/admin': (session) => session.user?.admin === true,
   },
-  // Overrides only — a page with no entry gets its own name as the title.
+  // Every page has one, since a name the framework made a title of would be English. The
+  // admin area's are in the shop's texts too: those are there before any route renders.
   titles: {
-    404: 'Page not found',
-    home: 'Products',
-    login: 'Sign in',
-    register: 'Create an account',
-    verify: 'Verify your email',
-    forgot: 'Reset your password',
-    reset: 'Set a new password',
-    'confirm-email': 'Confirm your new email',
-    admin: 'Admin',
-    'admin-products': 'All products',
-    'admin-product': 'Product', // until the product's own name arrives
-    'admin-mail': 'Mail',
+    404: t('title.notFound'),
+    home: t('title.home'),
+    product: t('title.product'), // until the product's own name arrives
+    cart: t('title.cart'),
+    checkout: t('title.checkout'),
+    account: t('title.account'),
+    login: t('title.login'),
+    register: t('title.register'),
+    verify: t('title.verify'),
+    forgot: t('title.forgot'),
+    reset: t('title.reset'),
+    'confirm-email': t('title.confirmEmail'),
+    admin: t('title.admin'),
+    inbox: t('title.inbox'),
+    orders: t('title.orders'),
+    'admin-products': t('title.adminProducts'),
+    'admin-product': t('title.adminProduct'), // until the product's own name arrives
+    'admin-mail': t('title.adminMail'),
   },
-  stores: { session, cart, theme, chat }, // register new store here
+  stores: { session, cart, theme, chat, i18n }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
   partials: ['card', 'toast', 'scrolltop', 'chat'],
   // register new page data here, and the component of a partial that has one

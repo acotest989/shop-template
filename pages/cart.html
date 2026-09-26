@@ -1,11 +1,11 @@
 <!-- No x-data: the cart is a store, so this page has no state of its own. -->
 <main class="mx-auto w-full max-w-3xl p-4">
-  <h1 class="mb-4 text-xl font-semibold text-gray-900">Cart</h1>
+  <h1 class="mb-4 text-xl font-semibold text-gray-900" x-text="t('cart.title')"></h1>
 
   <template x-if="$store.cart.items.length === 0">
     <div class="card p-8 text-center">
-      <p class="muted">Your cart is empty.</p>
-      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')">Browse products</button>
+      <p class="muted" x-text="t('cart.empty')"></p>
+      <button type="button" class="btn btn-primary mt-6" @click="goTo('/')" x-text="t('cart.browse')"></button>
     </div>
   </template>
 
@@ -39,7 +39,7 @@
                   <button
                     type="button"
                     class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900"
-                    :aria-label="'Decrease quantity of ' + item.title"
+                    :aria-label="t('cart.decrease', { title: item.title })"
                     @click="$store.cart.setQty(item.id, item.qty - 1)"
                   >&minus;</button>
 
@@ -49,7 +49,7 @@
                     type="button"
                     class="btn btn-sm px-2.5 text-gray-500 hover:text-gray-900 disabled:text-gray-300"
                     :disabled="item.qty >= $store.cart.maxQty(item)"
-                    :aria-label="'Increase quantity of ' + item.title"
+                    :aria-label="t('cart.increase', { title: item.title })"
                     @click="$store.cart.setQty(item.id, item.qty + 1)"
                   >+</button>
                 </div>
@@ -57,9 +57,10 @@
                 <button
                   type="button"
                   class="text-xs text-gray-400 underline-offset-2 transition-colors hover:text-red-600 hover:underline"
-                  :aria-label="'Remove ' + item.title + ' from cart'"
+                  :aria-label="t('cart.removeLabel', { title: item.title })"
                   @click="$store.cart.remove(item.id)"
-                >Remove</button>
+                  x-text="t('cart.remove')"
+                ></button>
 
                 <span
                   class="ml-auto text-sm font-semibold text-gray-900"
@@ -74,26 +75,27 @@
 
       <div class="card mt-4 p-4">
         <div class="flex items-baseline justify-between">
-          <span class="text-sm font-medium text-gray-900">Subtotal</span>
+          <span class="text-sm font-medium text-gray-900" x-text="t('cart.subtotal')"></span>
           <span
             class="text-lg font-semibold text-gray-900"
             x-text="money($store.cart.subtotal, $store.cart.currency)"
           ></span>
         </div>
-        <p class="muted mt-1 text-xs">
-          VAT included.
-          <span x-show="$store.cart.shipping">
-            Shipping <span x-text="money($store.cart.shipping, $store.cart.currency)"></span>, free for orders of
-            <span x-text="money($store.cart.freeFrom, $store.cart.currency)"></span> or more that weigh up to
-            <span x-text="$store.cart.freeUpTo / 1000"></span> kg.
-          </span>
-          <span x-show="!$store.cart.shipping">Shipping is free.</span>
-        </p>
+        <p
+          class="muted mt-1 text-xs"
+          x-text="t('cart.vat') + ' ' + ($store.cart.shipping
+            ? t('cart.shippingRule', {
+                price: money($store.cart.shipping, $store.cart.currency),
+                from: money($store.cart.freeFrom, $store.cart.currency),
+                kg: $store.cart.freeUpTo / 1000,
+              })
+            : t('cart.shippingFree'))"
+        ></p>
 
         <div class="mt-4 flex flex-wrap gap-3">
-          <button type="button" class="btn btn-primary flex-1" @click="goTo('/checkout')">Checkout</button>
-          <button type="button" class="btn btn-ghost" @click="goBack()">Back</button>
-          <button type="button" class="btn btn-ghost" @click="$store.cart.clear()">Clear cart</button>
+          <button type="button" class="btn btn-primary flex-1" @click="goTo('/checkout')" x-text="t('cart.checkout')"></button>
+          <button type="button" class="btn btn-ghost" @click="goBack()" x-text="t('common.back')"></button>
+          <button type="button" class="btn btn-ghost" @click="$store.cart.clear()" x-text="t('cart.clear')"></button>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { register } from '../services/auth.js';
 import { form, consumeRedirect } from 'alpineshell';
 import { nextPath } from '../lib/next.js';
+import { t } from '../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8; // PocketBase's own minimum for the users collection
@@ -16,12 +17,12 @@ export const registerPage = () => ({
   // the server's to say, and form() puts that answer back on the field.
   validate() {
     return {
-      name: this.values.name.trim().length < 2 ? 'Please enter your name.' : '',
-      email: EMAIL.test(this.values.email.trim()) ? '' : 'Please enter a valid email address.',
+      name: this.values.name.trim().length < 2 ? t('validation.name') : '',
+      email: EMAIL.test(this.values.email.trim()) ? '' : t('validation.email'),
       password:
-        this.values.password.length < MIN_PASSWORD ? `At least ${MIN_PASSWORD} characters.` : '',
+        this.values.password.length < MIN_PASSWORD ? t('validation.passwordLength', { n: MIN_PASSWORD }) : '',
       passwordConfirm:
-        this.values.passwordConfirm === this.values.password ? '' : 'The passwords do not match.',
+        this.values.passwordConfirm === this.values.password ? '' : t('validation.passwordMatch'),
     };
   },
 

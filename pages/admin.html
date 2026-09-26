@@ -2,7 +2,7 @@
 
   <template x-if="$store.session.user?.admin">
     <div>
-      <h1 class="mb-4 text-xl font-semibold text-gray-900">Overview</h1>
+      <h1 class="mb-4 text-xl font-semibold text-gray-900" x-text="t('admin.overview.title')"></h1>
 
       <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
 
@@ -20,36 +20,36 @@
           <!-- Each figure is a link to the list behind it. -->
           <div class="grid gap-4 sm:grid-cols-3">
             <a href="/admin/inbox" class="card block p-4 transition-shadow hover:shadow-md">
-              <p class="label">Waiting for an answer</p>
+              <p class="label" x-text="t('admin.overview.waiting')"></p>
               <p class="mt-2 text-3xl font-semibold tabular-nums" :class="overview.waiting ? 'text-amber-600' : 'text-gray-900'" x-text="overview.waiting"></p>
-              <p class="muted mt-1 text-xs" x-text="overview.waiting === 1 ? 'conversation in the inbox' : 'conversations in the inbox'"></p>
+              <p class="muted mt-1 text-xs" x-text="t('admin.overview.waitingNote', { n: overview.waiting })"></p>
             </a>
 
             <a href="/admin/orders" class="card block p-4 transition-shadow hover:shadow-md">
-              <p class="label">Orders today</p>
+              <p class="label" x-text="t('admin.overview.today')"></p>
               <p class="mt-2 text-3xl font-semibold tabular-nums text-gray-900" x-text="overview.today"></p>
-              <p class="muted mt-1 text-xs">placed since midnight</p>
+              <p class="muted mt-1 text-xs" x-text="t('admin.overview.todayNote')"></p>
             </a>
 
             <a href="/admin/orders?status=pending" class="card block p-4 transition-shadow hover:shadow-md">
-              <p class="label">Pending</p>
+              <p class="label" x-text="t('status.pending')"></p>
               <p class="mt-2 text-3xl font-semibold tabular-nums" :class="overview.pending ? 'text-amber-600' : 'text-gray-900'" x-text="overview.pending"></p>
-              <p class="muted mt-1 text-xs" x-text="overview.pending === 1 ? 'order not shipped yet' : 'orders not shipped yet'"></p>
+              <p class="muted mt-1 text-xs" x-text="t('admin.overview.pendingNote', { n: overview.pending })"></p>
             </a>
           </div>
 
           <section class="card mt-4 p-4">
             <div class="flex flex-wrap items-baseline gap-x-2">
-              <h2 class="label">Running low</h2>
-              <span class="muted text-xs" x-text="lowStock + ' or fewer left'"></span>
+              <h2 class="label" x-text="t('admin.overview.low')"></h2>
+              <span class="muted text-xs" x-text="t('admin.overview.lowNote', { n: lowStock })"></span>
               <span
                 x-show="overview.lowStock.count"
                 class="badge badge-warn ml-auto"
-                x-text="overview.lowStock.count === 1 ? '1 product' : overview.lowStock.count + ' products'"
+                x-text="t('admin.overview.lowCount', { n: overview.lowStock.count })"
               ></span>
             </div>
 
-            <p x-show="!overview.lowStock.count" class="muted mt-3" x-text="'Every product has more than ' + lowStock + ' left.'"></p>
+            <p x-show="!overview.lowStock.count" class="muted mt-3" x-text="t('admin.overview.lowNone', { n: lowStock })"></p>
 
             <ul class="mt-2 divide-y divide-gray-200" x-show="overview.lowStock.count">
               <template x-for="product in overview.lowStock.items" :key="product.id">
@@ -58,7 +58,7 @@
                     <img :src="product.image" alt="" width="40" height="40" loading="lazy" class="h-full w-full object-cover">
                   </span>
                   <a :href="'/admin/products/' + product.id" class="min-w-0 flex-1 truncate text-sm text-gray-900 hover:underline" x-text="product.title"></a>
-                  <span class="badge shrink-0" :class="product.stock > 0 ? 'badge-warn' : 'badge-bad'" x-text="product.stock > 0 ? product.stock + ' left' : 'Sold out'"></span>
+                  <span class="badge shrink-0" :class="product.stock > 0 ? 'badge-warn' : 'badge-bad'" x-text="product.stock > 0 ? t('admin.overview.left', { n: product.stock }) : t('product.soldOut')"></span>
                 </li>
               </template>
             </ul>
@@ -68,8 +68,8 @@
               href="/admin/products?show=low"
               class="mt-2 inline-block text-xs font-medium text-gray-600 underline underline-offset-2 hover:text-gray-900"
               x-text="overview.lowStock.count > overview.lowStock.items.length
-                ? 'See all ' + overview.lowStock.count + ' in Products'
-                : 'See them in Products'"
+                ? t('admin.overview.seeAll', { n: overview.lowStock.count })
+                : t('admin.overview.seeThem')"
             ></a>
           </section>
         </div>

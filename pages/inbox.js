@@ -1,4 +1,5 @@
 import { errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 import {
   fetchThreads,
   subscribeToThreads,
@@ -93,7 +94,7 @@ export const inboxPage = () => ({
       if (wanted) this.open(wanted);
     } catch (err) {
       console.error(err);
-      this.error = errorMessage(err, 'Could not load the inbox.');
+      this.error = errorMessage(err, t('admin.inbox.loadError'));
     } finally {
       this.pending = false;
     }
@@ -165,7 +166,7 @@ export const inboxPage = () => ({
       await load();
     } catch (err) {
       console.error(err);
-      if (current()) this.messagesError = errorMessage(err, 'Could not load this conversation.');
+      if (current()) this.messagesError = errorMessage(err, t('admin.inbox.conversationError'));
     } finally {
       if (current()) this.loadingMessages = false;
     }
@@ -184,7 +185,7 @@ export const inboxPage = () => ({
         this.draft = '';
       }
     } catch (err) {
-      this.sendError = errorMessage(err, 'The reply could not be sent. Try again.');
+      this.sendError = errorMessage(err, t('admin.inbox.sendError'));
     } finally {
       this.sending = false;
     }
@@ -199,7 +200,7 @@ export const inboxPage = () => ({
       this.receiveThread('update', { ...thread, waiting: false }); // realtime says the same a moment later
     } catch (err) {
       console.error(err);
-      this.notify(errorMessage(err, 'Could not mark the conversation as answered.'), 'error');
+      this.notify(errorMessage(err, t('admin.inbox.answeredError')), 'error');
     }
   },
 
@@ -212,10 +213,10 @@ export const inboxPage = () => ({
     try {
       await deleteThread(thread.id);
       this.receiveThread('delete', thread); // realtime says the same a moment later
-      this.notify('Conversation deleted.', 'success');
+      this.notify(t('admin.inbox.deleted'), 'success');
     } catch (err) {
       console.error(err);
-      this.notify(errorMessage(err, 'Could not delete the conversation.'), 'error');
+      this.notify(errorMessage(err, t('admin.inbox.deleteError')), 'error');
     } finally {
       this.deleting = false;
       this.confirmingDelete = false;
@@ -234,10 +235,10 @@ export const inboxPage = () => ({
       for (const thread of this.threads.filter((entry) => entry.lastMessageAt <= before)) {
         this.receiveThread('delete', thread); // realtime says the same a moment later
       }
-      this.notify(deleted === 1 ? '1 conversation deleted.' : `${deleted} conversations deleted.`, 'success');
+      this.notify(t('admin.inbox.cleared', { n: deleted }), 'success');
     } catch (err) {
       console.error(err);
-      this.notify(errorMessage(err, 'Could not clear the inbox.'), 'error');
+      this.notify(errorMessage(err, t('admin.inbox.clearError')), 'error');
     } finally {
       this.clearing = false;
       this.confirmingClear = false;

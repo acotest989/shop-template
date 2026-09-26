@@ -3,18 +3,18 @@
   <template x-if="$store.session.user?.admin">
     <div>
       <div class="mb-4 flex flex-wrap items-center gap-3">
-        <h1 class="text-xl font-semibold text-gray-900">Orders</h1>
-        <span x-show="!pending && !error" class="muted" x-text="total === 1 ? '1 order' : total + ' orders'"></span>
+        <h1 class="text-xl font-semibold text-gray-900" x-text="t('admin.orders.title')"></h1>
+        <span x-show="!pending && !error" class="muted" x-text="t('admin.orders.count', { n: total })"></span>
 
-        <label for="orders-status" class="sr-only">Show orders with status</label>
+        <label for="orders-status" class="sr-only" x-text="t('admin.orders.filterLabel')"></label>
         <!-- Options written out: a select fills its value before an x-for could add them. -->
         <select id="orders-status" x-model="status" class="input ml-auto w-auto">
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="returned">Returned</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="" x-text="t('admin.orders.allStatuses')"></option>
+          <option value="pending" x-text="t('status.pending')"></option>
+          <option value="shipped" x-text="t('status.shipped')"></option>
+          <option value="delivered" x-text="t('status.delivered')"></option>
+          <option value="returned" x-text="t('status.returned')"></option>
+          <option value="cancelled" x-text="t('status.cancelled')"></option>
         </select>
       </div>
 
@@ -35,7 +35,7 @@
       <p
         x-show="!pending && !error && !orders.length"
         class="card muted p-8 text-center"
-        x-text="status ? 'No ' + status + ' orders.' : 'No orders yet.'"
+        x-text="status ? t('admin.orders.noneWithStatus', { status: t('status.' + status) }) : t('admin.orders.none')"
       ></p>
 
       <ul class="flex flex-col gap-3" x-show="!pending && orders.length">
@@ -56,14 +56,14 @@
               </span>
 
               <span class="flex items-center gap-2">
-                <span class="badge capitalize" :class="statusBadge(order)" x-text="order.status"></span>
+                <span class="badge" :class="statusBadge(order)" x-text="t('status.' + order.status)"></span>
                 <!-- Whether the money arrived, which only the shop knows: the courier pays a cash
                      order over some days after delivering it. -->
                 <span
                   x-show="order.status !== 'cancelled' && order.status !== 'returned'"
                   class="badge"
                   :class="order.paid ? 'badge-good' : 'badge-warn'"
-                  x-text="order.paid ? 'Paid' : 'Not paid'"
+                  x-text="order.paid ? t('account.paid') : t('admin.orders.notPaid')"
                 ></span>
               </span>
 
@@ -81,23 +81,23 @@
             <div x-show="openId === order.id" class="grid gap-6 border-t border-gray-200 p-4 md:grid-cols-2">
               <div class="flex flex-col gap-4 text-sm">
                 <div>
-                  <p class="label">Customer</p>
+                  <p class="label" x-text="t('admin.orders.customer')"></p>
                   <p class="mt-1 text-gray-900" x-text="order.customer.name"></p>
                   <a :href="'mailto:' + order.customer.email" class="block text-gray-600 underline underline-offset-2 hover:text-gray-900" x-text="order.customer.email"></a>
                   <a :href="'tel:' + order.customer.phone.replace(/\s+/g, '')" class="block text-gray-600 underline underline-offset-2 hover:text-gray-900" x-text="order.customer.phone"></a>
                 </div>
                 <div>
-                  <p class="label">Ships to</p>
+                  <p class="label" x-text="t('admin.orders.shipsTo')"></p>
                   <p class="mt-1 text-gray-900" x-text="order.customer.address"></p>
                 </div>
                 <div>
-                  <p class="label">Payment</p>
-                  <p class="mt-1 text-gray-900" x-text="order.payment === 'cod' ? 'Cash on delivery' : 'Card'"></p>
+                  <p class="label" x-text="t('checkout.payment')"></p>
+                  <p class="mt-1 text-gray-900" x-text="order.payment === 'cod' ? t('checkout.cod') : t('checkout.card')"></p>
                 </div>
               </div>
 
               <div>
-                <p class="label">Items</p>
+                <p class="label" x-text="t('admin.orders.items')"></p>
                 <ul class="mt-1 flex flex-col gap-1 text-sm">
                   <template x-for="line in order.lines" :key="line.id">
                     <li class="flex gap-2">
@@ -110,18 +110,18 @@
 
                 <div class="mt-2 flex flex-col gap-1 border-t border-gray-200 pt-2 text-sm">
                   <div class="flex justify-between">
-                    <span class="muted">Shipping</span>
-                    <span class="tabular-nums text-gray-900" x-text="order.shipping ? money(order.shipping, order.currency) : 'Free'"></span>
+                    <span class="muted" x-text="t('checkout.shipping')"></span>
+                    <span class="tabular-nums text-gray-900" x-text="order.shipping ? money(order.shipping, order.currency) : t('checkout.free')"></span>
                   </div>
                   <div class="flex justify-between font-semibold text-gray-900">
-                    <span>Total</span>
+                    <span x-text="t('checkout.total')"></span>
                     <span class="tabular-nums" x-text="money(order.total, order.currency)"></span>
                   </div>
                 </div>
 
                 <div class="mt-4 flex flex-wrap items-end gap-4 rounded-lg bg-gray-50 p-3">
                   <div>
-                    <label :for="'status-' + order.id" class="label">Status</label>
+                    <label :for="'status-' + order.id" class="label" x-text="t('admin.orders.status')"></label>
                     <select
                       :id="'status-' + order.id"
                       class="input mt-1 w-auto"
@@ -129,11 +129,11 @@
                       :disabled="saving === order.id"
                       @change="change(order, { status: $event.target.value })"
                     >
-                      <option value="pending">Pending</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="returned">Returned</option>
-                      <option value="cancelled">Cancelled</option>
+                      <option value="pending" x-text="t('status.pending')"></option>
+                      <option value="shipped" x-text="t('status.shipped')"></option>
+                      <option value="delivered" x-text="t('status.delivered')"></option>
+                      <option value="returned" x-text="t('status.returned')"></option>
+                      <option value="cancelled" x-text="t('status.cancelled')"></option>
                     </select>
                   </div>
 
@@ -145,11 +145,11 @@
                       :disabled="saving === order.id"
                       @change="change(order, { paid: $event.target.checked })"
                     >
-                    Paid
+                    <span x-text="t('account.paid')"></span>
                   </label>
                 </div>
 
-                <p class="muted mt-2 text-xs">Returned and cancelled put the items back in stock; moving an order off either takes them out again.</p>
+                <p class="muted mt-2 text-xs" x-text="t('admin.orders.stockNote')"></p>
               </div>
             </div>
           </li>
@@ -157,9 +157,9 @@
       </ul>
 
       <div x-show="totalPages > 1" class="mt-4 flex items-center justify-center gap-3">
-        <button type="button" class="btn btn-ghost btn-sm" :disabled="page <= 1" @click="goToPage(page - 1)">Previous</button>
-        <span class="muted" x-text="'Page ' + page + ' of ' + totalPages"></span>
-        <button type="button" class="btn btn-ghost btn-sm" :disabled="page >= totalPages" @click="goToPage(page + 1)">Next</button>
+        <button type="button" class="btn btn-ghost btn-sm" :disabled="page <= 1" @click="goToPage(page - 1)" x-text="t('admin.common.previous')"></button>
+        <span class="muted" x-text="t('admin.common.pageOf', { n: page, total: totalPages })"></span>
+        <button type="button" class="btn btn-ghost btn-sm" :disabled="page >= totalPages" @click="goToPage(page + 1)" x-text="t('admin.common.next')"></button>
       </div>
     </div>
   </template>

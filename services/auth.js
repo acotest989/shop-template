@@ -1,13 +1,15 @@
 import { pb } from './pb.js';
 import { fieldError } from 'alpineshell';
 import { toUser } from '../models/user.js';
+import { t } from '../lib/i18n.js';
 
 // All contact with the SDK's auth lives here. The token is the SDK's business —
 // it stores it, refreshes it and sends it — so nothing above this file sees one.
 
 // The rate limiter answers 429, and its own wording is not something to hand a
 // visitor. Every entry point here can hit it, so the translation lives in one place.
-const TOO_MANY = 'Too many attempts. Please wait a minute and try again.';
+const TOO_MANY = t('auth.tooMany');
+const LINK_USED = t('auth.linkUsed');
 
 export async function login({ email, password }) {
   try {
@@ -19,7 +21,7 @@ export async function login({ email, password }) {
     // PocketBase answers a bad identity or password with 400; anything else is a
     // real failure and must not be disguised as wrong credentials.
     if (err.status === 400) {
-      throw new Error('Wrong email or password.');
+      throw new Error(t('auth.wrongCredentials'));
     }
     throw err;
   }
@@ -29,9 +31,9 @@ export async function login({ email, password }) {
 // server's wording, which changes between releases and would take this with it.
 // Anything unlisted keeps PocketBase's own text: terse, but still specific.
 const SAID_BETTER = {
-  validation_not_unique: 'That address already has an account.',
-  validation_invalid_email: 'That does not look like an email address.',
-  validation_length_out_of_range: 'Too short — use at least 8 characters.',
+  validation_not_unique: t('auth.addressTaken'),
+  validation_invalid_email: t('auth.notAnEmail'),
+  validation_length_out_of_range: t('auth.tooShort', { n: 8 }),
 };
 
 // PocketBase reports validation per field. Flattening it here — and rethrowing with
@@ -79,7 +81,7 @@ export async function confirmVerification(token) {
   try {
     await pb.collection('users').confirmVerification(token);
   } catch (err) {
-    if (err.status === 400) throw new Error('This link has expired or has already been used.');
+    if (err.status === 400) throw new Error(LINK_USED);
     throw err;
   }
 
@@ -104,7 +106,7 @@ export async function confirmPasswordReset(token, password) {
     await pb.collection('users').confirmPasswordReset(token, password, password);
   } catch (err) {
     if (err.status === 400 && !err.data?.data?.password) {
-      throw new Error('This link has expired or has already been used.');
+      throw new Error(LINK_USED);
     }
     rethrow(err);
   }
@@ -158,7 +160,7 @@ export async function confirmEmailChange(token, password) {
     await pb.collection('users').confirmEmailChange(token, password);
   } catch (err) {
     if (err.status === 400 && !err.data?.data?.password) {
-      throw new Error('This link has expired or has already been used.');
+      throw new Error(LINK_USED);
     }
     rethrow(err);
   }

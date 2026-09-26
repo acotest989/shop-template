@@ -1,5 +1,5 @@
 <main class="mx-auto w-full max-w-2xl p-4" x-data="accountPage">
-  <h1 class="mb-4 text-xl font-semibold text-gray-900">Account</h1>
+  <h1 class="mb-4 text-xl font-semibold text-gray-900" x-text="t('account.title')"></h1>
 
   <div class="flex flex-col gap-4">
 
@@ -7,26 +7,25 @@
     <template x-if="!verified">
       <div class="card flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50 p-4">
         <p class="text-sm text-amber-800">
-          <span class="font-medium">Your email is not verified.</span>
+          <span class="font-medium" x-text="t('account.notVerified')"></span>
         </p>
         <button
           type="button"
           class="btn btn-ghost btn-sm"
           x-show="!resent"
           @click="resendVerification()"
-        >Send the link again</button>
+          x-text="t('account.sendAgain')"
+        ></button>
       </div>
     </template>
 
     <!-- orders -->
     <section class="card p-4">
-      <p class="label">Your orders</p>
+      <p class="label" x-text="t('account.orders')"></p>
 
-      <p class="muted mt-3 text-sm" x-show="orders.pending">Loading…</p>
+      <p class="muted mt-3 text-sm" x-show="orders.pending" x-text="t('common.loading')"></p>
       <p class="mt-3 text-sm text-red-600" x-show="orders.error" x-text="orders.error"></p>
-      <p class="muted mt-3 text-sm" x-show="!orders.pending && !orders.error && !orders.items.length">
-        Nothing yet. Anything you order with this address turns up here.
-      </p>
+      <p class="muted mt-3 text-sm" x-show="!orders.pending && !orders.error && !orders.items.length" x-text="t('account.noOrders')"></p>
 
       <ul class="mt-1 divide-y divide-gray-200" x-show="orders.items.length">
         <template x-for="order in orders.items" :key="order.id">
@@ -45,19 +44,19 @@
                  money on yet, and an order that ended owes nothing, so it asks for nothing. -->
             <div class="flex shrink-0 items-center gap-2">
               <span
-                class="badge capitalize"
+                class="badge"
                 :class="{
                   'badge-soft': order.status === 'pending' || order.status === 'shipped',
                   'badge-good': order.status === 'delivered',
                   'badge-bad': order.status === 'cancelled' || order.status === 'returned',
                 }"
-                x-text="order.status"
+                x-text="t('status.' + order.status)"
               ></span>
               <span
                 class="badge"
                 x-show="order.status !== 'cancelled' && order.status !== 'returned'"
                 :class="order.paid || order.status === 'delivered' ? 'badge-good' : 'badge-warn'"
-                x-text="order.paid || order.status === 'delivered' ? 'Paid' : 'Pay on delivery'"
+                x-text="order.paid || order.status === 'delivered' ? t('account.paid') : t('account.payOnDelivery')"
               ></span>
               <span class="text-sm font-semibold text-gray-900" x-text="money(order.total, order.currency)"></span>
             </div>
@@ -68,13 +67,13 @@
 
     <!-- name -->
     <section class="card p-4">
-      <p class="label">Your name</p>
+      <p class="label" x-text="t('account.name')"></p>
       <form class="mt-3 flex flex-wrap items-start gap-3" @submit.prevent="saveName()" novalidate>
         <div class="min-w-48 flex-1">
           <input
             type="text"
             autocomplete="name"
-            aria-label="Your name"
+            :aria-label="t('account.name')"
             x-model="profile.name"
             @input="profile.error = ''; profile.saved = false"
             :disabled="profile.pending"
@@ -87,24 +86,18 @@
           type="submit"
           class="btn btn-primary"
           :disabled="profile.pending"
-          x-text="profile.pending ? 'Saving…' : 'Save'"
+          x-text="profile.pending ? t('common.saving') : t('common.save')"
         ></button>
       </form>
     </section>
 
     <!-- email -->
     <section class="card p-4">
-      <p class="label">Email</p>
-      <p class="muted mt-1 text-sm">
-        Currently <span class="font-medium text-gray-900" x-text="$store.session.user?.email"></span>.
-      </p>
+      <p class="label" x-text="t('common.email')"></p>
+      <p class="muted mt-1 text-sm" x-text="t('account.currentEmail', { email: $store.session.user?.email })"></p>
 
       <template x-if="emailChange.sent">
-        <p class="muted mt-3 text-sm">
-          We sent a confirmation link to
-          <span class="font-medium text-gray-900" x-text="emailChange.email"></span>.
-          The address changes once you open it — that link is what proves the inbox is yours.
-        </p>
+        <p class="muted mt-3 text-sm" x-text="t('account.emailLinkSent', { email: emailChange.email })"></p>
       </template>
 
       <template x-if="!emailChange.sent">
@@ -113,7 +106,7 @@
             <input
               type="email"
               autocomplete="email"
-              aria-label="New email address"
+              :aria-label="t('account.newEmail')"
               placeholder="new@example.com"
               x-model="emailChange.email"
               @input="emailChange.error = ''"
@@ -127,7 +120,7 @@
             type="submit"
             class="btn btn-ghost"
             :disabled="emailChange.pending"
-            x-text="emailChange.pending ? 'Sending…' : 'Change email'"
+            x-text="emailChange.pending ? t('common.sending') : t('account.changeEmail')"
           ></button>
         </form>
       </template>
@@ -135,16 +128,16 @@
 
     <!-- password -->
     <section class="card p-4">
-      <p class="label">Password</p>
-      <p class="muted mt-1 text-sm">Changing it signs out every device, including this one.</p>
+      <p class="label" x-text="t('common.password')"></p>
+      <p class="muted mt-1 text-sm" x-text="t('account.passwordNote')"></p>
 
       <form class="mt-3 flex flex-col gap-3" @submit.prevent="savePassword()" novalidate>
         <div>
           <input
             type="password"
             autocomplete="current-password"
-            aria-label="Current password"
-            placeholder="Current password"
+            :aria-label="t('account.currentPassword')"
+            :placeholder="t('account.currentPassword')"
             x-model="password.old"
             @input="password.errors.old = ''; password.error = ''"
             :disabled="password.pending"
@@ -159,8 +152,8 @@
             <input
               type="password"
               autocomplete="new-password"
-              aria-label="New password"
-              placeholder="New password"
+              :aria-label="t('reset.newPassword')"
+              :placeholder="t('reset.newPassword')"
               x-model="password.next"
               @input="password.errors.next = ''"
               :disabled="password.pending"
@@ -173,8 +166,8 @@
             <input
               type="password"
               autocomplete="new-password"
-              aria-label="Repeat new password"
-              placeholder="Repeat new password"
+              :aria-label="t('account.repeatNewPassword')"
+              :placeholder="t('account.repeatNewPassword')"
               x-model="password.confirm"
               @input="password.errors.confirm = ''"
               :disabled="password.pending"
@@ -197,27 +190,30 @@
           type="submit"
           class="btn btn-primary self-start"
           :disabled="password.pending"
-          x-text="password.pending ? 'Changing…' : 'Change password'"
+          x-text="password.pending ? t('account.changing') : t('account.changePassword')"
         ></button>
       </form>
     </section>
 
     <!-- delete -->
     <section class="card border-red-200 p-4">
-      <p class="label text-red-500">Delete account</p>
+      <p class="label text-red-500" x-text="t('account.delete')"></p>
 
       <template x-if="!danger.confirming">
         <div class="mt-1">
-          <p class="muted text-sm">The account and its orders go with it. This cannot be undone.</p>
-          <button type="button" class="btn btn-ghost mt-3 border-red-300 text-red-600 hover:bg-red-50" @click="danger.confirming = true">
-            Delete account
-          </button>
+          <p class="muted text-sm" x-text="t('account.deleteNote')"></p>
+          <button
+            type="button"
+            class="btn btn-ghost mt-3 border-red-300 text-red-600 hover:bg-red-50"
+            @click="danger.confirming = true"
+            x-text="t('account.delete')"
+          ></button>
         </div>
       </template>
 
       <template x-if="danger.confirming">
         <div class="mt-1">
-          <p class="text-sm font-medium text-red-700">Delete this account for good?</p>
+          <p class="text-sm font-medium text-red-700" x-text="t('account.deleteConfirm')"></p>
           <p
             x-show="danger.error"
             x-text="danger.error"
@@ -230,11 +226,15 @@
               class="btn bg-red-600 text-white hover:bg-red-500"
               :disabled="danger.pending"
               @click="confirmDelete()"
-              x-text="danger.pending ? 'Deleting…' : 'Yes, delete it'"
+              x-text="danger.pending ? t('common.deleting') : t('common.yesDelete')"
             ></button>
-            <button type="button" class="btn btn-ghost" :disabled="danger.pending" @click="danger.confirming = false">
-              Keep my account
-            </button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              :disabled="danger.pending"
+              @click="danger.confirming = false"
+              x-text="t('account.keep')"
+            ></button>
           </div>
         </div>
       </template>

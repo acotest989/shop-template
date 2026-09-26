@@ -1,4 +1,5 @@
 import { errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 import { fetchMails, fetchMailPreview, sendTestMail } from '../services/admin.js';
 
 // Every mail the shop sends, and each one as it would arrive, filled with the sample data in
@@ -20,7 +21,7 @@ export const adminMailPage = () => ({
       this.mails = await fetchMails();
     } catch (err) {
       console.error(err);
-      this.error = errorMessage(err, 'Could not load the mails.');
+      this.error = errorMessage(err, t('admin.mail.loadError'));
       return;
     } finally {
       this.pending = false;
@@ -49,7 +50,7 @@ export const adminMailPage = () => ({
       if (this.selected !== name) return; // another mail was picked while this one loaded
       console.error(err);
       this.preview = null;
-      this.previewError = errorMessage(err, 'Could not fill this mail.');
+      this.previewError = errorMessage(err, t('admin.mail.previewError'));
     } finally {
       if (this.selected === name) this.loading = false;
     }
@@ -68,10 +69,10 @@ export const adminMailPage = () => ({
     this.sending = true;
     try {
       const to = await sendTestMail(this.selected);
-      this.notify(`Sent to ${to}, with [Test] in front of the subject.`, 'success');
+      this.notify(t('admin.mail.sent', { to }), 'success');
     } catch (err) {
       console.error(err);
-      this.notify(errorMessage(err, 'The test mail could not be sent.'), 'error');
+      this.notify(errorMessage(err, t('admin.mail.sendError')), 'error');
     } finally {
       this.sending = false;
     }

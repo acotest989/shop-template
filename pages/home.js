@@ -1,5 +1,6 @@
 import { fetchProducts, fetchCategories } from '../services/products.js';
 import { humanize } from '../lib/helpers.js';
+import { t } from '../lib/i18n.js';
 import { errorMessage } from 'alpineshell';
 
 const SKELETON_COUNT = 12; // roughly a screenful, so the wait has a shape
@@ -67,7 +68,7 @@ export const homePage = () => ({
     } catch (err) {
       if (token !== this.latest) return;
       console.error(err);
-      this.error = errorMessage(err, 'Could not load products.');
+      this.error = errorMessage(err, t('home.loadError'));
     } finally {
       if (token === this.latest) {
         this.pending = false;
@@ -105,10 +106,10 @@ export const homePage = () => ({
   // "1–105 of 105" says nothing the shorter form does not.
   get range() {
     if (!this.total) return '';
-    if (this.totalPages <= 1) return `${this.total} products`;
+    if (this.totalPages <= 1) return t('home.count', { n: this.total });
 
     const from = (this.page - 1) * this.perPage + 1;
-    return `${from}–${from + this.products.length - 1} of ${this.total}`;
+    return t('home.range', { from, to: from + this.products.length - 1, total: this.total });
   },
 
   get isEmpty() {

@@ -1,4 +1,5 @@
 import { errorMessage } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 // The chat on a product page. What is said lives in the chat store; this keeps only what
 // belongs to the open panel. `product` is the page's, one scope up, which is what makes the
@@ -104,7 +105,7 @@ export const chatWidget = () => ({
     this.error = '';
     this.$store.chat.follow(this.product.id).catch((err) => {
       console.error(err);
-      this.error = errorMessage(err, 'The conversation could not be loaded. Close the chat and open it again.');
+      this.error = errorMessage(err, t('chat.loadError'));
     });
   },
 
@@ -116,7 +117,7 @@ export const chatWidget = () => ({
     try {
       await this.$store.chat.pick(this.product, faq);
     } catch (err) {
-      this.error = errorMessage(err, 'That question could not be sent. Try again.');
+      this.error = errorMessage(err, t('chat.pickError'));
     } finally {
       this.pending = false;
     }
@@ -131,7 +132,7 @@ export const chatWidget = () => ({
       await this.$store.chat.ask(this.product, this.draft);
       this.draft = '';
     } catch (err) {
-      this.error = errorMessage(err, 'Your question could not be sent. Try again.');
+      this.error = errorMessage(err, t('chat.sendError'));
     } finally {
       this.pending = false;
     }

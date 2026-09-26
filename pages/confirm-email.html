@@ -2,21 +2,21 @@
 
   <template x-if="done">
     <div class="card w-full max-w-sm p-6 text-center">
-      <p class="eyebrow">Address changed</p>
-      <h1 class="mt-2 text-lg font-semibold text-gray-900">Sign in with the new email.</h1>
-      <p class="muted mt-2">Changing the address signs out every device that was using the old session.</p>
-      <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/login')">Sign in</button>
+      <p class="eyebrow" x-text="t('confirmEmail.changed')"></p>
+      <h1 class="mt-2 text-lg font-semibold text-gray-900" x-text="t('confirmEmail.signInNew')"></h1>
+      <p class="muted mt-2" x-text="t('confirmEmail.signedOut')"></p>
+      <button type="button" class="btn btn-primary mt-6 w-full" @click="goTo('/login')" x-text="t('nav.signIn')"></button>
     </div>
   </template>
 
   <template x-if="!done">
     <div class="card w-full max-w-sm p-6">
-      <h1 class="text-lg font-semibold text-gray-900">Confirm your new email</h1>
-      <p class="muted mt-1">Your password confirms it is really you.</p>
+      <h1 class="text-lg font-semibold text-gray-900" x-text="t('confirmEmail.title')"></h1>
+      <p class="muted mt-1" x-text="t('confirmEmail.intro')"></p>
 
       <form class="mt-5 flex flex-col gap-4" @submit.prevent="submit()" novalidate>
         <div>
-          <label for="password" class="label">Password</label>
+          <label for="password" class="label" x-text="t('common.password')"></label>
           <input
             id="password"
             x-init="$el.focus()"
@@ -35,7 +35,7 @@
           type="submit"
           class="btn btn-primary w-full"
           :disabled="pending"
-          x-text="pending ? 'Confirming…' : 'Confirm'"
+          x-text="pending ? t('confirmEmail.confirming') : t('confirmEmail.submit')"
         ></button>
       </form>
     </div>

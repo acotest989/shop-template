@@ -1,7 +1,7 @@
 <main class="mx-auto w-full max-w-5xl p-4" x-data="homePage">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-baseline gap-2">
-      <h1 class="text-xl font-semibold text-gray-900">Products</h1>
+      <h1 class="text-xl font-semibold text-gray-900" x-text="t('home.title')"></h1>
       <span class="muted" x-show="!pending && !error" x-text="range"></span>
     </div>
 
@@ -12,10 +12,10 @@
       <select
         x-model="category"
         x-effect="categories.length && ($el.value = category)"
-        aria-label="Filter by category"
+        :aria-label="t('home.filterCategory')"
         class="input w-full sm:w-44"
       >
-        <option value="">All categories</option>
+        <option value="" x-text="t('home.allCategories')"></option>
         <template x-for="option in categories" :key="option.value">
           <option :value="option.value" x-text="option.label"></option>
         </template>
@@ -26,15 +26,15 @@
           x-ref="search"
           x-model.debounce.250ms="q"
           type="search"
-          placeholder="Search products…"
-          aria-label="Search products"
+          :placeholder="t('home.searchPlaceholder')"
+          :aria-label="t('home.searchLabel')"
           class="input pr-8"
         >
         <button
           type="button"
           x-show="q"
           @click="clear()"
-          aria-label="Clear search"
+          :aria-label="t('home.clearSearch')"
           class="absolute inset-y-0 right-0 px-2 text-lg leading-none text-gray-400 transition-colors hover:text-gray-900"
         >&times;</button>
       </div>
@@ -70,8 +70,8 @@
   <!-- empty -->
   <template x-if="isEmpty">
     <div class="p-8 text-center">
-      <p class="muted" x-text="q ? `No products match “${q}”.` : 'No products found.'"></p>
-      <button type="button" x-show="q" class="btn btn-ghost mt-4" @click="clear()">Clear search</button>
+      <p class="muted" x-text="q ? t('home.noMatch', { q }) : t('home.none')"></p>
+      <button type="button" x-show="q" class="btn btn-ghost mt-4" @click="clear()" x-text="t('home.clearSearch')"></button>
     </div>
   </template>
 
@@ -87,14 +87,14 @@
   <!-- paging -->
   <nav
     x-show="!pending && !error && totalPages > 1"
-    aria-label="Pagination"
+    :aria-label="t('paging.label')"
     class="mt-6 flex flex-wrap items-center justify-center gap-1"
   >
     <button
       type="button"
       class="btn btn-ghost btn-sm w-9 px-0 disabled:text-gray-300"
       :disabled="page === 1"
-      aria-label="Previous page"
+      :aria-label="t('paging.previous')"
       @click="goToPage(page - 1)"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
@@ -108,7 +108,7 @@
         class="btn btn-sm w-9"
         :class="n === page ? 'btn-primary' : 'btn-ghost'"
         :aria-current="n === page ? 'page' : false"
-        :aria-label="'Page ' + n"
+        :aria-label="t('paging.page', { n })"
         x-text="n"
         @click="goToPage(n)"
       ></button>
@@ -118,7 +118,7 @@
       type="button"
       class="btn btn-ghost btn-sm w-9 px-0 disabled:text-gray-300"
       :disabled="page === totalPages"
-      aria-label="Next page"
+      :aria-label="t('paging.next')"
       @click="goToPage(page + 1)"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">

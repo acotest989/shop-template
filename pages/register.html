@@ -2,31 +2,31 @@
 
   <template x-if="registered">
     <div class="card w-full max-w-sm p-6 text-center">
-      <p class="eyebrow">Welcome</p>
-      <h1 class="mt-2 text-lg font-semibold text-gray-900">You are signed in.</h1>
-      <p class="muted mt-2">
-        We sent a verification link to <span class="font-medium text-gray-900" x-text="values.email"></span>.
-        You can shop right away; confirming it just proves the address is yours.
-      </p>
-      <button type="button" class="btn btn-primary mt-6 w-full" @click="start()" x-text="returning ? 'Continue' : 'Start shopping'"></button>
+      <p class="eyebrow" x-text="t('register.welcome')"></p>
+      <h1 class="mt-2 text-lg font-semibold text-gray-900" x-text="t('register.signedIn')"></h1>
+      <p class="muted mt-2" x-text="t('register.linkSent', { email: values.email })"></p>
+      <button type="button" class="btn btn-primary mt-6 w-full" @click="start()" x-text="returning ? t('register.continue') : t('register.startShopping')"></button>
     </div>
   </template>
 
   <template x-if="!registered">
     <div class="card w-full max-w-sm p-6">
-      <h1 class="text-lg font-semibold text-gray-900">Create an account</h1>
+      <h1 class="text-lg font-semibold text-gray-900" x-text="t('register.title')"></h1>
       <!-- location.search carries ?next= across, so switching forms keeps the way back. -->
-      <p class="muted mt-1">Already have one? <a :href="'/login' + location.search" class="font-medium text-gray-900 underline underline-offset-2">Sign in</a>.</p>
+      <p class="muted mt-1">
+        <span x-text="t('register.haveAccount')"></span>
+        <a :href="'/login' + location.search" class="font-medium text-gray-900 underline underline-offset-2" x-text="t('register.signIn')"></a>.
+      </p>
 
       <form class="mt-5 flex flex-col gap-4" @submit.prevent="submit()" novalidate>
         <div>
-          <label for="name" class="label">Name</label>
+          <label for="name" class="label" x-text="t('register.name')"></label>
           <input
             id="name"
             x-init="$el.focus()"
             type="text"
             autocomplete="name"
-            placeholder="Ada Lovelace"
+            :placeholder="t('checkout.namePlaceholder')"
             x-model="values.name"
             @input="clear('name')"
             :disabled="pending"
@@ -37,24 +37,24 @@
         </div>
 
         <div>
-          <label for="email" class="label">Email</label>
+          <label for="email" class="label" x-text="t('common.email')"></label>
           <input
             id="email"
             type="email"
             autocomplete="email"
-            placeholder="ada@example.com"
+            :placeholder="t('checkout.emailPlaceholder')"
             x-model="values.email"
             @input="clear('email')"
             :disabled="pending"
             class="input mt-1"
             :class="errors.email && 'border-red-400'"
           >
-          <p class="muted mt-1 text-xs" x-show="!errors.email">Where the verification link is sent.</p>
+          <p class="muted mt-1 text-xs" x-show="!errors.email" x-text="t('register.emailHint')"></p>
           <p class="mt-1 text-xs text-red-600" x-show="errors.email" x-text="errors.email"></p>
         </div>
 
         <div>
-          <label for="password" class="label">Password</label>
+          <label for="password" class="label" x-text="t('common.password')"></label>
           <input
             id="password"
             type="password"
@@ -65,12 +65,12 @@
             class="input mt-1"
             :class="errors.password && 'border-red-400'"
           >
-          <p class="muted mt-1 text-xs" x-show="!errors.password">At least 8 characters.</p>
+          <p class="muted mt-1 text-xs" x-show="!errors.password" x-text="t('validation.passwordLength', { n: 8 })"></p>
           <p class="mt-1 text-xs text-red-600" x-show="errors.password" x-text="errors.password"></p>
         </div>
 
         <div>
-          <label for="passwordConfirm" class="label">Repeat password</label>
+          <label for="passwordConfirm" class="label" x-text="t('register.repeatPassword')"></label>
           <input
             id="passwordConfirm"
             type="password"
@@ -96,7 +96,7 @@
           type="submit"
           class="btn btn-primary w-full"
           :disabled="pending"
-          x-text="pending ? 'Creating account…' : 'Create account'"
+          x-text="pending ? t('register.creating') : t('register.submit')"
         ></button>
       </form>
     </div>

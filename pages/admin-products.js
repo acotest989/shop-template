@@ -1,6 +1,7 @@
 import { errorMessage } from 'alpineshell';
 import { fetchAdminProducts, fetchProductOptions, LOW_STOCK } from '../services/admin.js';
 import { humanize } from '../lib/helpers.js';
+import { t } from '../lib/i18n.js';
 
 const SHOW = ['', 'listed', 'hidden', 'low'];
 
@@ -65,7 +66,7 @@ export const adminProductsPage = () => ({
     } catch (err) {
       if (token !== this.latest) return;
       console.error(err);
-      this.error = errorMessage(err, 'Could not load the products.');
+      this.error = errorMessage(err, t('admin.products.loadError'));
     } finally {
       if (token === this.latest) {
         this.pending = false;

@@ -21,7 +21,7 @@
       x-show="!product.available"
       class="absolute inset-0 grid place-items-center bg-white/50 backdrop-blur-[1px]"
     >
-      <span class="badge badge-ink px-3 py-1 uppercase tracking-wider">Sold out</span>
+      <span class="badge badge-ink px-3 py-1 uppercase tracking-wider" x-text="t('product.soldOut')"></span>
     </div>
   </div>
 
@@ -47,13 +47,13 @@
           >&#9733;&#9733;&#9733;&#9733;&#9733;</span>
         </span>
         <span x-text="product.rating.toFixed(1)"></span>
-        <span class="sr-only">out of 5</span>
+        <span class="sr-only" x-text="t('product.outOf5')"></span>
       </span>
       <!-- The row stays either way, so a new product's card lines up with its neighbours. -->
-      <span x-show="!product.rating">No ratings yet</span>
+      <span x-show="!product.rating" x-text="t('product.noRatings')"></span>
 
       <!-- Only once it has one: '0 sold' reads worse than no number at all. -->
-      <span x-show="product.sold" x-text="'· ' + product.sold + ' sold'"></span>
+      <span x-show="product.sold" x-text="'· ' + t('product.sold', { n: product.sold })"></span>
     </p>
 
     <div class="mt-2 flex items-baseline gap-2">
@@ -68,7 +68,7 @@
     <p
       x-show="product.available && product.stock <= 3"
       class="badge badge-warn mt-2 self-start"
-      x-text="'Only ' + product.stock + ' left'"
+      x-text="t('product.onlyLeft', { n: product.stock })"
     ></p>
 
     <div class="relative mt-auto pt-3">
@@ -78,9 +78,9 @@
         type="button"
         class="btn btn-primary w-full"
         :disabled="!product.available || $store.cart.qtyOf(product.id) >= $store.cart.maxQty(product)"
-        :aria-label="product.available ? 'Add ' + product.title + ' to cart' : product.title + ' is sold out'"
-        x-text="product.available ? 'Add to cart' : 'Sold out'"
-        @click="$store.cart.add(product); notify(product.title + ' added to cart.', 'success')"
+        :aria-label="product.available ? t('card.addLabel', { title: product.title }) : t('card.soldOutLabel', { title: product.title })"
+        x-text="product.available ? t('product.addToCart') : t('product.soldOut')"
+        @click="$store.cart.add(product); notify(t('cart.added', { title: product.title }), 'success')"
       ></button>
     </div>
   </div>

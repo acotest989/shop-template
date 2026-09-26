@@ -31,6 +31,7 @@ COPY server/mail /pb/mail
 # work until somebody forgot, and then pb_data/data.db would be a public download.
 COPY index.html main.js app.js favicon.svg /pb/pb_public/
 COPY assets   /pb/pb_public/assets
+COPY lang     /pb/pb_public/lang
 COPY lib      /pb/pb_public/lib
 COPY models   /pb/pb_public/models
 COPY pages    /pb/pb_public/pages

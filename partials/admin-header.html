@@ -5,7 +5,8 @@
   <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
 
     <a href="/admin" class="text-sm font-bold uppercase tracking-widest text-gray-900">
-      Shop <span class="font-medium normal-case tracking-normal text-gray-500">admin</span>
+      <span x-text="t('brand.name')"></span>
+      <span class="font-medium normal-case tracking-normal text-gray-500" x-text="t('admin.header.admin')"></span>
     </a>
 
     <!-- A row of its own on a phone, under the name and the way back, so no tab is squeezed out.
@@ -20,15 +21,15 @@
         },
       }"
       class="order-last -mx-1 flex w-full gap-1 overflow-x-auto text-sm sm:order-none sm:mx-0 sm:w-auto"
-      aria-label="Admin"
+      :aria-label="t('admin.header.nav')"
     >
       <template
         x-for="tab in [
-          { href: '/admin', label: 'Overview' },
-          { href: '/admin/inbox', label: 'Inbox' },
-          { href: '/admin/orders', label: 'Orders' },
-          { href: '/admin/products', label: 'Products' },
-          { href: '/admin/mail', label: 'Mail' },
+          { href: '/admin', label: 'admin.tab.overview' },
+          { href: '/admin/inbox', label: 'admin.tab.inbox' },
+          { href: '/admin/orders', label: 'admin.tab.orders' },
+          { href: '/admin/products', label: 'admin.tab.products' },
+          { href: '/admin/mail', label: 'admin.tab.mail' },
         ]"
         :key="tab.href"
       >
@@ -37,7 +38,7 @@
           class="shrink-0 rounded-lg px-3 py-1.5 transition-colors"
           :class="here(tab.href) ? 'bg-gray-100 font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'"
           :aria-current="here(tab.href) ? 'page' : null"
-          x-text="tab.label"
+          x-text="t(tab.label)"
         ></a>
       </template>
     </nav>
@@ -46,7 +47,7 @@
       <button
         type="button"
         class="rounded-lg p-1.5 text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-focus focus-visible:ring-offset-2"
-        :aria-label="$store.theme.dark ? 'Switch to light mode' : 'Switch to dark mode'"
+        :aria-label="$store.theme.dark ? t('theme.toLight') : t('theme.toDark')"
         @click="$store.theme.toggle()"
       >
         <svg x-show="!$store.theme.dark" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -57,7 +58,7 @@
         </svg>
       </button>
 
-      <a href="/" class="muted transition-colors hover:text-gray-900">Back to shop</a>
+      <a href="/" class="muted transition-colors hover:text-gray-900" x-text="t('admin.header.backToShop')"></a>
     </div>
 
   </div>

@@ -13,7 +13,7 @@
     x-show="shown"
     x-transition.opacity
     @click="window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' })"
-    aria-label="Back to top"
+    :aria-label="t('common.backToTop')"
     class="scroll-top fixed bottom-4 right-4 z-20 grid h-10 w-10 place-items-center rounded-full border border-gray-200 bg-white/90 text-gray-900 shadow-lg backdrop-blur transition-colors hover:bg-white"
   >
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">

@@ -1,5 +1,6 @@
 import { placeOrder } from '../services/orders.js';
 import { form } from 'alpineshell';
+import { t } from '../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -8,7 +9,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const digitsIn = (value) => value.replace(/\D/g, '').length;
 
 export const checkoutPage = () => ({
-  ...form({ name: '', email: '', phone: '', address: '' }, { fallback: 'Could not place the order.' }),
+  ...form({ name: '', email: '', phone: '', address: '' }, { fallback: t('checkout.error') }),
 
   order: null, // set once the order is placed; the page then shows the receipt
 
@@ -25,17 +26,17 @@ export const checkoutPage = () => ({
 
   validate() {
     return {
-      name: this.values.name.trim().length < 3 ? 'Please enter your full name.' : '',
-      email: EMAIL.test(this.values.email.trim()) ? '' : 'Please enter a valid email address.',
+      name: this.values.name.trim().length < 3 ? t('checkout.nameError') : '',
+      email: EMAIL.test(this.values.email.trim()) ? '' : t('validation.email'),
       phone: this.phoneError,
-      address: this.values.address.trim().length < 5 ? 'Please enter your address.' : '',
+      address: this.values.address.trim().length < 5 ? t('checkout.addressError') : '',
     };
   },
 
   get phoneError() {
     const digits = digitsIn(this.values.phone);
-    if (digits === 0) return 'The courier needs a number to call.';
-    return digits < 6 || digits > 15 ? 'Please enter a valid phone number.' : '';
+    if (digits === 0) return t('checkout.phoneMissing');
+    return digits < 6 || digits > 15 ? t('checkout.phoneError') : '';
   },
 
   async save() {

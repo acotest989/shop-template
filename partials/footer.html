@@ -4,10 +4,8 @@
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 
       <div class="lg:col-span-2">
-        <p class="text-sm font-bold uppercase tracking-widest text-white">Shop</p>
-        <p class="mt-3 max-w-xs text-sm leading-relaxed">
-          A small demo storefront built with Alpine and Tailwind — no framework, no build step.
-        </p>
+        <p class="text-sm font-bold uppercase tracking-widest text-white" x-text="t('brand.name')"></p>
+        <p class="mt-3 max-w-xs text-sm leading-relaxed" x-text="t('footer.about')"></p>
 
         <div class="mt-5 flex gap-2">
           <template x-for="method in ['VISA', 'MC', 'AMEX', 'PayPal']" :key="method">
@@ -20,33 +18,34 @@
       </div>
 
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-white">Store</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-white" x-text="t('footer.store')"></p>
         <nav class="mt-3 flex flex-col gap-2 text-sm">
-          <a href="/" class="transition-colors hover:text-white">All products</a>
-          <a href="/login" class="transition-colors hover:text-white" x-show="!$store.session.user">Sign in</a>
+          <a href="/" class="transition-colors hover:text-white" x-text="t('footer.allProducts')"></a>
+          <a href="/login" class="transition-colors hover:text-white" x-show="!$store.session.user" x-text="t('nav.signIn')"></a>
           <button
             type="button"
             class="cursor-pointer text-left transition-colors hover:text-white"
             x-show="$store.session.user"
             @click="signOut()"
-          >Sign out</button>
+            x-text="t('nav.signOut')"
+          ></button>
         </nav>
       </div>
 
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-white">Support</p>
+        <p class="text-xs font-semibold uppercase tracking-wider text-white" x-text="t('footer.support')"></p>
         <ul class="mt-3 flex flex-col gap-2 text-sm">
-          <li>Mon–Fri, 9–17h</li>
+          <li x-text="t('footer.hours')"></li>
           <li>support@shop.test</li>
-          <li>Free returns for 30 days</li>
+          <li x-text="t('footer.returns')"></li>
         </ul>
       </div>
 
     </div>
 
     <div class="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center">
-      <p x-text="'© ' + new Date().getFullYear() + ' Shop. All rights reserved.'"></p>
-      <p class="sm:ml-auto">Prices include VAT.</p>
+      <p x-text="t('footer.rights', { year: new Date().getFullYear(), name: t('brand.name') })"></p>
+      <p class="sm:ml-auto" x-text="t('footer.vat')"></p>
     </div>
 
   </div>

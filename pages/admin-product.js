@@ -2,6 +2,7 @@ import { form, errorMessage, setPageTitle } from 'alpineshell';
 import { fetchAdminProduct, fetchProductOptions, saveProduct } from '../services/admin.js';
 import { toCents, fromCents } from '../lib/format.js';
 import { humanize } from '../lib/helpers.js';
+import { t } from '../lib/i18n.js';
 
 // The same limits as server/pb_hooks/products.pb.js, which is the one that counts.
 const PICTURE = /^https:\/\/\S+$/;
@@ -58,13 +59,13 @@ export const adminProductPage = () => ({
       this.categories = options.categories;
       this.currency = product?.currency ?? options.currency;
       if (product) this.fill(product);
-      setPageTitle(product ? product.title : 'New product');
+      setPageTitle(product ? product.title : t('admin.product.new'));
     } catch (err) {
       if (err.status === 404) {
-        this.loadError = 'This product does not exist.';
+        this.loadError = t('product.notFound');
       } else {
         console.error(err);
-        this.loadError = errorMessage(err, 'Could not load the product.');
+        this.loadError = errorMessage(err, t('product.loadError'));
       }
     } finally {
       this.loading = false;
@@ -108,25 +109,25 @@ export const adminProductPage = () => ({
     const images = linesOf(v.images);
 
     return {
-      title: !title ? 'Give the product a name.' : title.length > MAX_TITLE ? `At most ${MAX_TITLE} characters.` : '',
-      brand: v.brand.trim().length > MAX_BRAND ? `At most ${MAX_BRAND} characters.` : '',
-      category: v.category.trim() ? '' : 'Choose a category or type a new one.',
-      description: v.description.trim().length > MAX_DESCRIPTION ? `At most ${MAX_DESCRIPTION} characters.` : '',
-      price: price > 0 ? '' : 'Enter a price, like 19.99.',
+      title: !title ? t('admin.product.titleMissing') : title.length > MAX_TITLE ? t('admin.product.tooLong', { n: MAX_TITLE }) : '',
+      brand: v.brand.trim().length > MAX_BRAND ? t('admin.product.tooLong', { n: MAX_BRAND }) : '',
+      category: v.category.trim() ? '' : t('admin.product.categoryMissing'),
+      description: v.description.trim().length > MAX_DESCRIPTION ? t('admin.product.tooLong', { n: MAX_DESCRIPTION }) : '',
+      price: price > 0 ? '' : t('admin.product.priceMissing'),
       regularPrice:
         Number.isNaN(regularPrice) || (regularPrice > 0 && regularPrice <= price)
-          ? 'Leave it empty, or make it higher than the price.'
+          ? t('admin.product.regularPriceError')
           : '',
-      stock: /^\d+$/.test(v.stock.trim()) ? '' : 'Enter how many are in stock: 0 or more.',
-      weight: /^\d+$/.test(v.weight.trim()) && Number(v.weight) > 0 ? '' : 'Enter the packed weight in grams.',
-      image: this.isPicture(v.image) ? '' : 'Paste the address of a picture, starting with https://.',
+      stock: /^\d+$/.test(v.stock.trim()) ? '' : t('admin.product.stockError'),
+      weight: /^\d+$/.test(v.weight.trim()) && Number(v.weight) > 0 ? '' : t('admin.product.weightError'),
+      image: this.isPicture(v.image) ? '' : t('admin.product.imageError'),
       images:
         images.length > MAX_PICTURES
-          ? `At most ${MAX_PICTURES} pictures.`
+          ? t('admin.product.tooManyPictures', { n: MAX_PICTURES })
           : images.every((url) => this.isPicture(url))
             ? ''
-            : 'Put one picture address on each line, each starting with https://.',
-      tags: tagsOf(v.tags).length > MAX_TAGS ? `At most ${MAX_TAGS} tags.` : '',
+            : t('admin.product.imagesError'),
+      tags: tagsOf(v.tags).length > MAX_TAGS ? t('admin.product.tooManyTags', { n: MAX_TAGS }) : '',
     };
   },
 
@@ -164,7 +165,7 @@ export const adminProductPage = () => ({
     const created = !this.product;
     this.fill(saved);
     setPageTitle(saved.title);
-    this.notify(created ? `${saved.title} added.` : `${saved.title} saved.`, 'success');
+    this.notify(created ? t('admin.product.added', { title: saved.title }) : t('admin.product.saved', { title: saved.title }), 'success');
 
     // A new product has an address now. Replaced rather than navigated to, so the page stays
     // as it is and Back still leads to the list.

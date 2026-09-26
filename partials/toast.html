@@ -37,7 +37,7 @@
   <div class="min-w-0 flex-1">
     <p
       class="text-xs font-semibold uppercase tracking-wider"
-      x-text="({ error: 'Error', warning: 'Careful', success: 'Done' })[message.type] ?? 'Note'"
+      x-text="t('toast.' + (['error', 'warning', 'success'].includes(message.type) ? message.type : 'info'))"
     ></p>
     <p class="text-base font-medium leading-snug text-gray-900" x-text="message.text"></p>
   </div>
@@ -45,7 +45,7 @@
   <button
     type="button"
     @click="dismiss()"
-    aria-label="Close"
+    :aria-label="t('common.close')"
     class="shrink-0 rounded-lg p-1.5 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
   >
     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
