@@ -16,11 +16,16 @@ const LIMIT = 200;
 
 // No admin check here: the collection rules give an admin every thread and anybody else
 // their own, so a page that calls this without the right account gets nothing it should not.
+//
+// requestKey null here and in fetchMessages: the page reads the list once on arrival and once
+// more when the live connection comes up, and the SDK would otherwise cancel the first read
+// the moment the second one goes to the same address.
 export async function fetchThreads() {
   const result = await pb.collection('threads').getList(1, LIMIT, {
     ...THREAD_OPTIONS,
     sort: '-last_message',
     skipTotal: true,
+    requestKey: null,
   });
   return result.items.map(toThread);
 }
@@ -40,6 +45,7 @@ export async function fetchMessages(threadId) {
     filter: inThread(threadId),
     fields: MESSAGE_FIELDS,
     sort: 'created',
+    requestKey: null,
   });
   return records.map(toMessage);
 }

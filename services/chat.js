@@ -34,11 +34,14 @@ const aboutProduct = (productId) =>
     product: productId,
   });
 
+// requestKey null: the chat reads the conversation once on opening and once more when the live
+// connection comes up, and the SDK would otherwise cancel the first read for the second.
 export async function fetchConversation(productId) {
   const records = await pb.collection('messages').getFullList({
     filter: aboutProduct(productId),
     fields: MESSAGE_FIELDS,
     sort: 'created',
+    requestKey: null,
   });
   return records.map(toMessage);
 }
