@@ -18,7 +18,7 @@
       "paid": false,
       "cod": true,
       "passwordLink": "/reset-password/sample-token",
-      "validFor": "30 minuta",
+      "validFor": "1 dan",
       "accountLink": "/account"
     }
   },
@@ -72,7 +72,7 @@
     "when": "Pri otvaranju naloga, i kad god kupac zatraži novi link sa stranice naloga.",
     "sample": {
       "link": "/verify/sample-token",
-      "validFor": "3 dana"
+      "validFor": "1 dan"
     }
   },
   "reset-password": {
@@ -81,7 +81,7 @@
     "when": "Kad je neko zatraži na /forgot-password.",
     "sample": {
       "link": "/reset-password/sample-token",
-      "validFor": "30 minuta"
+      "validFor": "1 dan"
     }
   },
   "confirm-email-change": {

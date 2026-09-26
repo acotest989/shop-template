@@ -36,7 +36,7 @@ Three of those arrive by email, and PocketBase's stock templates link to its own
 | Password reset | `{APP_URL}/reset-password/{TOKEN}` |
 | Email change | `{APP_URL}/confirm-email/{TOKEN}` |
 
-What a file cannot carry is application settings, so two things stay manual: the application's URL and name under **Settings → Application** — every link in a mail starts with the one, and every mail signs with the other, which PocketBase ships as Acme — and SMTP under **Settings → Mail**, since the built-in sendmail will not deliver.
+What a file cannot carry is application settings, so two things stay manual: the application's URL and name under **Settings → Application** — every link in a mail starts with the one, and the other is the shop's name wherever it appears, in the header, the footer, every page's title and every mail; PocketBase ships it as Acme — and SMTP under **Settings → Mail**, since the built-in sendmail will not deliver.
 
 Two behaviours worth knowing before they surprise you. Changing a password or an email invalidates every token the account has, so the app signs itself out on purpose. And `/forgot-password` answers the same way whether or not the address has an account, because the honest answer would tell a stranger who is registered here.
 

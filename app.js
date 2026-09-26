@@ -2,6 +2,7 @@ import { consumeRedirect } from 'alpineshell';
 import { money, formatDate, discountPercent, starPercent } from './lib/format.js';
 import { nextPath } from './lib/next.js';
 import { t, loadAdminTexts } from './lib/i18n.js';
+import { shopName } from './lib/shop.js';
 
 // Merged into AlpineShell's root component — available to every page and partial.
 export const app = {
@@ -10,6 +11,7 @@ export const app = {
   discountPercent,
   starPercent,
   t, // every sentence on screen: x-text="t('cart.empty')"
+  shopName, // Application name in PocketBase's settings, as the mails sign
 
   init() {
     // The admin area's sentences, fetched for an admin alone: at once for one already signed

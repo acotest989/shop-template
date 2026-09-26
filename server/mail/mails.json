@@ -18,7 +18,7 @@
       "paid": false,
       "cod": true,
       "passwordLink": "/reset-password/sample-token",
-      "validFor": "30 minutes",
+      "validFor": "1 day",
       "accountLink": "/account"
     }
   },
@@ -72,7 +72,7 @@
     "when": "On registering, and whenever a customer asks for a new link from their account.",
     "sample": {
       "link": "/verify/sample-token",
-      "validFor": "3 days"
+      "validFor": "1 day"
     }
   },
   "reset-password": {
@@ -81,7 +81,7 @@
     "when": "When somebody asks for it on /forgot-password.",
     "sample": {
       "link": "/reset-password/sample-token",
-      "validFor": "30 minutes"
+      "validFor": "1 day"
     }
   },
   "confirm-email-change": {

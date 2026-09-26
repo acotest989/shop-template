@@ -70,7 +70,9 @@ routerUse((e) => {
     html = html.replace(/(<html\b[^>]*\bdata-accent=")[^"]*"/, (all, start) => start + accent + '"');
   }
 
-  const site = lang.t('site.title');
+  // The shop's name is Application name, which the mails sign with too; site.title in
+  // server/lang/ only stands in for an empty one.
+  const site = String($app.settings().meta.appName || '').trim() || lang.t('site.title');
   const appURL = String($app.settings().meta.appURL || '').replace(/\/+$/, '');
   const url = appURL + path;
 

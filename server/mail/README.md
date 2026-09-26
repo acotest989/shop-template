@@ -38,7 +38,7 @@ The `<title>` is the subject. The rest is the body, and it goes into `layout.htm
 | `{{^name}}…{{/name}}` | shown when it is not |
 | `{{> name}}` | the part `_name.html`, in its place |
 
-`{{shopName}}`, `{{appURL}}` and `{{language}}` work in every mail. They are **Settings → Application** in the dashboard: the name the mails sign with, which PocketBase ships as Acme, and the address every link starts with. The rest are whatever the hook sending the mail hands over, and the sample in `mails.json` has every one of them. A name that is not there comes out empty.
+`{{shopName}}`, `{{appURL}}` and `{{language}}` work in every mail. They are **Settings → Application** in the dashboard: the shop's name, which the pages show as well and PocketBase ships as Acme, and the address every link starts with. The rest are whatever the hook sending the mail hands over, and the sample in `mails.json` has every one of them. A name that is not there comes out empty.
 
 `<!-- comments -->` are notes for whoever edits the file, and are taken out before anything is sent.
 
