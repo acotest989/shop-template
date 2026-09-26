@@ -1,6 +1,6 @@
-import { fetchProducts, fetchCategories } from '../services/products.js';
-import { humanize } from '../lib/helpers.js';
-import { t } from '../lib/i18n.js';
+import { fetchProducts, fetchCategories } from '../../services/products.js';
+import { humanize } from '../../lib/helpers.js';
+import { t } from '../../lib/i18n.js';
 import { errorMessage } from 'alpineshell';
 
 const SKELETON_COUNT = 12; // roughly a screenful, so the wait has a shape

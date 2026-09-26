@@ -34,7 +34,7 @@ export default {
 
 Plural forms are the ones `Intl.PluralRules` names for the language: English has `one` and `other`; Serbian `one` (1, 21, 31…), `few` (2–4, 22–24…) and `other` (5–20, 25…). An entry without the form a number needs falls back to `other`.
 
-Keys read as `page.what`, so a template says what it shows. A key missing from a dictionary shows as the key itself, with a warning in the console — except an `admin.` key while `admin.js` is still on its way, which shows nothing for that moment.
+Keys read as `page.what`, so a template says what it shows. A page's title is `title.` and the page's name, `title.shop.cart` for `shop/cart`: `main.js` asks for it that way, so a new page needs its title here and nothing more. A key missing from a dictionary shows as the key itself, with a warning in the console — except an `admin.` key while `admin.js` is still on its way, which shows nothing for that moment.
 
 ## Adding a language
 

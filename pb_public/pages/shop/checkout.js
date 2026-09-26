@@ -1,6 +1,6 @@
-import { placeOrder } from '../services/orders.js';
+import { placeOrder } from '../../services/orders.js';
 import { form } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 

@@ -5,10 +5,10 @@ import {
   requestVerification,
   deleteAccount,
   isVerified,
-} from '../services/auth.js';
-import { fetchOrders } from '../services/orders.js';
+} from '../../services/auth.js';
+import { fetchOrders } from '../../services/orders.js';
 import { errorMessage } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8;

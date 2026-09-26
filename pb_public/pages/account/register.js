@@ -1,7 +1,7 @@
-import { register } from '../services/auth.js';
+import { register } from '../../services/auth.js';
 import { form, consumeRedirect } from 'alpineshell';
-import { nextPath } from '../lib/next.js';
-import { t } from '../lib/i18n.js';
+import { nextPath } from '../../lib/next.js';
+import { t } from '../../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD = 8; // PocketBase's own minimum for the users collection

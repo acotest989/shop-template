@@ -52,7 +52,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   // Card is off until a real provider is wired in. Refusing it here rather than only in
   // the markup is the whole point: a disabled radio is a suggestion, and a POST naming
   // 'card' would otherwise walk away with an order marked paid that nobody paid for.
-  // Turning it back on is this line and `cardPayment` in pages/checkout.js.
+  // Turning it back on is this line and `cardPayment` in pb_public/pages/shop/checkout.js.
   const CARD_PAYMENT = false;
 
   // Ten of one product is more than a household orders, and it bounds what a single

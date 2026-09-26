@@ -1,9 +1,9 @@
 import { errorMessage } from 'alpineshell';
-import { fetchOverview, LOW_STOCK } from '../services/admin.js';
-import { t } from '../lib/i18n.js';
+import { fetchOverview, LOW_STOCK } from '../../services/admin.js';
+import { t } from '../../lib/i18n.js';
 
 // The admin area's front page: what wants the shop's attention, each figure a way in to it.
-export const adminPage = () => ({
+export const adminOverviewPage = () => ({
   overview: null,
   pending: true,
   error: '',

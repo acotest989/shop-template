@@ -1,5 +1,5 @@
 import { errorMessage } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 import {
   fetchThreads,
   subscribeToThreads,
@@ -9,7 +9,7 @@ import {
   markAnswered,
   deleteThread,
   clearInbox,
-} from '../services/inbox.js';
+} from '../../services/inbox.js';
 
 // MAX_LENGTH in pb_hooks/inbox.pb.js, which is the one that counts.
 const MAX_LENGTH = 2000;
@@ -19,7 +19,7 @@ const oldestFirst = (a, b) => a.sentAt.localeCompare(b.sentAt);
 
 // The shop's inbox: every conversation on the left, the open one on the right, both kept
 // current by realtime. On a phone it is one or the other.
-export const inboxPage = () => ({
+export const adminInboxPage = () => ({
   threads: [],
   filter: 'waiting', // or 'all'
   pending: true,

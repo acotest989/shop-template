@@ -1,6 +1,6 @@
-import { confirmVerification } from '../services/auth.js';
+import { confirmVerification } from '../../services/auth.js';
 import { errorMessage } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 
 export const verifyPage = () => ({
   pending: true,

@@ -1,6 +1,6 @@
-import { requestPasswordReset } from '../services/auth.js';
+import { requestPasswordReset } from '../../services/auth.js';
 import { form } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 

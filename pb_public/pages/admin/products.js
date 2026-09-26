@@ -1,7 +1,7 @@
 import { errorMessage } from 'alpineshell';
-import { fetchAdminProducts, fetchProductOptions, LOW_STOCK } from '../services/admin.js';
-import { humanize } from '../lib/helpers.js';
-import { t } from '../lib/i18n.js';
+import { fetchAdminProducts, fetchProductOptions, LOW_STOCK } from '../../services/admin.js';
+import { humanize } from '../../lib/helpers.js';
+import { t } from '../../lib/i18n.js';
 
 const SHOW = ['', 'listed', 'hidden', 'low'];
 

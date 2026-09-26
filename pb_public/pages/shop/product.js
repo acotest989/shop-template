@@ -1,6 +1,6 @@
-import { fetchProduct } from '../services/products.js';
+import { fetchProduct } from '../../services/products.js';
 import { setPageTitle, errorMessage } from 'alpineshell';
-import { t } from '../lib/i18n.js';
+import { t } from '../../lib/i18n.js';
 
 export const productPage = () => ({
   product: null,
@@ -42,7 +42,7 @@ export const productPage = () => ({
     try {
       this.product = await fetchProduct(this.$params.handle);
       if (!this.product) this.error = t('product.notFound');
-      setPageTitle(this.product?.title ?? t('title.productNotFound')); // the generic title is set before the fetch
+      setPageTitle(this.product?.title ?? t('title.shop.productNotFound')); // the generic title is set before the fetch
     } catch (err) {
       console.error(err);
       this.error = errorMessage(err, t('product.loadError'));
