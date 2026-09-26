@@ -10,7 +10,7 @@ The binary is not in git: ~33 MB, one build per platform, and the deploy uses th
 ./pocketbase superuser create you@example.com yourpassword  # first run only
 ```
 
-`--publicDir=..` makes PocketBase serve the shop as well as the API: one origin, no CORS, and `--indexFallback` (on by default) sends unknown paths to `index.html`, which is the SPA fallback the router needs. There is no Live Server in the loop, so nothing reloads the page when a write lands in the database.
+`--publicDir=..` makes PocketBase serve the shop as well as the API: one origin, no CORS, and `--indexFallback` (on by default) sends unknown paths to `index.html`, which is the SPA fallback the router needs. `pb_hooks/site.pb.js` answers those paths first, with `index.html` rewritten to the shop's language; it reads `--publicDir` from the command line to find the file, or `pb_public` beside the binary without one. There is no Live Server in the loop, so nothing reloads the page when a write lands in the database.
 
 The trade is that `..` is the whole repository, `/server/pb_data/data.db` included. `pb_hooks/private.pb.js` refuses everything under `/server/` and every name that starts with a dot, `.git` among them, so the command above gives none of it away, even on a machine where somebody runs it facing the internet. The deploy does not lean on that: the image copies only the frontend into `pb_public/` and leaves the server folder out.
 

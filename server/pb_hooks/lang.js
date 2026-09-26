@@ -2,9 +2,8 @@
 
 // The shop's language on the server's side: what the hooks say back to a page, the Telegram
 // messages, money as the mails write it, and which folder of server/mail/ the mails come from.
-// The pages have lang/ at the shop's root, chosen in index.html, which the server never reads;
-// so the language is set once more for this side, as `language` in the one record of
-// `shop_settings`.
+// It is `language` in the one record of `shop_settings`, chosen at /admin/settings, and the
+// pages follow it too: site.pb.js asks language() before it hands out index.html.
 //
 // The sentences are server/lang/<language>.json, read on every use like the mails, so an edit
 // needs no restart. Whatever a language lacks is taken from en.json. Not a hook itself: a

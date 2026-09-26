@@ -73,6 +73,14 @@ export function toMailPreview(raw) {
   };
 }
 
+// The settings an admin can change, and the choices there are: languages as codes, en or sr-Latn.
+export function toSettings(raw) {
+  return {
+    language: raw.language,
+    languages: raw.languages ?? [],
+  };
+}
+
 // Which field of the form a server's complaint belongs to. The hook answers in the form's own
 // names, and PocketBase, when its own checks catch something first, in the record's.
 const FORM_FIELDS = [

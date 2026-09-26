@@ -12,7 +12,7 @@ Every mail the shop sends is a file here, PocketBase's own account mails include
 
 ## Languages
 
-The files here are English. A folder named after a language holds the same files translated, and a shop sends the one in `language` of `shop_settings` (see `lang/README.md` at the shop's root). A file the folder lacks is taken from here, so a half-translated folder still sends every mail. `layout.html` has no words of its own and serves every language: `{{language}}` puts the language on its `<html>`.
+The files here are English. A folder named after a language holds the same files translated, and a shop sends the one chosen at `/admin/settings`, `language` in `shop_settings` (see `lang/README.md` at the shop's root). A file the folder lacks is taken from here, so a half-translated folder still sends every mail. `layout.html` has no words of its own and serves every language: `{{language}}` puts the language on its `<html>`.
 
 The notes on what each mail is for are in the English files; the translations carry none, so they stay short.
 

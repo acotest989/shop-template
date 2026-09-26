@@ -1,7 +1,7 @@
 import { pb } from './pb.js';
 import { fieldError } from 'alpineshell';
 import { fromOrder } from '../models/order.js';
-import { toStockItem, toAdminProduct, toProductBody, productField, toMail, toMailPreview } from '../models/admin.js';
+import { toStockItem, toAdminProduct, toProductBody, productField, toMail, toMailPreview, toSettings } from '../models/admin.js';
 
 // A product at or under this many left counts as running low, on the overview and in the
 // products list.
@@ -152,6 +152,18 @@ export async function fetchMailPreview(name) {
 export async function sendTestMail(name) {
   const answer = await pb.send(`/api/shop/admin/mail/${encodeURIComponent(name)}/test`, { method: 'POST' });
   return answer.to;
+}
+
+// The shop's settings, from the one record of `shop_settings` by way of
+// server/pb_hooks/settings.pb.js, which hands out only what an admin may change here.
+export async function fetchSettings() {
+  return toSettings(await pb.send('/api/shop/admin/settings', { method: 'GET' }));
+}
+
+// The shop's language, for its pages, mails and messages at once.
+export async function saveLanguage(language) {
+  const answer = await pb.send('/api/shop/admin/settings', { method: 'POST', body: { language } });
+  return answer.language;
 }
 
 // Put the server's complaints on the form's fields. One the form has no field for, a handle

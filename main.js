@@ -23,6 +23,7 @@ import { ordersPage } from './pages/orders.js';
 import { adminProductsPage } from './pages/admin-products.js';
 import { adminProductPage } from './pages/admin-product.js';
 import { adminMailPage } from './pages/admin-mail.js';
+import { adminSettingsPage } from './pages/admin-settings.js';
 
 createApp({
   app, // state and methods merged into the root component, reachable from every page
@@ -53,6 +54,7 @@ createApp({
     // 'new' for a product that is not there yet.
     '/admin/products/:id': { page: 'admin-product', header: 'admin-header', footer: false },
     '/admin/mail': { page: 'admin-mail', header: 'admin-header', footer: false },
+    '/admin/settings': { page: 'admin-settings', header: 'admin-header', footer: false },
   },
   protected: ['/account'], // register protected route here
   // More than a session. Signed out, /admin goes to the login page like any protected route;
@@ -82,6 +84,7 @@ createApp({
     'admin-products': t('title.adminProducts'),
     'admin-product': t('title.adminProduct'), // until the product's own name arrives
     'admin-mail': t('title.adminMail'),
+    'admin-settings': t('title.adminSettings'),
   },
   stores: { session, cart, theme, chat, i18n }, // register new store here
   // Only partials you render yourself with x-html; header and footer are fetched by the router.
@@ -90,7 +93,7 @@ createApp({
   pages: {
     homePage, productPage, loginPage, registerPage, verifyPage,
     forgotPage, resetPage, confirmEmailPage, accountPage, checkoutPage,
-    adminPage, inboxPage, ordersPage, adminProductsPage, adminProductPage, adminMailPage,
+    adminPage, inboxPage, ordersPage, adminProductsPage, adminProductPage, adminMailPage, adminSettingsPage,
     chatWidget,
   },
   // What AlpineShell says itself when something breaks, in the shop's language.

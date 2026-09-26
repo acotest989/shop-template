@@ -17,6 +17,7 @@ export default {
   'admin.tab.orders': 'Orders',
   'admin.tab.products': 'Products',
   'admin.tab.mail': 'Mail',
+  'admin.tab.settings': 'Settings',
 
   'admin.overview.title': 'Overview',
   'admin.overview.error': 'Could not load the overview.',
@@ -165,4 +166,12 @@ export default {
   'admin.mail.sampleFrom': 'sample from',
   'admin.mail.previewTitle': 'Mail preview',
   'admin.mail.previewError': 'Could not fill this mail.',
+
+  'admin.settings.title': 'Settings',
+  'admin.settings.loadError': 'Could not load the settings.',
+  'admin.settings.language': 'Language',
+  'admin.settings.languageNote': 'What the shop speaks: its pages, the admin area, the mails it sends, its messages and Telegram. Products and the chat’s ready-made questions stay as they were written.',
+  'admin.settings.current': 'In use',
+  'admin.settings.reloadNote': 'The page reloads in the new language.',
+  'admin.settings.saveError': 'Could not change the language.',
 };

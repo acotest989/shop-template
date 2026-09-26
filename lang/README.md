@@ -14,18 +14,11 @@ Two languages ship with the shop:
 | `en/` | English | €12.99, 26 Sept 2026 |
 | `sr-Latn/` | Serbian, Latin script, ijekavian — customers are addressed as "Vi", the admin area as "ti" | 12,99 €, 26. 9. 2026. |
 
-The shop speaks one language at a time, chosen in `index.html`:
+The shop speaks one language at a time, chosen in the admin area under **Settings**, and kept as `language` in the `shop_settings` record. Everything follows it:
 
-```html
-<html lang="sr-Latn">
-…
-"lang/shop": "/lang/sr-Latn/shop.js",
-"lang/admin": "/lang/sr-Latn/admin.js"
-```
-
-The `<title>` and the description in the same file's `<head>` are for search engines and link previews, which read the page as it was served, so they are written there in the shop's language too.
-
-The server never reads `index.html`, so it is told separately: **`language`** in the `shop_settings` record, in the dashboard, set to the same one. That is the language of the mails (`server/mail/`), of what the hooks answer a page with (a product that sold out while in the cart, say), and of the Telegram messages (`server/lang/`). Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in, and the few sentences AlpineShell says itself are the `shell.` keys, handed to it as `texts` in `main.js`.
+- **the pages.** `index.html` names the language in `lang` on `<html>` and in two entries of its import map, `lang/shop` and `lang/admin`, which `lib/i18n.js` loads. `server/pb_hooks/site.pb.js` rewrites all three on every load, along with the `<title>` and the description, which search engines and link previews read without running a script (`site.title` and `site.description` in `server/lang/`). The file itself stays English, and goes out as it is only if the server cannot read it.
+- **the server.** The mails (`server/mail/`), what the hooks answer a page with (a product that sold out while in the cart, say), and the Telegram messages (`server/lang/`).
+- **what nobody wrote here.** Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in, and the few sentences AlpineShell says itself are the `shell.` keys, handed to it as `texts` in `main.js`.
 
 ## Writing an entry
 
@@ -45,6 +38,6 @@ Keys read as `page.what`, so a template says what it shows. A key missing from a
 
 ## Adding a language
 
-Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, set `locale`, and point `index.html` at it. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one.
+Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, and set `locale`. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one.
 
-The server's side is three more things: `server/lang/en.json` copied under the language's name and translated (same syntax, plus how money is written); the mails, as a folder of the same name in `server/mail/`; and the language added to the choices of `language` in `shop_settings`, by a migration. A language other than English and its neighbours also needs its plural rule in `server/pb_hooks/lang.js`, whose engine has no `Intl`.
+The server's side is three more things: `server/lang/en.json` copied under the language's name and translated (same syntax, plus how money is written); the mails, as a folder of the same name in `server/mail/`; and the language added to the choices of `language` in `shop_settings`, by a migration, after which Settings offers it. A language other than English and its neighbours also needs its plural rule in `server/pb_hooks/lang.js`, whose engine has no `Intl`.

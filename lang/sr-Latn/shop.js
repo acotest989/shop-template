@@ -25,6 +25,7 @@ export default {
   'title.adminProducts': 'Svi proizvodi',
   'title.adminProduct': 'Proizvod',
   'title.adminMail': 'E-mailovi',
+  'title.adminSettings': 'Podešavanja',
 
   'brand.name': 'Shop',
 

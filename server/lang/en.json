@@ -3,6 +3,9 @@
   "number.group": ",",
   "money": "{amount} {currency}",
 
+  "site.title": "Shop",
+  "site.description": "A small demo storefront built with Alpine and Tailwind — no framework, no build step.",
+
   "order.incomplete": "The delivery details are incomplete.",
   "order.payment": "Choose how you would like to pay.",
   "order.noCard": "Card payment is not available yet. Please choose cash on delivery.",
@@ -62,6 +65,9 @@
   "mail.cannotFill": "The template could not be filled: {error}",
   "mail.noSuchMail": "There is no mail by that name.",
   "mail.notSent": "The mail could not be sent. Check Settings → Mail in the dashboard.",
+
+  "settings.onlyShop": "Only the shop can change its settings.",
+  "settings.noSuchLanguage": "The shop has no such language.",
 
   "telegram.order": "New order {reference}: {total}",
   "telegram.paidByCard": "Paid by card",

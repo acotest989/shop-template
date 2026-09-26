@@ -27,6 +27,7 @@ export default {
   'title.adminProducts': 'All products',
   'title.adminProduct': 'Product',
   'title.adminMail': 'Mail',
+  'title.adminSettings': 'Settings',
 
   'brand.name': 'Shop',
 

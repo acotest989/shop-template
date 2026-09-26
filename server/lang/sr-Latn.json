@@ -5,6 +5,9 @@
   "currency.EUR": "€",
   "currency.BAM": "KM",
 
+  "site.title": "Shop",
+  "site.description": "Mala demo prodavnica napravljena uz Alpine i Tailwind — bez frameworka, bez build koraka.",
+
   "order.incomplete": "Podaci za dostavu nisu potpuni.",
   "order.payment": "Izaberite način plaćanja.",
   "order.noCard": "Plaćanje karticom još nije dostupno. Izaberite plaćanje pouzećem.",
@@ -92,6 +95,9 @@
   "mail.cannotFill": "Šablon se nije mogao popuniti: {error}",
   "mail.noSuchMail": "Nema e-maila pod tim imenom.",
   "mail.notSent": "E-mail nije mogao biti poslan. Provjeri Settings → Mail u dashboardu.",
+
+  "settings.onlyShop": "Samo prodavnica može mijenjati svoja podešavanja.",
+  "settings.noSuchLanguage": "Prodavnica nema taj jezik.",
 
   "telegram.order": "Nova narudžba {reference}: {total}",
   "telegram.paidByCard": "Plaćeno karticom",

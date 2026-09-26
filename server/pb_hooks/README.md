@@ -22,6 +22,8 @@ A route rather than a create hook, because then the collection can stay closed: 
 | `inbox.pb.js` | the admin's replies and deletions, and the job that mails a customer a reply they have not seen |
 | `products.pb.js` | saves a product from the admin area |
 | `mail.pb.js` | puts `server/mail/` in place of PocketBase's own account mails, and serves `/admin/mail` its previews and tests |
+| `settings.pb.js` | reads and saves what `/admin/settings` changes: the shop's language |
+| `site.pb.js` | hands out `index.html` in the shop's language, for every route of the shop |
 | `cache.pb.js` | tells browsers to check the shop's files before using a cached copy |
 | `private.pb.js` | keeps `server/` and dotfiles out of what `--publicDir=..` serves |
 | `mailer.js`, `lang.js`, `settings.js`, `telegram.js` | not hooks: code the hooks above share |

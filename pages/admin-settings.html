@@ -1,0 +1,45 @@
+<main class="mx-auto w-full max-w-6xl p-4" x-data="adminSettingsPage">
+
+  <h1 class="mb-4 text-xl font-semibold text-gray-900" x-text="t('admin.settings.title')"></h1>
+
+  <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
+
+  <section class="card max-w-xl p-4" x-show="pending || languages.length">
+    <h2 class="text-sm font-semibold text-gray-900" x-text="t('admin.settings.language')"></h2>
+    <p class="muted mt-1 text-sm" x-text="t('admin.settings.languageNote')"></p>
+
+    <div x-show="pending" class="mt-4 flex flex-col gap-2" aria-hidden="true">
+      <div class="skeleton h-10 w-full"></div>
+      <div class="skeleton h-10 w-full"></div>
+    </div>
+
+    <!-- Radios rather than a select: the choices arrive with the settings, and a select fills in
+         its value before an x-for could add the options. -->
+    <fieldset x-show="!pending" class="mt-4 flex flex-col gap-2" :disabled="saving">
+      <legend class="sr-only" x-text="t('admin.settings.language')"></legend>
+      <template x-for="code in languages" :key="code">
+        <label
+          class="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors"
+          :class="chosen === code ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
+        >
+          <input type="radio" name="language" :value="code" x-model="chosen" class="accent-gray-900">
+          <span class="text-sm font-medium text-gray-900" x-text="nameOf(code)"></span>
+          <span class="muted text-xs" x-show="nameHere(code) && nameHere(code).toLowerCase() !== nameOf(code).toLowerCase()" x-text="nameHere(code)"></span>
+          <span x-show="code === current" class="ml-auto rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600" x-text="t('admin.settings.current')"></span>
+        </label>
+      </template>
+    </fieldset>
+
+    <div x-show="!pending" class="mt-4 flex items-center gap-3">
+      <button
+        type="button"
+        class="btn btn-primary"
+        :disabled="saving || chosen === current"
+        @click="save()"
+        x-text="saving ? t('common.saving') : t('common.save')"
+      ></button>
+      <p class="muted text-xs" x-show="chosen !== current" x-text="t('admin.settings.reloadNote')"></p>
+    </div>
+  </section>
+
+</main>

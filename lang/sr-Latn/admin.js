@@ -15,6 +15,7 @@ export default {
   'admin.tab.orders': 'Narudžbe',
   'admin.tab.products': 'Proizvodi',
   'admin.tab.mail': 'E-mailovi',
+  'admin.tab.settings': 'Podešavanja',
 
   'admin.overview.title': 'Pregled',
   'admin.overview.error': 'Pregled se nije mogao učitati.',
@@ -176,4 +177,12 @@ export default {
   'admin.mail.sampleFrom': 'primjer iz',
   'admin.mail.previewTitle': 'Pregled e-maila',
   'admin.mail.previewError': 'Ovaj e-mail se nije mogao popuniti.',
+
+  'admin.settings.title': 'Podešavanja',
+  'admin.settings.loadError': 'Podešavanja se nisu mogla učitati.',
+  'admin.settings.language': 'Jezik',
+  'admin.settings.languageNote': 'Jezik prodavnice: njene stranice, admin dio, e-mailovi koje šalje, poruke i Telegram. Proizvodi i ponuđena pitanja u chatu ostaju onako kako su napisani.',
+  'admin.settings.current': 'Trenutni',
+  'admin.settings.reloadNote': 'Stranica se ponovo učitava na novom jeziku.',
+  'admin.settings.saveError': 'Jezik se nije mogao promijeniti.',
 };
