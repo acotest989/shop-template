@@ -1,4 +1,4 @@
-import { storageKey } from '../lib/storage.js';
+import { storageKey } from '../lib/shop.js';
 import { t } from '../lib/i18n.js';
 import { currentUser, onAuthChange } from '../services/auth.js';
 import {

@@ -1,7 +1,6 @@
 import { form, errorMessage, setPageTitle } from 'alpineshell';
-import { fetchAdminProduct, fetchProductOptions, saveProduct } from '../../services/admin.js';
-import { toCents, fromCents } from '../../lib/format.js';
-import { humanize } from '../../lib/helpers.js';
+import { fetchAdminProduct, fetchProductOptions, saveProduct } from '../../services/products.js';
+import { toCents, fromCents, humanize } from '../../lib/format.js';
 import { t } from '../../lib/i18n.js';
 
 // The same limits as pb_hooks/products.pb.js, which is the one that counts.

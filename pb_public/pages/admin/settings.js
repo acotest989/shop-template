@@ -1,6 +1,6 @@
 import { errorMessage } from 'alpineshell';
 import { t, locale } from '../../lib/i18n.js';
-import { fetchSettings, saveSettings } from '../../services/admin.js';
+import { fetchSettings, saveSettings } from '../../services/settings.js';
 
 // The shop's settings, each section saved on its own: the language, which the pages, the mails,
 // the server's messages and Telegram all speak; the accent colour; and how the owner hears of a

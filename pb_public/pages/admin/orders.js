@@ -1,6 +1,6 @@
 import { errorMessage } from 'alpineshell';
 import { t } from '../../lib/i18n.js';
-import { fetchAllOrders, subscribeToOrders, updateOrder } from '../../services/admin.js';
+import { fetchAllOrders, subscribeToOrders, updateOrder } from '../../services/orders.js';
 
 // Every status an order can have, as the collection and the hook know them.
 const STATUSES = ['pending', 'shipped', 'delivered', 'returned', 'cancelled'];

@@ -1,5 +1,5 @@
 import PocketBase, { LocalAuthStore } from 'pocketbase';
-import { storageKey } from '../lib/storage.js';
+import { storageKey } from '../lib/shop.js';
 import { t } from '../lib/i18n.js';
 
 // The only file that imports the SDK, so swapping the backend stays a one-file job.

@@ -1,6 +1,6 @@
 import { errorMessage } from 'alpineshell';
-import { fetchAdminProducts, fetchProductOptions, LOW_STOCK } from '../../services/admin.js';
-import { humanize } from '../../lib/helpers.js';
+import { fetchAdminProducts, fetchProductOptions, LOW_STOCK } from '../../services/products.js';
+import { humanize } from '../../lib/format.js';
 import { t } from '../../lib/i18n.js';
 
 const SHOW = ['', 'listed', 'hidden', 'low'];

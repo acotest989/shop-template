@@ -1,6 +1,6 @@
 import { errorMessage } from 'alpineshell';
 import { t } from '../../lib/i18n.js';
-import { fetchMails, fetchMailPreview, sendTestMail } from '../../services/admin.js';
+import { fetchMails, fetchMailPreview, sendTestMail } from '../../services/mail.js';
 
 // Every mail the shop sends, and each one as it would arrive, filled with the sample data in
 // pb_hooks/mail/mails.json. The one thing sent from here is a test, to the admin's own address.

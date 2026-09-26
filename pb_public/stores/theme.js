@@ -1,4 +1,4 @@
-import { storageKey } from '../lib/storage.js';
+import { storageKey } from '../lib/shop.js';
 
 // The key the script at the top of index.html reads before the first paint.
 const KEY = storageKey('theme');

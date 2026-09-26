@@ -1,6 +1,5 @@
 import { pb } from './pb.js';
 import { fieldError } from 'alpineshell';
-import { toUser } from '../models/user.js';
 import { t } from '../lib/i18n.js';
 
 // All contact with the SDK's auth lives here. The token is the SDK's business —
@@ -183,4 +182,17 @@ export function currentUser() {
 
 export function onAuthChange(callback) {
   pb.authStore.onChange((token, record) => callback(record ? toUser(record) : null));
+}
+
+// The account as the app knows it: the record's fields stop here.
+function toUser(record) {
+  return {
+    id: record.id,
+    name: record.name || record.email.split('@')[0],
+    email: record.email,
+
+    // Answers the chat from the inbox. Ticked in the dashboard only; the server checks it
+    // again on every reply, so this decides what the page offers and nothing more.
+    admin: record.admin === true,
+  };
 }

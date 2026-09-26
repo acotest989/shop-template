@@ -1,6 +1,8 @@
 import { pb } from './pb.js';
-import { toThread } from '../models/inbox.js';
-import { toMessage } from '../models/chat.js';
+import { toMessage } from './chat.js';
+
+// The admin area's side of the chat: every conversation, and the shop's replies. A message is
+// drawn as the customer's chat draws it, by toMessage in services/chat.js.
 
 const THREAD_OPTIONS = {
   expand: 'user,product',
@@ -88,4 +90,27 @@ export async function markAnswered(threadId) {
     method: 'POST',
     body: { thread: threadId },
   });
+}
+
+// A conversation as the inbox lists it: who is asking, about what, the last thing said, and
+// whether the shop owes an answer.
+function toThread(raw) {
+  const product = raw.expand?.product;
+  const user = raw.expand?.user;
+
+  return {
+    id: raw.id,
+    subject: raw.subject,
+
+    // Null once the product is out of the catalogue; the subject keeps its name.
+    product: product ? { handle: product.handle, title: product.title, image: product.image } : null,
+
+    // Null for a guest, until they sign in from the same browser.
+    customer: user ? { name: user.name || user.email.split('@')[0], email: user.email } : null,
+
+    visitor: raw.visitor,
+    waiting: raw.waiting === true,
+    preview: raw.preview ?? '',
+    lastMessageAt: raw.last_message ? raw.last_message.replace(' ', 'T') : '',
+  };
 }

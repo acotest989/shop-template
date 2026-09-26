@@ -55,9 +55,8 @@ pb_public/          what the browser gets, served as it is
   pages/            one .html + one .js per route, in shop/, account/ and admin/
   partials/         markup reused across routes, and chrome that outlives them; admin/ has the admin area's
   stores/           Alpine stores (state that outlives a page)
-  services/         talks to the outside world; only place that knows endpoints
-  models/           what the app's own records look like; API shapes stop here
-  lib/              money, dates, storage keys, t(); helpers.js takes what has no subject yet
+  services/         one file per topic, the only code that knows endpoints; API shapes stop there
+  lib/              money and dates, t(), the shop's name and storage keys, the ?next= path
   lang/             every sentence on screen, one folder per language
 pb_hooks/           whatever the browser must not decide
   mail/             every mail the shop sends, as a template
@@ -79,9 +78,9 @@ The pages are in three parts of the shop, `shop/`, `account/` and `admin/`, and 
 
 No build also means no version in a filename, so nothing tells a browser that `app.js` changed. `pb_hooks/cache.pb.js` sends `Cache-Control: no-cache` with everything outside `/api/`: the browser keeps its copy but asks before using it, and an unchanged file costs a 304. Without it, a file nobody touched for weeks can stay in a visitor's cache for days after a deploy, next to newer files that expect it to have changed.
 
-**Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase, `models/product.js` turns a record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. Searching, filtering by category, sorting and paging all happen in the database: a page hands over a term, a category and a page number, and gets back one page of products with the count behind it.
+**Data lives behind `services/`.** Pages never fetch anything themselves, and never see where the data came from: `services/products.js` asks PocketBase and turns each record into the app's own product, and the column names stop there — `price_cents` becomes `price`, `regular_price_cents` becomes `regularPrice`. There is one such file per topic, products, orders, chat, the inbox, mail, settings and the account, each with its calls at the top and what its records become at the bottom, so everything about one thing is in one place. Searching, filtering by category, sorting and paging all happen in the database: a page hands over a term, a category and a page number, and gets back one page of products with the count behind it.
 
-That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js`, `models/user.js` and `stores/session.js` changed, while `pages/account/login.html`, `pages/account/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/shop/home.js` and `pages/shop/product.js` were not opened at all. Orders were the last of it, and `services/mock.js` went with them — nothing in this app is faked any more.
+That boundary has been tested twice rather than asserted. Sign-in moved from a hard-coded demo user to PocketBase: `services/auth.js`, `services/pb.js` and `stores/session.js` changed, while `pages/account/login.html`, `pages/account/login.js` and `app.js` did not. The catalogue then moved the same way, from dummyjson to a `products` collection, and `pages/shop/home.js` and `pages/shop/product.js` were not opened at all. Orders were the last of it, and `services/mock.js` went with them — nothing in this app is faked any more.
 
 **State ownership.** Page-specific state (products, loading, errors) belongs to the page component. Anything shared across routes and written from outside Alpine — the session — is a store, because plain component data cannot be updated reactively from module code such as the router's auth guard. The cart is a store for the same reason: the header badge, the product card and `/cart` all read it, and it survives a reload through `$persist`. It works the other way round too — `pages/shop/cart.html` has no `x-data` at all, because a page whose state lives in a store needs no component of its own.
 

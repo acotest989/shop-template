@@ -1,5 +1,6 @@
 import { errorMessage } from 'alpineshell';
-import { fetchOverview, LOW_STOCK } from '../../services/admin.js';
+import { fetchOverview } from '../../services/overview.js';
+import { LOW_STOCK } from '../../services/products.js';
 import { t } from '../../lib/i18n.js';
 
 // The admin area's front page: what wants the shop's attention, each figure a way in to it.

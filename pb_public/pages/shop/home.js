@@ -1,5 +1,5 @@
 import { fetchProducts, fetchCategories } from '../../services/products.js';
-import { humanize } from '../../lib/helpers.js';
+import { humanize } from '../../lib/format.js';
 import { t } from '../../lib/i18n.js';
 import { errorMessage } from 'alpineshell';
 

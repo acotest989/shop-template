@@ -32,6 +32,13 @@ export function discountPercent(price, compareAt) {
   return Math.round((1 - price / compareAt) * 100);
 }
 
+// A category is stored as a slug, and shown as words. Only the readable half of the round trip:
+// a slug has thrown away case and punctuation, so this makes one presentable rather than
+// restoring what it was made from.
+export function humanize(slug) {
+  return slug.replace(/-/g, ' ').replace(/^./, (first) => first.toUpperCase());
+}
+
 // How much of a five-star row is filled, snapped to the nearest half the way shops
 // show it, so a score reads as a shape instead of a sliver.
 export function starPercent(rating = 0) {

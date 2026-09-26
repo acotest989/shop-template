@@ -1,4 +1,4 @@
-import { storageKey } from '../lib/storage.js';
+import { storageKey } from '../lib/shop.js';
 
 // The most of one product a single order takes. The server refuses more on its own —
 // MAX_QTY in pb_hooks/orders.pb.js — so this only keeps the cart from building an
