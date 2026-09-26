@@ -11,7 +11,7 @@ import {
   clearInbox,
 } from '../../services/inbox.js';
 
-// MAX_LENGTH in pb_hooks/inbox.pb.js, which is the one that counts.
+// MAX_LENGTH in pb_hooks/lib/inbox.js, which is the one that counts.
 const MAX_LENGTH = 2000;
 
 const newestFirst = (a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt);

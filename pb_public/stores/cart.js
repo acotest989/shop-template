@@ -1,12 +1,12 @@
 import { storageKey } from '../lib/shop.js';
 
 // The most of one product a single order takes. The server refuses more on its own —
-// MAX_QTY in pb_hooks/orders.pb.js — so this only keeps the cart from building an
+// MAX_QTY in pb_hooks/lib/orders.js — so this only keeps the cart from building an
 // order that would be turned away.
 const MAX_QTY = 10;
 
 // The shipping rules as the hook has them: SHIPPING, FREE_FROM and FREE_UP_TO in
-// pb_hooks/orders.pb.js. The hook's are the ones that count, and it refuses an
+// pb_hooks/lib/orders.js. The hook's are the ones that count, and it refuses an
 // order whose page showed less shipping than it works out.
 const SHIPPING = 1500;
 const FREE_FROM = 30000;

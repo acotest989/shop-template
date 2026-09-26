@@ -1,13 +1,13 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
 // The shop's language on the server's side: what the hooks say back to a page, the Telegram
 // messages, money as the mails write it, and which folder of pb_hooks/mail/ the mails come from.
 // It is `language` in the one record of `shop_settings`, chosen at /admin/settings, and the
-// pages follow it too: site.pb.js asks language() before it hands out index.html.
+// pages follow it too: lib/site.js asks language() before it hands out index.html.
 //
 // The sentences are pb_hooks/lang/<language>.json, read on every use like the mails, so an edit
-// needs no restart. Whatever a language lacks is taken from en.json. Not a hook itself: a
-// handler takes it in with require(__hooks + '/lang.js').
+// needs no restart. Whatever a language lacks is taken from en.json. Code that says
+// something takes it in with require(__hooks + '/lib/lang.js').
 
 const DIR = __hooks + '/lang/';
 
@@ -46,7 +46,7 @@ const plural = (lang, n) => {
 };
 
 // The shop's language, read once, for a handler that has more than one thing to say:
-//   const lang = require(__hooks + '/lang.js').open();
+//   const lang = require(__hooks + '/lib/lang.js').open();
 //   throw new BadRequestError(lang.t('order.priceChanged', { title: title }));
 // t() is the pages' t(): {name} is filled in, and { one, few, other } is picked by {n}.
 function open() {

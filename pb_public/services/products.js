@@ -196,7 +196,7 @@ function toAdminProduct(raw) {
   };
 }
 
-// Going out to pb_hooks/products.pb.js. `stockWas` is the stock the form opened with:
+// Going out to pb_hooks/lib/products.js. `stockWas` is the stock the form opened with:
 // the hook writes a changed stock only over that number, so a sale made meanwhile is not undone.
 function toProductBody(product, { stockWas } = {}) {
   return {

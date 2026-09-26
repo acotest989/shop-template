@@ -61,7 +61,7 @@ export function subscribeToMessages(threadId, onChange) {
 }
 
 export async function sendReply(threadId, text) {
-  const answer = await pb.send('/api/shop/inbox/reply', {
+  const answer = await pb.send('/api/shop/admin/inbox/reply', {
     method: 'POST',
     body: { thread: threadId, body: text.trim() },
   });
@@ -69,7 +69,7 @@ export async function sendReply(threadId, text) {
 }
 
 export async function deleteThread(threadId) {
-  await pb.send('/api/shop/inbox/delete', {
+  await pb.send('/api/shop/admin/inbox/delete', {
     method: 'POST',
     body: { thread: threadId },
   });
@@ -78,7 +78,7 @@ export async function deleteThread(threadId) {
 // Everything no newer than `before`, the newest conversation the page had on screen. Answers
 // with how many went.
 export async function clearInbox(before) {
-  const answer = await pb.send('/api/shop/inbox/clear', {
+  const answer = await pb.send('/api/shop/admin/inbox/clear', {
     method: 'POST',
     body: { before },
   });
@@ -86,7 +86,7 @@ export async function clearInbox(before) {
 }
 
 export async function markAnswered(threadId) {
-  await pb.send('/api/shop/inbox/answered', {
+  await pb.send('/api/shop/admin/inbox/answered', {
     method: 'POST',
     body: { thread: threadId },
   });

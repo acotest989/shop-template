@@ -10,7 +10,7 @@ import {
   markSeen,
 } from '../services/chat.js';
 
-// GUEST_QUESTIONS and MAX_LENGTH in pb_hooks/chat.pb.js. The hook's are the ones
+// GUEST_QUESTIONS and MAX_LENGTH in pb_hooks/lib/chat.js. The hook's are the ones
 // that count; these only keep the chat from offering what it would refuse.
 const GUEST_QUESTIONS = 3;
 const MAX_LENGTH = 500;

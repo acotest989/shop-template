@@ -4,16 +4,21 @@ Every mail the shop sends is a file here, PocketBase's own account mails include
 
 | File | What it is |
 |---|---|
+| `layout.html` | The frame around every mail, in every language: the shop's name above, its address below, the mail as `{{{content}}}`, and the hidden `{{preheader}}`. |
+| `en/`, `sr-Latn/` | The mails in each language, the same files in every folder. |
+
+In each language's folder:
+
+| File | What it is |
+|---|---|
 | `mails.json` | Every mail, in the order `/admin/mail` lists them: what it is, who gets it, when, and the sample its preview is filled with. |
-| `layout.html` | The frame around every mail: the shop's name above, its address below, the mail as `{{{content}}}`, and the hidden `{{preheader}}`. |
 | `_order-summary.html` | A part, not a mail: the lines, shipping and total both order mails show. |
 | `_link-fallback.html` | A part: under a button, its `{{link}}` spelled out, for a mail program that draws no button. |
 | everything else | One mail each, named as in `mails.json`. |
-| `sr-Latn/` | The same mails in Serbian, and `mails.json` with Serbian descriptions and samples. |
 
 ## Languages
 
-The files here are English. A folder named after a language holds the same files translated, and a shop sends the one chosen at `/admin/settings`, `language` in `shop_settings` (see `pb_public/lang/README.md`). A file the folder lacks is taken from here, so a half-translated folder still sends every mail. `layout.html` has no words of its own and serves every language: `{{language}}` puts the language on its `<html>`.
+Every language is a folder, and a shop sends from the one chosen at `/admin/settings`, `language` in `shop_settings` (see `pb_public/lang/README.md`). A file a language's folder lacks is taken from `en/`, so a half-translated folder still sends every mail. `layout.html` has no words of its own and serves them all: `{{language}}` puts the language on its `<html>`.
 
 The notes on what each mail is for are in the English files; the translations carry none, so they stay short.
 
@@ -44,22 +49,22 @@ The `<title>` is the subject. The rest is the body, and it goes into `layout.htm
 
 It is mail, not a web page: tables for layout, styles inline on each element, no scripts. Plenty of mail programs read nothing else.
 
-Nothing else needs writing by hand. `pb_hooks/mailer.js` makes two things from every template as it fills it:
+Nothing else needs writing by hand. `pb_hooks/lib/mailer.js` makes two things from every template as it fills it:
 
 - **a plain-text part**, sent beside the HTML: what a program that shows no HTML shows, and what spam filters expect to find. A link becomes its words and its address, a table row a line. Anything marked `data-html-only` is left out of it — the address under a button, which the button's own line already carries.
 - **the preheader**, the line an inbox shows under the subject: the start of the mail's own text, hidden in the mail itself. Without it, the inbox would show the shop's name from the header.
 
-A mail with a link that runs out says how long it is good for, in `{{validFor}}`: PocketBase's token settings on the users collection (**Options** in the dashboard), written as the shop's language writes time. The order confirmation's password link is a reset token, 30 minutes unless that is changed there.
+A mail with a link that runs out says how long it is good for, in `{{validFor}}`: PocketBase's token settings on the users collection (**Options** in the dashboard), written as the shop's language writes time. The order confirmation's password link is a reset token, which this shop keeps good for a day: `pb_migrations/1790295000_password_link_day.js`.
 
 ## Who sends what
 
 | Mail | Sent by |
 |---|---|
-| `order-confirmation`, `shop-new-order` | `pb_hooks/orders.pb.js`, as an order is placed |
-| `shop-new-question` | `pb_hooks/chat.pb.js`, as a question starts waiting |
-| `chat-reply` | `pb_hooks/inbox.pb.js`, a job that runs every minute |
-| `verify-email`, `reset-password`, `confirm-email-change`, `login-alert` | PocketBase itself; `pb_hooks/mail.pb.js` swaps its text for these |
+| `order-confirmation`, `shop-new-order` | `pb_hooks/lib/orders.js`, as an order is placed |
+| `shop-new-question` | `pb_hooks/lib/chat.js`, as a question starts waiting |
+| `chat-reply` | `pb_hooks/lib/inbox.js`, a job that runs every minute |
+| `verify-email`, `reset-password`, `confirm-email-change`, `login-alert` | PocketBase itself; `pb_hooks/lib/mail.js` swaps its text for these |
 
 The mail templates on the users collection in the dashboard no longer decide anything: the hooks replace what PocketBase makes from them. Should one of these files fail to fill, PocketBase's own message goes out in its place rather than none at all.
 
-A new mail is a file here, an entry in `mails.json`, and a hook that calls `require(__hooks + '/mailer.js').send(name, data, to)` — and the same file and entry in every language folder. Money the hook hands over is already written in the shop's language, by `lang.money()` in `pb_hooks/lang.js`.
+A new mail is a file in `en/`, an entry in its `mails.json`, and code that calls `require(__hooks + '/lib/mailer.js').send(name, data, to)` — and the same file and entry in every other language's folder. Money the hook hands over is already written in the shop's language, by `lang.money()` in `pb_hooks/lib/lang.js`.

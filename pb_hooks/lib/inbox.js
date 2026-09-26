@@ -1,21 +1,29 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
-// The shop's side of the chat: a reply, and closing a conversation that needs none. Both are
-// for an account with `admin` ticked, and only the dashboard can tick it. The collections
-// refuse writes from a browser, so these routes are the only way a reply gets in.
-//
-// Everything lives inside each handler, for the reason given in orders.pb.js.
-routerAdd('POST', '/api/shop/inbox/reply', (e) => {
-  // The messages collection's own limit on a body.
-  const MAX_LENGTH = 2000;
-  const lang = require(__hooks + '/lang.js').open(); // what a refusal says
+// The shop's side of the chat, at /admin/inbox: a reply, closing a conversation that needs none,
+// deleting one or all of them, and the job that mails a customer a reply they have not seen. The
+// routes and the job that call these are in pb_hooks/shop.pb.js; the routes are an admin's alone.
+// The collections refuse writes from a browser, so the routes are the only way a reply gets in.
 
-  if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError(lang.t('inbox.onlyShopReply'));
+// The messages collection's own limit on a body.
+const MAX_LENGTH = 2000;
+
+// A customer who has not seen a reply in this long is mailed about it.
+const DELAY_MINUTES = 5;
+
+// The conversation a request names, or the refusal to say it is gone.
+const threadOf = (lang, id) => {
+  try {
+    return $app.findRecordById('threads', String(id || ''));
+  } catch (err) {
+    throw new NotFoundError(lang.t('inbox.gone'));
   }
+};
 
+// POST /api/shop/admin/inbox/reply
+function reply(e) {
+  const lang = require(__hooks + '/lib/lang.js').open(); // what a refusal says
   const body = e.requestInfo().body || {};
-  const threadId = String(body.thread || '');
   const text = String(body.body || '').trim();
 
   if (!text) {
@@ -30,7 +38,7 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
   $app.runInTransaction((tx) => {
     let thread;
     try {
-      thread = tx.findRecordById('threads', threadId);
+      thread = tx.findRecordById('threads', String(body.thread || ''));
     } catch (err) {
       throw new NotFoundError(lang.t('inbox.gone'));
     }
@@ -46,8 +54,8 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
     thread.set('waiting', false);
 
     // A customer is mailed about a reply they have not seen in five minutes, by the job below.
-    // The clock starts at the first unseen reply, so replying twice does not push it back.
-    // A guest has no address to mail.
+    // The clock starts at the first unseen reply, so replying twice does not push it back. A
+    // guest has no address to mail.
     if (thread.getString('user') && !thread.getString('reply_unseen_since')) {
       thread.set('reply_unseen_since', new DateTime());
       thread.set('reply_mailed', false);
@@ -66,65 +74,37 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
   });
 
   return e.json(200, { message: sent });
-}, $apis.requireAuth('users'));
+}
 
-// For a conversation that needs no answer: a thank-you, or a question settled some other way,
-// like a phone call. It leaves the list of waiting ones without a reply the customer would see.
-routerAdd('POST', '/api/shop/inbox/answered', (e) => {
-  const lang = require(__hooks + '/lang.js').open();
-
-  if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError(lang.t('inbox.onlyShopClose'));
-  }
-
-  const threadId = String((e.requestInfo().body || {}).thread || '');
-
-  let thread;
-  try {
-    thread = $app.findRecordById('threads', threadId);
-  } catch (err) {
-    throw new NotFoundError(lang.t('inbox.gone'));
-  }
+// POST /api/shop/admin/inbox/answered — for a conversation that needs no answer: a thank-you, or
+// a question settled some other way, like a phone call. It leaves the list of waiting ones
+// without a reply the customer would see.
+function answered(e) {
+  const lang = require(__hooks + '/lib/lang.js').open();
+  const thread = threadOf(lang, (e.requestInfo().body || {}).thread);
 
   thread.set('waiting', false);
   $app.save(thread);
 
   return e.json(200, { waiting: false });
-}, $apis.requireAuth('users'));
+}
 
-// A conversation and every message in it, for good: the messages go with the thread, since
-// their relation to it cascades. Realtime tells the inbox, and a customer's open chat, as the
-// records go. A guest's tab keeps its own copy until it closes, which is all a guest ever had.
-routerAdd('POST', '/api/shop/inbox/delete', (e) => {
-  const lang = require(__hooks + '/lang.js').open();
-
-  if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError(lang.t('inbox.onlyShopDelete'));
-  }
-
-  const threadId = String((e.requestInfo().body || {}).thread || '');
-
-  let thread;
-  try {
-    thread = $app.findRecordById('threads', threadId);
-  } catch (err) {
-    throw new NotFoundError(lang.t('inbox.gone'));
-  }
-
-  $app.delete(thread);
+// POST /api/shop/admin/inbox/delete — a conversation and every message in it, for good: the
+// messages go with the thread, since their relation to it cascades. Realtime tells the inbox,
+// and a customer's open chat, as the records go. A guest's tab keeps its own copy until it
+// closes, which is all a guest ever had.
+function remove(e) {
+  const lang = require(__hooks + '/lib/lang.js').open();
+  $app.delete(threadOf(lang, (e.requestInfo().body || {}).thread));
 
   return e.json(200, { deleted: true });
-}, $apis.requireAuth('users'));
+}
 
-// Every conversation at once, and every message in them. The page sends the newest moment it
-// had on screen, and only what is no newer goes: a question that lands while the shop is
-// confirming is not swept away unread with the rest.
-routerAdd('POST', '/api/shop/inbox/clear', (e) => {
-  const lang = require(__hooks + '/lang.js').open();
-
-  if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError(lang.t('inbox.onlyShopClear'));
-  }
+// POST /api/shop/admin/inbox/clear — every conversation at once, and every message in them. The
+// page sends the newest moment it had on screen, and only what is no newer goes: a question that
+// lands while the shop is confirming is not swept away unread with the rest.
+function clear(e) {
+  const lang = require(__hooks + '/lib/lang.js').open();
 
   // The page has it as 2026-09-15T13:05:00.123Z; stored dates put a space where the T is.
   const before = String((e.requestInfo().body || {}).before || '').replace('T', ' ');
@@ -143,13 +123,11 @@ routerAdd('POST', '/api/shop/inbox/clear', (e) => {
   });
 
   return e.json(200, { deleted: deleted });
-}, $apis.requireAuth('users'));
+}
 
-// Every minute, one mail to each customer with a reply they have not seen for five minutes.
-// Seen means the chat on the product page showed it, and said so to /api/shop/chat/seen.
-cronAdd('chat_reply_mail', '* * * * *', () => {
-  const DELAY_MINUTES = 5;
-
+// Every minute, one mail to each customer with a reply they have not seen for five minutes. Seen
+// means the chat on the product page showed it, and said so to /api/shop/chat/seen.
+function mailReplies() {
   // Dates are stored as text in this very format, so they compare as text.
   const cutoff = new Date(Date.now() - DELAY_MINUTES * 60 * 1000).toISOString().replace('T', ' ');
 
@@ -191,7 +169,7 @@ cronAdd('chat_reply_mail', '* * * * *', () => {
       const name = user.getString('name');
 
       // chat-reply.html in pb_hooks/mail/.
-      require(__hooks + '/mailer.js').send('chat-reply', {
+      require(__hooks + '/lib/mailer.js').send('chat-reply', {
         name: name,
         product: thread.getString('subject'),
         reply: latest.length ? latest[0].getString('body') : '',
@@ -201,4 +179,6 @@ cronAdd('chat_reply_mail', '* * * * *', () => {
       $app.logger().error('reply mail failed', 'thread', thread.id, 'error', String(err));
     }
   }
-});
+}
+
+module.exports = { reply, answered, remove, clear, mailReplies };

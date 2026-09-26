@@ -3,7 +3,7 @@ import { fetchAdminProduct, fetchProductOptions, saveProduct } from '../../servi
 import { toCents, fromCents, humanize } from '../../lib/format.js';
 import { t } from '../../lib/i18n.js';
 
-// The same limits as pb_hooks/products.pb.js, which is the one that counts.
+// The same limits as pb_hooks/lib/products.js, which is the one that counts.
 const PICTURE = /^https:\/\/\S+$/;
 const MAX_TITLE = 200;
 const MAX_BRAND = 100;

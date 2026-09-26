@@ -98,7 +98,7 @@ createApp({
     timedOut: t('shell.timedOut'),
   },
   // The suffix after every page's title. Not document.title, the default: a product's page
-  // arrives titled with the product already (pb_hooks/site.pb.js).
+  // arrives titled with the product already (pb_hooks/lib/site.js).
   siteName: shopName,
   // Defaults in effect — uncomment to change:
   // loginPath: '/login',        // where the guard sends a signed-out visitor

@@ -1,23 +1,25 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
-// A question from the chat on a product page: one of the shop's own, picked from the list,
-// or one the visitor wrote. The chat collections refuse every write, so this route is the
-// only way in. A customer reads their conversations through the collection rules; a guest
-// reads nothing back.
-//
-// Everything lives inside the handler, for the reason given in orders.pb.js.
-routerAdd('POST', '/api/shop/chat', (e) => {
-  // What a guest may write before an account is the way on, which is also the only way to
-  // read a reply. Picking from the list is free. stores/chat.js shows the same numbers.
-  const GUEST_QUESTIONS = 3;
-  const MAX_LENGTH = 500;
+// The chat on a product page: a question, the customer having seen a reply, and a guest's
+// conversations becoming their account's. The routes that call these are in
+// pb_hooks/shop.pb.js. The chat collections refuse every write, so the routes are the only way
+// in; a customer reads their conversations through the collection rules, a guest reads nothing
+// back.
 
-  // The id the browser made for itself with crypto.randomUUID(). It tells the shop the same
-  // visitor came back; it is never taken as proof of who they are.
-  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+// What a guest may write before an account is the way on, which is also the only way to read a
+// reply. Picking from the list is free. pb_public/stores/chat.js shows the same numbers.
+const GUEST_QUESTIONS = 3;
+const MAX_LENGTH = 500;
 
-  // What a refusal says, and the Telegram message: pb_hooks/lang.js.
-  const lang = require(__hooks + '/lang.js').open();
+// The id the browser made for itself with crypto.randomUUID(). It tells the shop the same
+// visitor came back; it is never taken as proof of who they are.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+// POST /api/shop/chat — one of the shop's own questions, picked from the list, or one the
+// visitor wrote.
+function ask(e) {
+  // What a refusal says, and the Telegram message: lib/lang.js.
+  const lang = require(__hooks + '/lib/lang.js').open();
 
   const info = e.requestInfo();
   const body = info.body || {};
@@ -85,8 +87,8 @@ routerAdd('POST', '/api/shop/chat', (e) => {
       }
     }
 
-    // One conversation per product: a customer's across every browser they sign in from,
-    // a guest's for as long as the browser keeps its id.
+    // One conversation per product: a customer's across every browser they sign in from, a
+    // guest's for as long as the browser keeps its id.
     let thread = null;
     try {
       thread = user
@@ -143,57 +145,55 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     };
   });
 
-  // After the transaction, and outside it: the question stands whether or not the owner hears
-  // of it, and a mail server that stalls must not cost the visitor what they wrote. Mail, a
-  // Telegram message or both, as the switches in `shop_settings` say: pb_hooks/settings.js.
-  if (notice) {
-    let settings = null;
-    try {
-      settings = require(__hooks + '/settings.js');
-    } catch (err) {
-      $app.logger().error('settings unreadable', 'error', String(err));
-    }
-    const on = (name) => !settings || settings.on(name); // unreadable switches count as on
-
-    // To the address the shop sends from, as with orders, so there is nothing else to configure:
-    // shop-new-question.html in pb_hooks/mail/.
-    if (on('mail_questions')) {
-      try {
-        const meta = $app.settings().meta;
-        require(__hooks + '/mailer.js').send('shop-new-question', {
-          product: notice.subject,
-          from: notice.from,
-          email: notice.email,
-          text: notice.text,
-          inboxLink: meta.appURL + '/admin/inbox?thread=' + notice.thread,
-        }, [{ address: meta.senderAddress }]);
-      } catch (err) {
-        $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
-      }
-    }
-
-    // The owner's phone, when the shop has a Telegram bot: pb_hooks/telegram.js.
-    if (on('telegram_questions')) {
-      try {
-        require(__hooks + '/telegram.js').send(
-          lang.t('telegram.question', { product: notice.subject }) + '\n' +
-          notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
-          notice.text + '\n\n' +
-          lang.t('telegram.answer', { link: $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread }),
-        );
-      } catch (err) {
-        $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
-      }
-    }
-  }
+  if (notice) tellTheShop(lang, notice);
 
   // Only a guest has questions left; a customer's count is null.
   return e.json(200, { left: left, message: sent });
-});
+}
 
-// The customer has the shop's latest reply about a product on screen, so the mail about it is
-// not needed: the job in inbox.pb.js mails only replies still unseen after five minutes.
-routerAdd('POST', '/api/shop/chat/seen', (e) => {
+// After the transaction, and outside it: the question stands whether or not the owner hears of
+// it, and a mail server that stalls must not cost the visitor what they wrote. Mail, a Telegram
+// message or both, as the switches in `shop_settings` say.
+function tellTheShop(lang, notice) {
+  const settings = require(__hooks + '/lib/settings.js');
+  const meta = $app.settings().meta;
+  const link = meta.appURL + '/admin/inbox?thread=' + notice.thread;
+
+  // To the address the shop sends from, as with orders, so there is nothing else to configure:
+  // shop-new-question.html in pb_hooks/mail/.
+  if (settings.on('mail_questions')) {
+    try {
+      require(__hooks + '/lib/mailer.js').send('shop-new-question', {
+        product: notice.subject,
+        from: notice.from,
+        email: notice.email,
+        text: notice.text,
+        inboxLink: link,
+      }, [{ address: meta.senderAddress }]);
+    } catch (err) {
+      $app.logger().error('chat mail failed', 'thread', notice.thread, 'error', String(err));
+    }
+  }
+
+  // The owner's phone, when the shop has a Telegram bot: lib/telegram.js.
+  if (settings.on('telegram_questions')) {
+    try {
+      require(__hooks + '/lib/telegram.js').send(
+        lang.t('telegram.question', { product: notice.subject }) + '\n' +
+        notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
+        notice.text + '\n\n' +
+        lang.t('telegram.answer', { link: link }),
+      );
+    } catch (err) {
+      $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
+    }
+  }
+}
+
+// POST /api/shop/chat/seen — the customer has the shop's latest reply about a product on screen,
+// so the mail about it is not needed: the job in lib/inbox.js mails only replies still unseen
+// after five minutes.
+function seen(e) {
   const productId = String((e.requestInfo().body || {}).product || '');
 
   let thread;
@@ -210,18 +210,16 @@ routerAdd('POST', '/api/shop/chat/seen', (e) => {
   }
 
   return e.json(200, { seen: true });
-}, $apis.requireAuth('users'));
+}
 
-// A guest's conversations become the account's once there is an account: after signing in,
-// after registering, or on the first page a signed-in browser opens after asking as a guest.
-// The browser's id is all that ties them together, which is why a shared computer hands them
-// to whoever signs in on it next.
-routerAdd('POST', '/api/shop/chat/claim', (e) => {
-  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
+// POST /api/shop/chat/claim — a guest's conversations become the account's once there is an
+// account: after signing in, after registering, or on the first page a signed-in browser opens
+// after asking as a guest. The browser's id is all that ties them together, which is why a
+// shared computer hands them to whoever signs in on it next.
+function claim(e) {
   const visitor = String((e.requestInfo().body || {}).visitor || '').toLowerCase();
   if (!UUID.test(visitor)) {
-    throw new BadRequestError(require(__hooks + '/lang.js').open().t('chat.noVisitor'));
+    throw new BadRequestError(require(__hooks + '/lib/lang.js').open().t('chat.noVisitor'));
   }
 
   const user = e.auth;
@@ -272,4 +270,6 @@ routerAdd('POST', '/api/shop/chat/claim', (e) => {
   });
 
   return e.json(200, { claimed: claimed });
-}, $apis.requireAuth('users'));
+}
+
+module.exports = { ask, seen, claim };

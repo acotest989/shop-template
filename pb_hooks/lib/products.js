@@ -1,60 +1,55 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
 // The catalogue as an admin edits it at /admin/products: a new product, or every field of one
-// that exists. The collection refuses writes from a browser, so this route is the only way in
-// from the shop; the dashboard is the other.
+// that exists. The collection refuses writes from a browser, so the route in pb_hooks/shop.pb.js
+// is the only way in from the shop; the dashboard is the other.
 //
 // Nothing here deletes. A product leaves the shop by being hidden, since orders and
 // conversations name it, and cancelling or returning an order puts its goods back on it.
-//
-// Everything lives inside the handler, for the reason given in orders.pb.js.
-routerAdd('POST', '/api/shop/admin/products/save', (e) => {
-  const MAX_TITLE = 200;
-  const MAX_BRAND = 100;
-  const MAX_DESCRIPTION = 5000;
-  const MAX_PICTURES = 12;
-  const MAX_TAGS = 20;
 
-  // https only: a shop served over https shows an http picture as a broken one.
-  const PICTURE = /^https:\/\/\S+$/;
+const MAX_TITLE = 200;
+const MAX_BRAND = 100;
+const MAX_DESCRIPTION = 5000;
+const MAX_PICTURES = 12;
+const MAX_TAGS = 20;
 
-  // What a refusal says: pb_hooks/lang.js.
-  const lang = require(__hooks + '/lang.js').open();
+// https only: a shop served over https shows an http picture as a broken one.
+const PICTURE = /^https:\/\/\S+$/;
 
-  if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError(lang.t('products.onlyShop'));
+const text = (value) => String(value == null ? '' : value).trim();
+
+// A list sent as JSON, read by index: what arrives is a Go slice, and not every array method is
+// certain to be on it.
+const list = (value) => {
+  const items = [];
+  if (!value || typeof value === 'string' || typeof value.length !== 'number') return items;
+  for (let i = 0; i < value.length; i++) {
+    const item = text(value[i]);
+    if (item && items.indexOf(item) === -1) items.push(item);
   }
+  return items;
+};
 
+// The shop's addresses and categories are written this way: lower case and dashes, with the
+// letters of a Bosnian name folded rather than dropped, so Čaša becomes casa and not -asa. Those
+// five by hand, and any other accent by normalize where the engine has it.
+const slug = (value) => {
+  let folded = String(value || '').toLowerCase()
+    .replace(/đ/g, 'dj').replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z')
+    .replace(/['’]/g, '');
+  try {
+    folded = folded.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  } catch (err) {
+    // an engine without normalize: the letters it cannot fold turn into dashes
+  }
+  return folded.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+};
+
+// POST /api/shop/admin/products/save
+function save(e) {
+  // What a refusal says: lib/lang.js.
+  const lang = require(__hooks + '/lib/lang.js').open();
   const body = e.requestInfo().body || {};
-
-  const text = (value) => String(value == null ? '' : value).trim();
-
-  // A list sent as JSON, read by index: what arrives is a Go slice, and not every array method
-  // is certain to be on it.
-  const list = (value) => {
-    const items = [];
-    if (!value || typeof value === 'string' || typeof value.length !== 'number') return items;
-    for (let i = 0; i < value.length; i++) {
-      const item = text(value[i]);
-      if (item && items.indexOf(item) === -1) items.push(item);
-    }
-    return items;
-  };
-
-  // The shop's addresses and categories are written this way: lower case and dashes, with the
-  // letters of a Bosnian name folded rather than dropped, so Čaša becomes casa and not -asa.
-  // Those five by hand, and any other accent by normalize where the engine has it.
-  const slug = (value) => {
-    let folded = String(value || '').toLowerCase()
-      .replace(/đ/g, 'dj').replace(/[čć]/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z')
-      .replace(/['’]/g, '');
-    try {
-      folded = folded.normalize('NFD').replace(/[̀-ͯ]/g, '');
-    } catch (err) {
-      // an engine without normalize: the letters it cannot fold turn into dashes
-    }
-    return folded.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-  };
 
   const id = text(body.id);
   const title = text(body.title);
@@ -118,8 +113,8 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
       }
 
       // The form sends the stock it opened with. Left as it was, the stock is not written at
-      // all, so a sale made while the page was open stands. Changed, it is written only over
-      // the number the admin saw; anything else would put back what an order just took.
+      // all, so a sale made while the page was open stands. Changed, it is written only over the
+      // number the admin saw; anything else would put back what an order just took.
       const current = record.getInt('stock');
       const was = Number(body.stockWas);
       if (stock !== was) {
@@ -178,4 +173,6 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
   });
 
   return e.json(200, saved);
-}, $apis.requireAuth('users'));
+}
+
+module.exports = { save };

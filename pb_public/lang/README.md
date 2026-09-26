@@ -16,7 +16,7 @@ Two languages ship with the shop:
 
 The shop speaks one language at a time, chosen in the admin area under **Settings**, and kept as `language` in the `shop_settings` record. Everything follows it:
 
-- **the pages.** `index.html` names the language in `lang` on `<html>` and in two entries of its import map, `lang/shop` and `lang/admin`, which `lib/i18n.js` loads. `pb_hooks/site.pb.js` rewrites all three on every load, along with the `<title>` and the description, which search engines and link previews read without running a script (`site.title` and `site.description` in `pb_hooks/lang/`). The file itself stays English, and goes out as it is only if the server cannot read it.
+- **the pages.** `index.html` names the language in `lang` on `<html>` and in two entries of its import map, `lang/shop` and `lang/admin`, which `lib/i18n.js` loads. `pb_hooks/lib/site.js` rewrites all three on every load, along with the `<title>` and the description, which search engines and link previews read without running a script (`site.title` and `site.description` in `pb_hooks/lang/`). The file itself stays English, and goes out as it is only if the server cannot read it.
 - **the server.** The mails (`pb_hooks/mail/`), what the hooks answer a page with (a product that sold out while in the cart, say), and the Telegram messages (`pb_hooks/lang/`).
 - **what nobody wrote here.** Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in, and the few sentences AlpineShell says itself are the `shell.` keys, handed to it as `texts` in `main.js`.
 
@@ -40,4 +40,4 @@ Keys read as `page.what`, so a template says what it shows. A page's title is `t
 
 Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, and set `locale`. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one.
 
-The server's side is three more things: `pb_hooks/lang/en.json` copied under the language's name and translated (same syntax, plus how money is written); the mails, as a folder of the same name in `pb_hooks/mail/`; and the language added to the choices of `language` in `shop_settings`, by a migration, after which Settings offers it. A language other than English and its neighbours also needs its plural rule in `pb_hooks/lang.js`, whose engine has no `Intl`.
+The server's side is three more things: `pb_hooks/lang/en.json` copied under the language's name and translated (same syntax, plus how money is written); the mails, as a folder of the same name in `pb_hooks/mail/`; and the language added to the choices of `language` in `shop_settings`, by a migration, after which Settings offers it. A language other than English and its neighbours also needs its plural rule in `pb_hooks/lib/lang.js`, whose engine has no `Intl`.

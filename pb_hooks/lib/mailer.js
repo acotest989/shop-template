@@ -1,19 +1,21 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
 // Every mail the shop sends is a file in pb_hooks/mail/, and this turns one into a message: the
 // template filled with what the hook hands over, framed by layout.html, with its <title> as the
 // subject. The files are read on every send, so an edited template is the one the next mail
 // uses, with no restart. The syntax is in pb_hooks/mail/README.md.
 //
-// A mail is in the shop's language, `language` in `shop_settings`: pb_hooks/mail/sr-Latn/ holds
-// the Serbian files, and a file a language's folder lacks is taken from pb_hooks/mail/ itself.
+// A mail is in the shop's language, `language` in `shop_settings`: every language is a folder,
+// pb_hooks/mail/en/ and pb_hooks/mail/sr-Latn/, and a file a language's folder lacks is taken
+// from en/. layout.html has no words and serves them all.
 //
-// Not a hook itself: a handler takes it in with require(__hooks + '/mailer.js').
+// Code that sends a mail takes this in with require(__hooks + '/lib/mailer.js').
 
 const DIR = __hooks + '/mail/';
 const NAME = /^[a-z0-9-]+$/;
 
-// A file's path under pb_hooks/mail/: the language's own, or else the English one.
+// A file's path under pb_hooks/mail/: the language's own, or else the English one, which every
+// mail has.
 const locate = (file, lang) => {
   if (lang && lang !== 'en') {
     try {
@@ -23,7 +25,7 @@ const locate = (file, lang) => {
       // not translated
     }
   }
-  return file;
+  return 'en/' + file;
 };
 
 const read = (file, lang) => toString($os.readFile(DIR + locate(file, lang)));
@@ -142,7 +144,7 @@ const plain = (html) => html
 function render(name, data) {
   if (!NAME.test(name)) throw new Error('not a mail: ' + name);
 
-  const lang = require(__hooks + '/lang.js').language();
+  const lang = require(__hooks + '/lib/lang.js').language();
   const meta = $app.settings().meta;
   const scopes = [{ shopName: meta.appName, appURL: meta.appURL, language: lang }, data || {}];
 
@@ -152,7 +154,7 @@ function render(name, data) {
   const content = fill(source.replace(/<title>[\s\S]*?<\/title>/i, ''), scopes, true).trim();
   const body = plain(content);
   const preheader = body.replace(/:?\s*https?:\/\/\S+/g, '').replace(/\s+/g, ' ').slice(0, 140);
-  const html = fill(strip(read('layout.html', lang)), scopes.concat([{ subject: subject, content: content, preheader: preheader }]), true);
+  const html = fill(strip(toString($os.readFile(DIR + 'layout.html'))), scopes.concat([{ subject: subject, content: content, preheader: preheader }]), true);
   const text = meta.appName + '\n\n' + body + '\n\n-- \n' + meta.appName + ' · ' + meta.appURL;
 
   return { subject: subject, html: html, text: text, file: 'pb_hooks/mail/' + locate(name + '.html', lang) };
@@ -196,7 +198,7 @@ function replace(e, name, data) {
 // cannot be read, and the mail then says nothing about it.
 function validFor(record, token) {
   try {
-    return require(__hooks + '/lang.js').open().duration(record.collection()[token].duration);
+    return require(__hooks + '/lib/lang.js').open().duration(record.collection()[token].duration);
   } catch (err) {
     return '';
   }
@@ -205,7 +207,7 @@ function validFor(record, token) {
 // Every mail there is, in the order /admin/mail lists them, with what each one is for and the
 // sample data its preview is filled with, in the shop's language.
 function catalogue() {
-  return JSON.parse(read('mails.json', require(__hooks + '/lang.js').language()));
+  return JSON.parse(read('mails.json', require(__hooks + '/lib/lang.js').language()));
 }
 
 // One mail filled with its sample, or null for a name mails.json does not have. A sample link

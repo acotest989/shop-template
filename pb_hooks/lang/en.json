@@ -9,6 +9,8 @@
   "site.title": "Shop",
   "site.description": "A small demo storefront built with Alpine and Tailwind — no framework, no build step.",
 
+  "admin.only": "Only an admin of the shop can do this. Sign in with an admin account.",
+
   "order.incomplete": "The delivery details are incomplete.",
   "order.payment": "Choose how you would like to pay.",
   "order.noCard": "Card payment is not available yet. Please choose cash on delivery.",
@@ -24,7 +26,6 @@
   "order.shipping": "Shipping costs more than the page showed. Reload the page to see the new total.",
   "order.free": "Free",
 
-  "orders.onlyShop": "Only the shop can change an order.",
   "orders.gone": "This order no longer exists.",
   "orders.status": "That is not a status an order can have.",
   "orders.reopen": "Not enough {title} left to reopen this order.",
@@ -37,16 +38,11 @@
   "chat.guestLimit": "A guest can ask {n} questions. Create an account or sign in to keep asking.",
   "chat.guest": "A guest",
 
-  "inbox.onlyShopReply": "Only the shop can reply here.",
   "inbox.writeFirst": "Write a reply first.",
   "inbox.tooLong": "A reply can be at most {n} characters.",
   "inbox.gone": "This conversation no longer exists.",
-  "inbox.onlyShopClose": "Only the shop can close a conversation.",
-  "inbox.onlyShopDelete": "Only the shop can delete a conversation.",
-  "inbox.onlyShopClear": "Only the shop can clear the inbox.",
   "inbox.reload": "Reload the inbox and try again.",
 
-  "products.onlyShop": "Only the shop can change its products.",
   "products.checkForm": "Please check the form.",
   "products.name": "Give the product a name.",
   "products.tooLong": "At most {n} characters.",
@@ -63,13 +59,10 @@
   "products.stockChanged": "The stock changed to {n} since you opened this product, most likely an order. Check the number and save again.",
   "products.nameTaken": "Too many products share this name. Change it a little.",
 
-  "mail.onlyShopSee": "Only the shop can see its mails.",
-  "mail.onlyShopTest": "Only the shop can send a test mail.",
   "mail.cannotFill": "The template could not be filled: {error}",
   "mail.noSuchMail": "There is no mail by that name.",
   "mail.notSent": "The mail could not be sent. Check Settings → Mail in the dashboard.",
 
-  "settings.onlyShop": "Only the shop can change its settings.",
   "settings.noSuchLanguage": "The shop has no such language.",
   "settings.noSuchAccent": "The shop has no such colour.",
 

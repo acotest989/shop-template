@@ -11,6 +11,8 @@
   "site.title": "Shop",
   "site.description": "Mala demo prodavnica napravljena uz Alpine i Tailwind — bez frameworka, bez build koraka.",
 
+  "admin.only": "Ovo može samo administrator prodavnice. Prijavite se administratorskim nalogom.",
+
   "order.incomplete": "Podaci za dostavu nisu potpuni.",
   "order.payment": "Izaberite način plaćanja.",
   "order.noCard": "Plaćanje karticom još nije dostupno. Izaberite plaćanje pouzećem.",
@@ -30,7 +32,6 @@
   "order.shipping": "Dostava košta više nego što je stranica pokazala. Osvježite stranicu da vidite novi iznos.",
   "order.free": "Besplatno",
 
-  "orders.onlyShop": "Samo prodavnica može mijenjati narudžbu.",
   "orders.gone": "Ova narudžba više ne postoji.",
   "orders.status": "Narudžba ne može imati taj status.",
   "orders.reopen": "Na stanju nema dovoljno proizvoda {title} da se ova narudžba ponovo otvori.",
@@ -51,7 +52,6 @@
   },
   "chat.guest": "Gost",
 
-  "inbox.onlyShopReply": "Samo prodavnica može odgovarati ovdje.",
   "inbox.writeFirst": "Prvo napiši odgovor.",
   "inbox.tooLong": {
     "one": "Odgovor može imati najviše {n} znak.",
@@ -59,12 +59,8 @@
     "other": "Odgovor može imati najviše {n} znakova."
   },
   "inbox.gone": "Ovaj razgovor više ne postoji.",
-  "inbox.onlyShopClose": "Samo prodavnica može zatvoriti razgovor.",
-  "inbox.onlyShopDelete": "Samo prodavnica može obrisati razgovor.",
-  "inbox.onlyShopClear": "Samo prodavnica može isprazniti poruke.",
   "inbox.reload": "Osvježi poruke i pokušaj ponovo.",
 
-  "products.onlyShop": "Samo prodavnica može mijenjati svoje proizvode.",
   "products.checkForm": "Provjeri formular.",
   "products.name": "Unesi naziv proizvoda.",
   "products.tooLong": {
@@ -93,13 +89,10 @@
   "products.stockChanged": "Stanje se promijenilo na {n} otkad je ovaj proizvod otvoren, najvjerovatnije zbog narudžbe. Provjeri broj i sačuvaj ponovo.",
   "products.nameTaken": "Previše proizvoda ima ovaj naziv. Malo ga izmijeni.",
 
-  "mail.onlyShopSee": "Samo prodavnica može vidjeti svoje e-mailove.",
-  "mail.onlyShopTest": "Samo prodavnica može poslati test e-mail.",
   "mail.cannotFill": "Šablon se nije mogao popuniti: {error}",
   "mail.noSuchMail": "Nema e-maila pod tim imenom.",
   "mail.notSent": "E-mail nije mogao biti poslan. Provjeri Settings → Mail u dashboardu.",
 
-  "settings.onlyShop": "Samo prodavnica može mijenjati svoja podešavanja.",
   "settings.noSuchLanguage": "Prodavnica nema taj jezik.",
   "settings.noSuchAccent": "Prodavnica nema tu boju.",
 

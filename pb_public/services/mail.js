@@ -1,7 +1,7 @@
 import { pb } from './pb.js';
 
 // The mails the shop sends, as /admin/mail shows them: the templates in pb_hooks/mail/, filled
-// by pb_hooks/mail.pb.js with the samples in their mails.json.
+// by pb_hooks/lib/mail.js with the samples in their mails.json.
 
 // Every mail there is, in the order the page lists them.
 export async function fetchMails() {

@@ -1,7 +1,7 @@
 import { pb } from './pb.js';
 
 // The shop's settings, from the one record of `shop_settings` by way of
-// pb_hooks/settings.pb.js, which hands out only what an admin may change at /admin/settings.
+// pb_hooks/lib/settings.js, which hands out only what an admin may change at /admin/settings.
 
 export async function fetchSettings() {
   return toSettings(await pb.send('/api/shop/admin/settings', { method: 'GET' }));

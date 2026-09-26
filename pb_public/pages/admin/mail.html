@@ -89,7 +89,7 @@
           <!-- Where to change it: the file, and where its sample comes from. -->
           <span class="muted ml-auto text-xs">
             <span x-text="t('admin.mail.edit')"></span> <span class="font-mono" x-text="preview?.file"></span>,
-            <span x-text="t('admin.mail.sampleFrom')"></span> <span class="font-mono">pb_hooks/mail/mails.json</span>
+            <span x-text="t('admin.mail.sampleFrom')"></span> <span class="font-mono" x-text="preview?.file.replace(/[^/]+$/, 'mails.json')"></span>
           </span>
         </div>
       </header>
@@ -104,7 +104,7 @@
         :class="loading && 'opacity-60'"
       >
         <!-- The plain-text part, for a mail program that reads no HTML: made from the same template
-             by pb_hooks/mailer.js. -->
+             by pb_hooks/lib/mailer.js. -->
         <div x-show="width === 'text'" class="mx-auto max-w-2xl rounded-lg border border-gray-200 bg-white p-4">
           <p class="muted mb-3 text-xs" x-text="t('admin.mail.textNote')"></p>
           <pre class="whitespace-pre-wrap break-words font-mono text-sm text-gray-800" x-text="preview?.text"></pre>

@@ -1,8 +1,7 @@
-/// <reference path="../pb_data/types.d.ts" />
+/// <reference path="../../pb_data/types.d.ts" />
 
-// A message to the owner's own Telegram chat, for any hook with something to tell them. Not a
-// hook itself: the name does not end in .pb.js, so PocketBase does not load it on its own, and
-// a handler takes it in with require(__hooks + '/telegram.js').
+// A message to the owner's own Telegram chat, for any code with something to tell them, which
+// takes this in with require(__hooks + '/lib/telegram.js').
 //
 // The bot's token and the chat to write to are the one record in `shop_settings`, filled in the
 // dashboard. Either one empty, and nothing is sent. A failure is logged and goes no further: a
