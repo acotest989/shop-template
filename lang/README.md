@@ -7,6 +7,13 @@ Every sentence the shop shows is a key here, looked up with `t()`: `x-text="t('c
 | `shop.js` | everything a customer can see, and what the admin area shares with it: page titles, Save, the order statuses |
 | `admin.js` | the admin area's own sentences, every key starting with `admin.` — fetched only for an account with `admin` ticked, so a customer never downloads it |
 
+Two languages ship with the shop:
+
+| Folder | Language | Money and dates |
+|---|---|---|
+| `en/` | English | €12.99, 26 Sept 2026 |
+| `sr-Latn/` | Serbian, Latin script, ijekavian — customers are addressed as "Vi", the admin area as "ti" | 12,99 €, 26. 9. 2026. |
+
 The shop speaks one language at a time, chosen in `index.html`:
 
 ```html
@@ -36,4 +43,4 @@ Keys read as `page.what`, so a template says what it shows. A key missing from a
 
 ## Adding a language
 
-Copy `en/` to a folder named after the language (`sr-Latn`, `de`…), translate the values, keep the keys, set `locale`, and point `index.html` at it. The server's side — mails, and the messages the hooks send back — is separate, in `server/`.
+Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, set `locale`, and point `index.html` at it. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one. The server's side — mails, and the messages the hooks send back — is separate, in `server/`.
