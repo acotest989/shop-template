@@ -1,0 +1,99 @@
+{
+  "order-confirmation": {
+    "title": "Potvrda narudžbe",
+    "to": "Kupac",
+    "when": "Čim je narudžba primljena. Dio o nalogu samo kad je završetak kupovine otvorio nalog za tu adresu.",
+    "sample": {
+      "reference": "SH-MG2K7Q1XAB",
+      "name": "Marko Marković",
+      "email": "marko@primjer.ba",
+      "phone": "+387 61 000 000",
+      "address": "Maršala Tita 12, 71000 Sarajevo",
+      "lines": [
+        { "title": "Stona lampa", "qty": 1, "amount": "49,99 €" },
+        { "title": "Saksija", "qty": 2, "amount": "29,98 €" }
+      ],
+      "shipping": "15,00 €",
+      "total": "94,97 €",
+      "paid": false,
+      "cod": true,
+      "passwordLink": "/reset-password/sample-token"
+    }
+  },
+  "shop-new-order": {
+    "title": "Nova narudžba",
+    "to": "Ti, na adresu prodavnice",
+    "when": "Čim je narudžba primljena, dok je mail_orders uključen.",
+    "sample": {
+      "reference": "SH-MG2K7Q1XAB",
+      "name": "Marko Marković",
+      "email": "marko@primjer.ba",
+      "phone": "+387 61 000 000",
+      "address": "Maršala Tita 12, 71000 Sarajevo",
+      "lines": [
+        { "title": "Stona lampa", "qty": 1, "amount": "49,99 €" },
+        { "title": "Saksija", "qty": 2, "amount": "29,98 €" }
+      ],
+      "shipping": "15,00 €",
+      "total": "94,97 €",
+      "paid": false,
+      "cod": true
+    }
+  },
+  "shop-new-question": {
+    "title": "Novo pitanje",
+    "to": "Ti, na adresu prodavnice",
+    "when": "Kad pitanje iz chata počne čekati odgovor, dok je mail_questions uključen.",
+    "sample": {
+      "product": "Stona lampa",
+      "from": "Marko Marković",
+      "email": "marko@primjer.ba",
+      "text": "Da li dolazi sa sijalicom?\nI da li je kabl dovoljno dug da od noćnog ormarića dođe do poda?",
+      "inboxLink": "/admin/inbox"
+    }
+  },
+  "chat-reply": {
+    "title": "Odgovor na pitanje",
+    "to": "Kupac koji je pitao",
+    "when": "Pet minuta nakon tvog odgovora, ako ga kupac do tada nije vidio.",
+    "sample": {
+      "name": "Marko Marković",
+      "product": "Stona lampa",
+      "reply": "Da, topla bijela sijalica je u kutiji.\nKabl je dug 1,8 m, dovoljno da od bilo kog noćnog ormarića dođe do poda.",
+      "link": "/products/table-lamp?chat"
+    }
+  },
+  "verify-email": {
+    "title": "Potvrda e-mail adrese",
+    "to": "Novi kupac",
+    "when": "Pri otvaranju naloga, i kad god kupac zatraži novi link sa stranice naloga.",
+    "sample": {
+      "link": "/verify/sample-token"
+    }
+  },
+  "reset-password": {
+    "title": "Nova lozinka",
+    "to": "Kupac koji je zaboravio lozinku",
+    "when": "Kad je neko zatraži na /forgot-password.",
+    "sample": {
+      "link": "/reset-password/sample-token"
+    }
+  },
+  "confirm-email-change": {
+    "title": "Potvrda nove e-mail adrese",
+    "to": "Nova adresa",
+    "when": "Kad kupac promijeni e-mail adresu na /account.",
+    "sample": {
+      "link": "/confirm-email/sample-token",
+      "newEmail": "marko.markovic@primjer.ba"
+    }
+  },
+  "login-alert": {
+    "title": "Prijava sa nove lokacije",
+    "to": "Vlasnik naloga",
+    "when": "Kad se nalog prijavi sa uređaja ili mjesta koje ranije nije koristio.",
+    "sample": {
+      "info": "Chrome on Windows, from 203.0.113.7"
+    }
+  }
+}

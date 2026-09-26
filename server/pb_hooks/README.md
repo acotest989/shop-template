@@ -24,11 +24,13 @@ A route rather than a create hook, because then the collection can stay closed: 
 | `mail.pb.js` | puts `server/mail/` in place of PocketBase's own account mails, and serves `/admin/mail` its previews and tests |
 | `cache.pb.js` | tells browsers to check the shop's files before using a cached copy |
 | `private.pb.js` | keeps `server/` and dotfiles out of what `--publicDir=..` serves |
-| `mailer.js`, `settings.js`, `telegram.js` | not hooks: code the hooks above share |
+| `mailer.js`, `lang.js`, `settings.js`, `telegram.js` | not hooks: code the hooks above share |
 
 The engine is goja: ES5 plus most of ES6, CommonJS only (no ES modules without pre-bundling), no `setTimeout`, no `fetch` (`$http.send` does its job, as in `telegram.js`), no Node APIs. Each handler runs isolated, so variables declared outside one are not visible inside it — a helper defined at the top of the file is missing at call time, which is why everything in `orders.pb.js` sits inside its handler.
 
-Code two hooks share goes in a file without the `.pb.js`, which PocketBase does not load on its own: `mailer.js`, `settings.js` and `telegram.js` are that, and a handler takes one in with `require(__hooks + '/telegram.js')`, from inside itself like everything else.
+Code two hooks share goes in a file without the `.pb.js`, which PocketBase does not load on its own: `mailer.js`, `lang.js`, `settings.js` and `telegram.js` are that, and a handler takes one in with `require(__hooks + '/telegram.js')`, from inside itself like everything else.
+
+No hook writes a sentence a person reads. It asks `lang.js` for one, in the language set in `shop_settings`: `lang.t('order.priceChanged', { title: title })`, from `server/lang/<language>.json`. A new message is a key in `server/lang/en.json` and in every other file there; the syntax is the pages' own, in `lang/README.md` at the shop's root.
 
 Two things that cost an afternoon if nobody says them: the extension really must be `.pb.js`, and routes are registered when the server starts. The file watcher does not reliably restart it, so restart it yourself after adding or renaming a hook.
 

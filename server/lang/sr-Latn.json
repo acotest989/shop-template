@@ -1,0 +1,101 @@
+{
+  "number.decimal": ",",
+  "number.group": ".",
+  "money": "{amount} {currency}",
+  "currency.EUR": "€",
+  "currency.BAM": "KM",
+
+  "order.incomplete": "Podaci za dostavu nisu potpuni.",
+  "order.payment": "Izaberite način plaćanja.",
+  "order.noCard": "Plaćanje karticom još nije dostupno. Izaberite plaćanje pouzećem.",
+  "order.empty": "Korpa je prazna.",
+  "order.quantity": "Količina nije ispravna.",
+  "order.twice": "Isti proizvod je dvaput u narudžbi.",
+  "order.oneGone": "Jedan od ovih proizvoda više nije u prodaji.",
+  "order.gone": "Proizvod {title} više nije u prodaji. Uklonite ga iz korpe da naručite ostalo.",
+  "order.priceChanged": "Cijena proizvoda {title} se promijenila dok je bio u Vašoj korpi.",
+  "order.atMost": {
+    "one": "Jedna narudžba može sadržati najviše {n} komad proizvoda {title}.",
+    "few": "Jedna narudžba može sadržati najviše {n} komada proizvoda {title}.",
+    "other": "Jedna narudžba može sadržati najviše {n} komada proizvoda {title}."
+  },
+  "order.notEnough": "Na stanju nema toliko komada proizvoda {title}.",
+  "order.currencies": "Cijene ovih proizvoda nisu u istoj valuti.",
+  "order.shipping": "Dostava košta više nego što je stranica pokazala. Osvježite stranicu da vidite novi iznos.",
+  "order.free": "Besplatno",
+
+  "orders.onlyShop": "Samo prodavnica može mijenjati narudžbu.",
+  "orders.gone": "Ova narudžba više ne postoji.",
+  "orders.status": "Narudžba ne može imati taj status.",
+  "orders.reopen": "Na stanju nema dovoljno proizvoda {title} da se ova narudžba ponovo otvori.",
+
+  "chat.noVisitor": "Ovaj browser nema oznaku posjetioca. Osvježite stranicu i pokušajte ponovo.",
+  "chat.pickOrWrite": "Izaberite pitanje sa liste ili napišite svoje.",
+  "chat.tooLong": {
+    "one": "Pitanje može imati najviše {n} znak.",
+    "few": "Pitanje može imati najviše {n} znaka.",
+    "other": "Pitanje može imati najviše {n} znakova."
+  },
+  "chat.productGone": "Ovaj proizvod više nije u prodaji.",
+  "chat.faqGone": "Tog pitanja više nema na listi.",
+  "chat.guestLimit": {
+    "one": "Gost može postaviti {n} pitanje. Otvorite nalog ili se prijavite da nastavite s pitanjima.",
+    "few": "Gost može postaviti {n} pitanja. Otvorite nalog ili se prijavite da nastavite s pitanjima.",
+    "other": "Gost može postaviti {n} pitanja. Otvorite nalog ili se prijavite da nastavite s pitanjima."
+  },
+  "chat.guest": "Gost",
+
+  "inbox.onlyShopReply": "Samo prodavnica može odgovarati ovdje.",
+  "inbox.writeFirst": "Prvo napiši odgovor.",
+  "inbox.tooLong": {
+    "one": "Odgovor može imati najviše {n} znak.",
+    "few": "Odgovor može imati najviše {n} znaka.",
+    "other": "Odgovor može imati najviše {n} znakova."
+  },
+  "inbox.gone": "Ovaj razgovor više ne postoji.",
+  "inbox.onlyShopClose": "Samo prodavnica može zatvoriti razgovor.",
+  "inbox.onlyShopDelete": "Samo prodavnica može obrisati razgovor.",
+  "inbox.onlyShopClear": "Samo prodavnica može isprazniti poruke.",
+  "inbox.reload": "Osvježi poruke i pokušaj ponovo.",
+
+  "products.onlyShop": "Samo prodavnica može mijenjati svoje proizvode.",
+  "products.checkForm": "Provjeri formular.",
+  "products.name": "Unesi naziv proizvoda.",
+  "products.tooLong": {
+    "one": "Najviše {n} znak.",
+    "few": "Najviše {n} znaka.",
+    "other": "Najviše {n} znakova."
+  },
+  "products.category": "Izaberi kategoriju ili upiši novu.",
+  "products.price": "Unesi cijenu veću od nule.",
+  "products.regularPrice": "Ostavi prazno ili unesi iznos veći od cijene.",
+  "products.stock": "Unesi koliko ima na stanju: 0 ili više.",
+  "products.weight": "Unesi težinu sa pakovanjem u gramima.",
+  "products.image": "Zalijepi adresu slike koja počinje sa https://.",
+  "products.tooManyPictures": {
+    "one": "Najviše {n} slika.",
+    "few": "Najviše {n} slike.",
+    "other": "Najviše {n} slika."
+  },
+  "products.images": "U svaki red stavi jednu adresu slike koja počinje sa https://.",
+  "products.tooManyTags": {
+    "one": "Najviše {n} oznaka.",
+    "few": "Najviše {n} oznake.",
+    "other": "Najviše {n} oznaka."
+  },
+  "products.gone": "Ovaj proizvod više ne postoji.",
+  "products.stockChanged": "Stanje se promijenilo na {n} otkad je ovaj proizvod otvoren, najvjerovatnije zbog narudžbe. Provjeri broj i sačuvaj ponovo.",
+  "products.nameTaken": "Previše proizvoda ima ovaj naziv. Malo ga izmijeni.",
+
+  "mail.onlyShopSee": "Samo prodavnica može vidjeti svoje e-mailove.",
+  "mail.onlyShopTest": "Samo prodavnica može poslati test e-mail.",
+  "mail.cannotFill": "Šablon se nije mogao popuniti: {error}",
+  "mail.noSuchMail": "Nema e-maila pod tim imenom.",
+  "mail.notSent": "E-mail nije mogao biti poslan. Provjeri Settings → Mail u dashboardu.",
+
+  "telegram.order": "Nova narudžba {reference}: {total}",
+  "telegram.paidByCard": "Plaćeno karticom",
+  "telegram.cod": "Plaćanje pouzećem",
+  "telegram.question": "Pitanje o proizvodu {product}",
+  "telegram.answer": "Odgovori: {link}"
+}

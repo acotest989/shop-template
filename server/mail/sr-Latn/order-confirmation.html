@@ -1,0 +1,9 @@
+<title>Narudžba {{reference}}</title>
+<p>Hvala, {{name}}.</p>
+<p>Broj narudžbe: <strong>{{reference}}</strong>.</p>
+{{> order-summary}}
+{{#paid}}<p>Plaćeno karticom. Pri preuzimanju ne plaćate ništa.</p>{{/paid}}
+{{^paid}}<p>Molimo Vas da za kurira pripremite {{total}}.</p>{{/paid}}
+{{#passwordLink}}
+<p>Otvorili smo nalog za {{email}}, da ovu narudžbu možete kasnije pronaći. <a href="{{passwordLink}}" style="color:#111827;">Izaberite lozinku</a>.</p>
+{{/passwordLink}}

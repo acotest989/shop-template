@@ -8,9 +8,10 @@
 routerAdd('POST', '/api/shop/inbox/reply', (e) => {
   // The messages collection's own limit on a body.
   const MAX_LENGTH = 2000;
+  const lang = require(__hooks + '/lang.js').open(); // what a refusal says
 
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can reply here.');
+    throw new ForbiddenError(lang.t('inbox.onlyShopReply'));
   }
 
   const body = e.requestInfo().body || {};
@@ -18,10 +19,10 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
   const text = String(body.body || '').trim();
 
   if (!text) {
-    throw new BadRequestError('Write a reply first.');
+    throw new BadRequestError(lang.t('inbox.writeFirst'));
   }
   if (text.length > MAX_LENGTH) {
-    throw new BadRequestError('A reply can be at most ' + MAX_LENGTH + ' characters.');
+    throw new BadRequestError(lang.t('inbox.tooLong', { n: MAX_LENGTH }));
   }
 
   let sent = null;
@@ -31,7 +32,7 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
     try {
       thread = tx.findRecordById('threads', threadId);
     } catch (err) {
-      throw new NotFoundError('This conversation no longer exists.');
+      throw new NotFoundError(lang.t('inbox.gone'));
     }
 
     const message = new Record(tx.findCollectionByNameOrId('messages'));
@@ -70,8 +71,10 @@ routerAdd('POST', '/api/shop/inbox/reply', (e) => {
 // For a conversation that needs no answer: a thank-you, or a question settled some other way,
 // like a phone call. It leaves the list of waiting ones without a reply the customer would see.
 routerAdd('POST', '/api/shop/inbox/answered', (e) => {
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can close a conversation.');
+    throw new ForbiddenError(lang.t('inbox.onlyShopClose'));
   }
 
   const threadId = String((e.requestInfo().body || {}).thread || '');
@@ -80,7 +83,7 @@ routerAdd('POST', '/api/shop/inbox/answered', (e) => {
   try {
     thread = $app.findRecordById('threads', threadId);
   } catch (err) {
-    throw new NotFoundError('This conversation no longer exists.');
+    throw new NotFoundError(lang.t('inbox.gone'));
   }
 
   thread.set('waiting', false);
@@ -93,8 +96,10 @@ routerAdd('POST', '/api/shop/inbox/answered', (e) => {
 // their relation to it cascades. Realtime tells the inbox, and a customer's open chat, as the
 // records go. A guest's tab keeps its own copy until it closes, which is all a guest ever had.
 routerAdd('POST', '/api/shop/inbox/delete', (e) => {
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can delete a conversation.');
+    throw new ForbiddenError(lang.t('inbox.onlyShopDelete'));
   }
 
   const threadId = String((e.requestInfo().body || {}).thread || '');
@@ -103,7 +108,7 @@ routerAdd('POST', '/api/shop/inbox/delete', (e) => {
   try {
     thread = $app.findRecordById('threads', threadId);
   } catch (err) {
-    throw new NotFoundError('This conversation no longer exists.');
+    throw new NotFoundError(lang.t('inbox.gone'));
   }
 
   $app.delete(thread);
@@ -115,14 +120,16 @@ routerAdd('POST', '/api/shop/inbox/delete', (e) => {
 // had on screen, and only what is no newer goes: a question that lands while the shop is
 // confirming is not swept away unread with the rest.
 routerAdd('POST', '/api/shop/inbox/clear', (e) => {
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can clear the inbox.');
+    throw new ForbiddenError(lang.t('inbox.onlyShopClear'));
   }
 
   // The page has it as 2026-09-15T13:05:00.123Z; stored dates put a space where the T is.
   const before = String((e.requestInfo().body || {}).before || '').replace('T', ' ');
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(before)) {
-    throw new BadRequestError('Reload the inbox and try again.');
+    throw new BadRequestError(lang.t('inbox.reload'));
   }
 
   let deleted = 0;

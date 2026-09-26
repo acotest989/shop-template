@@ -52,10 +52,10 @@ onMailerRecordAuthAlertSend((e) => {
   e.next();
 }, 'users');
 
-// Every mail in server/mail/mails.json, in its order: what it is, who gets it and when.
+// Every mail in mails.json, in its order: what it is, who gets it and when, in the shop's language.
 routerAdd('GET', '/api/shop/admin/mail', (e) => {
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can see its mails.');
+    throw new ForbiddenError(require(__hooks + '/lang.js').open().t('mail.onlyShopSee'));
   }
 
   const catalogue = require(__hooks + '/mailer.js').catalogue();
@@ -70,8 +70,10 @@ routerAdd('GET', '/api/shop/admin/mail', (e) => {
 // One mail as it would go out, filled with its sample: read from disk on every request, so the
 // preview shows a template the moment it is saved.
 routerAdd('GET', '/api/shop/admin/mail/{name}', (e) => {
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can see its mails.');
+    throw new ForbiddenError(lang.t('mail.onlyShopSee'));
   }
 
   const name = e.request.pathValue('name');
@@ -81,21 +83,23 @@ routerAdd('GET', '/api/shop/admin/mail/{name}', (e) => {
     mail = require(__hooks + '/mailer.js').preview(name);
   } catch (err) {
     // A template being edited can be half written; say what is wrong with it.
-    throw new BadRequestError('The template could not be filled: ' + (err && err.message ? err.message : String(err)));
+    throw new BadRequestError(lang.t('mail.cannotFill', { error: err && err.message ? err.message : String(err) }));
   }
   if (!mail) {
-    throw new NotFoundError('There is no mail by that name.');
+    throw new NotFoundError(lang.t('mail.noSuchMail'));
   }
 
-  return e.json(200, { name: name, subject: mail.subject, html: mail.html, file: 'server/mail/' + name + '.html' });
+  return e.json(200, { name: name, subject: mail.subject, html: mail.html, file: mail.file });
 }, $apis.requireAuth('users'));
 
 // The same mail, sent: to the admin's own address alone, filled with its sample, and marked as
 // a test in its subject, so it can be read where the customers read theirs. Nothing else goes
 // anywhere from here.
 routerAdd('POST', '/api/shop/admin/mail/{name}/test', (e) => {
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can send a test mail.');
+    throw new ForbiddenError(lang.t('mail.onlyShopTest'));
   }
 
   const mailer = require(__hooks + '/mailer.js');
@@ -105,10 +109,10 @@ routerAdd('POST', '/api/shop/admin/mail/{name}/test', (e) => {
   try {
     mail = mailer.preview(name);
   } catch (err) {
-    throw new BadRequestError('The template could not be filled: ' + (err && err.message ? err.message : String(err)));
+    throw new BadRequestError(lang.t('mail.cannotFill', { error: err && err.message ? err.message : String(err) }));
   }
   if (!mail) {
-    throw new NotFoundError('There is no mail by that name.');
+    throw new NotFoundError(lang.t('mail.noSuchMail'));
   }
 
   const to = e.auth.email();
@@ -117,7 +121,7 @@ routerAdd('POST', '/api/shop/admin/mail/{name}/test', (e) => {
     mailer.deliver({ subject: '[Test] ' + mail.subject, html: mail.html }, [{ address: to }]);
   } catch (err) {
     $app.logger().error('test mail failed', 'mail', name, 'error', String(err));
-    throw new BadRequestError('The mail could not be sent. Check Settings → Mail in the dashboard.');
+    throw new BadRequestError(lang.t('mail.notSent'));
   }
 
   return e.json(200, { to: to });

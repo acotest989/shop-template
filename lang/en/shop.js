@@ -42,6 +42,9 @@ export default {
   'common.yesDelete': 'Yes, delete it',
   'common.email': 'Email',
   'common.password': 'Password',
+  'common.tooMany': 'Too many attempts. Please wait a minute and try again.',
+  'common.offline': 'The shop could not be reached. Check your connection and try again.',
+  'common.serverError': 'Something went wrong on our side. Please try again in a moment.',
 
   'validation.name': 'Please enter your name.',
   'validation.email': 'Please enter a valid email address.',
@@ -287,8 +290,8 @@ export default {
   'account.deleteError': 'Could not delete the account.',
 
   // What PocketBase answers, said better: services/auth.js.
-  'auth.tooMany': 'Too many attempts. Please wait a minute and try again.',
   'auth.wrongCredentials': 'Wrong email or password.',
+  'auth.wrongPassword': 'That is not the password of this account.',
   'auth.linkUsed': 'This link has expired or has already been used.',
   'auth.addressTaken': 'That address already has an account.',
   'auth.notAnEmail': 'That does not look like an email address.',

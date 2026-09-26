@@ -35,6 +35,9 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     return { record: record, created: true };
   };
 
+  // What a refusal says, the money in the mails and the Telegram message: server/pb_hooks/lang.js.
+  const lang = require(__hooks + '/lang.js').open();
+
   const info = e.requestInfo();
   const body = info.body || {};
   const customer = body.customer || {};
@@ -67,20 +70,17 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   const FREE_UP_TO = 20000;
 
   if (!name || !email || !phone || !address) {
-    throw new BadRequestError('The delivery details are incomplete.');
+    throw new BadRequestError(lang.t('order.incomplete'));
   }
   if (payment !== 'card' && payment !== 'cod') {
-    throw new BadRequestError('Choose how you would like to pay.');
+    throw new BadRequestError(lang.t('order.payment'));
   }
   if (payment === 'card' && !CARD_PAYMENT) {
-    throw new BadRequestError('Card payment is not available yet. Please choose cash on delivery.');
+    throw new BadRequestError(lang.t('order.noCard'));
   }
   if (!items.length) {
-    throw new BadRequestError('There is nothing in the cart.');
+    throw new BadRequestError(lang.t('order.empty'));
   }
-
-  // Money as a person reads it. The app has toLocaleString; this engine does not.
-  const money = (cents, currency) => (cents / 100).toFixed(2) + ' ' + currency;
 
   // The buyer's letter and the shop's copy: order-confirmation.html and shop-new-order.html in
   // server/mail/, filled by server/pb_hooks/mailer.js. This only gathers what they show.
@@ -96,10 +96,10 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       lines: order.lines.map((line) => ({
         title: line.title,
         qty: line.qty,
-        amount: money(line.price * line.qty, order.currency),
+        amount: lang.money(line.price * line.qty, order.currency),
       })),
-      shipping: order.shipping ? money(order.shipping, order.currency) : 'Free',
-      total: money(order.total, order.currency),
+      shipping: order.shipping ? lang.money(order.shipping, order.currency) : lang.t('order.free'),
+      total: lang.money(order.total, order.currency),
       paid: order.paid,
       cod: order.payment === 'cod',
 
@@ -140,14 +140,14 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     for (const item of items) {
       const qty = Number(item.qty);
       if (!Number.isInteger(qty) || qty < 1) {
-        throw new BadRequestError('That is not a quantity.');
+        throw new BadRequestError(lang.t('order.quantity'));
       }
 
       // One line per product, the way the cart sends it. A second line would be checked
       // against stock the first has not taken yet, and would slip past the cap as well.
       const id = String(item.id);
       if (seen.indexOf(id) !== -1) {
-        throw new BadRequestError('The same product is in this order twice.');
+        throw new BadRequestError(lang.t('order.twice'));
       }
       seen.push(id);
 
@@ -155,7 +155,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
       try {
         product = tx.findRecordById('products', id);
       } catch (err) {
-        throw new BadRequestError('One of these products is no longer sold.');
+        throw new BadRequestError(lang.t('order.oneGone'));
       }
 
       const title = product.getString('title');
@@ -163,25 +163,25 @@ routerAdd('POST', '/api/shop/orders', (e) => {
 
       // Hidden in the admin area while it sat in somebody's cart.
       if (product.getBool('hidden')) {
-        throw new BadRequestError(title + ' is no longer sold. Remove it from the cart to order the rest.');
+        throw new BadRequestError(lang.t('order.gone', { title: title }));
       }
 
       // The cart's price is sent to be checked, never to be charged. Somebody who
       // agreed to one number must not be billed another without being told.
       if (Number(item.price) !== price) {
-        throw new BadRequestError('The price of ' + title + ' changed while it was in your cart.');
+        throw new BadRequestError(lang.t('order.priceChanged', { title: title }));
       }
       if (qty > MAX_QTY) {
-        throw new BadRequestError('One order can take at most ' + MAX_QTY + ' of ' + title + '.');
+        throw new BadRequestError(lang.t('order.atMost', { n: MAX_QTY, title: title }));
       }
       if (product.getInt('stock') < qty) {
-        throw new BadRequestError(title + ' does not have that many left.');
+        throw new BadRequestError(lang.t('order.notEnough', { title: title }));
       }
 
       // One total cannot stand for two currencies.
       currency = currency || product.getString('currency');
       if (product.getString('currency') !== currency) {
-        throw new BadRequestError('These products are not priced in the same currency.');
+        throw new BadRequestError(lang.t('order.currencies'));
       }
 
       lines.push({ id: product.id, handle: product.getString('handle'), title: title, price: price, qty: qty });
@@ -205,7 +205,7 @@ routerAdd('POST', '/api/shop/orders', (e) => {
     // were kept cannot promise free shipping, and finding it on the receipt hurts nobody.
     const shown = Number(body.shipping);
     if (!Number.isInteger(shown) || shown < shipping) {
-      throw new BadRequestError('Shipping costs more than the page showed. Reload the page to see the new total.');
+      throw new BadRequestError(lang.t('order.shipping'));
     }
 
     const owner = info.auth && info.auth.id
@@ -281,10 +281,10 @@ routerAdd('POST', '/api/shop/orders', (e) => {
   if (on('telegram_orders')) {
     try {
       require(__hooks + '/telegram.js').send(
-        'New order ' + placed.reference + ': ' + money(placed.total, placed.currency) + '\n' +
+        lang.t('telegram.order', { reference: placed.reference, total: lang.money(placed.total, placed.currency) }) + '\n' +
         placed.name + ', ' + placed.phone + '\n\n' +
         placed.lines.map((line) => line.title + ' × ' + line.qty).join('\n') + '\n\n' +
-        (placed.paid ? 'Paid by card' : 'Cash on delivery') + '\n' +
+        lang.t(placed.paid ? 'telegram.paidByCard' : 'telegram.cod') + '\n' +
         $app.settings().meta.appURL + '/admin/orders',
       );
     } catch (err) {
@@ -300,9 +300,10 @@ routerAdd('POST', '/api/shop/orders', (e) => {
 // them again does so here too, and a reopening the shelf cannot cover is refused.
 routerAdd('POST', '/api/shop/admin/orders/update', (e) => {
   const STATUSES = ['pending', 'shipped', 'delivered', 'returned', 'cancelled'];
+  const lang = require(__hooks + '/lang.js').open();
 
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can change an order.');
+    throw new ForbiddenError(lang.t('orders.onlyShop'));
   }
 
   const body = e.requestInfo().body || {};
@@ -311,13 +312,13 @@ routerAdd('POST', '/api/shop/admin/orders/update', (e) => {
   try {
     order = $app.findRecordById('orders', String(body.order || ''));
   } catch (err) {
-    throw new NotFoundError('This order no longer exists.');
+    throw new NotFoundError(lang.t('orders.gone'));
   }
 
   if (body.status !== undefined) {
     const status = String(body.status);
     if (STATUSES.indexOf(status) === -1) {
-      throw new BadRequestError('That is not a status an order can have.');
+      throw new BadRequestError(lang.t('orders.status'));
     }
     order.set('status', status);
   }
@@ -364,7 +365,8 @@ onRecordUpdate((e) => {
 
     const stock = product.getInt('stock') + direction * line.qty;
     if (stock < 0) {
-      throw new BadRequestError('Not enough ' + product.getString('title') + ' left to reopen this order.');
+      const lang = require(__hooks + '/lang.js').open();
+      throw new BadRequestError(lang.t('orders.reopen', { title: product.getString('title') }));
     }
     product.set('stock', stock);
     product.set('sold', Math.max(0, product.getInt('sold') - direction * line.qty));

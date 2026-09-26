@@ -18,8 +18,11 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
   // https only: a shop served over https shows an http picture as a broken one.
   const PICTURE = /^https:\/\/\S+$/;
 
+  // What a refusal says: server/pb_hooks/lang.js.
+  const lang = require(__hooks + '/lang.js').open();
+
   if (!e.auth.getBool('admin')) {
-    throw new ForbiddenError('Only the shop can change its products.');
+    throw new ForbiddenError(lang.t('products.onlyShop'));
   }
 
   const body = e.requestInfo().body || {};
@@ -73,32 +76,32 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
     errors[field] = new ValidationError(code, message);
   };
 
-  if (!title) fail('title', 'required', 'Give the product a name.');
-  else if (title.length > MAX_TITLE) fail('title', 'too_long', 'At most ' + MAX_TITLE + ' characters.');
+  if (!title) fail('title', 'required', lang.t('products.name'));
+  else if (title.length > MAX_TITLE) fail('title', 'too_long', lang.t('products.tooLong', { n: MAX_TITLE }));
 
-  if (brand.length > MAX_BRAND) fail('brand', 'too_long', 'At most ' + MAX_BRAND + ' characters.');
-  if (!category) fail('category', 'required', 'Choose a category or type a new one.');
+  if (brand.length > MAX_BRAND) fail('brand', 'too_long', lang.t('products.tooLong', { n: MAX_BRAND }));
+  if (!category) fail('category', 'required', lang.t('products.category'));
 
-  if (!Number.isInteger(price) || price <= 0) fail('price', 'invalid', 'Enter a price above zero.');
+  if (!Number.isInteger(price) || price <= 0) fail('price', 'invalid', lang.t('products.price'));
   if (!Number.isInteger(regularPrice) || regularPrice < 0 || (regularPrice > 0 && regularPrice <= price)) {
-    fail('regularPrice', 'invalid', 'Leave it empty, or make it higher than the price.');
+    fail('regularPrice', 'invalid', lang.t('products.regularPrice'));
   }
 
-  if (!Number.isInteger(stock) || stock < 0) fail('stock', 'invalid', 'Enter how many are in stock: 0 or more.');
-  if (!Number.isInteger(weight) || weight <= 0) fail('weight', 'invalid', 'Enter the packed weight in grams.');
+  if (!Number.isInteger(stock) || stock < 0) fail('stock', 'invalid', lang.t('products.stock'));
+  if (!Number.isInteger(weight) || weight <= 0) fail('weight', 'invalid', lang.t('products.weight'));
 
-  if (!PICTURE.test(image)) fail('image', 'invalid', 'Paste the address of a picture, starting with https://.');
+  if (!PICTURE.test(image)) fail('image', 'invalid', lang.t('products.image'));
   if (images.length > MAX_PICTURES) {
-    fail('images', 'too_many', 'At most ' + MAX_PICTURES + ' pictures.');
+    fail('images', 'too_many', lang.t('products.tooManyPictures', { n: MAX_PICTURES }));
   } else if (images.some((url) => !PICTURE.test(url))) {
-    fail('images', 'invalid', 'Put one picture address on each line, each starting with https://.');
+    fail('images', 'invalid', lang.t('products.images'));
   }
 
-  if (tags.length > MAX_TAGS) fail('tags', 'too_many', 'At most ' + MAX_TAGS + ' tags.');
-  if (description.length > MAX_DESCRIPTION) fail('description', 'too_long', 'At most ' + MAX_DESCRIPTION + ' characters.');
+  if (tags.length > MAX_TAGS) fail('tags', 'too_many', lang.t('products.tooManyTags', { n: MAX_TAGS }));
+  if (description.length > MAX_DESCRIPTION) fail('description', 'too_long', lang.t('products.tooLong', { n: MAX_DESCRIPTION }));
 
   if (Object.keys(errors).length) {
-    throw new BadRequestError('Please check the form.', errors);
+    throw new BadRequestError(lang.t('products.checkForm'), errors);
   }
 
   let saved = null;
@@ -111,7 +114,7 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
       try {
         record = tx.findRecordById('products', id);
       } catch (err) {
-        throw new NotFoundError('This product no longer exists.');
+        throw new NotFoundError(lang.t('products.gone'));
       }
 
       // The form sends the stock it opened with. Left as it was, the stock is not written at
@@ -121,11 +124,8 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
       const was = Number(body.stockWas);
       if (stock !== was) {
         if (current !== was) {
-          throw new BadRequestError('Please check the form.', {
-            stock: new ValidationError(
-              'stock_changed',
-              'The stock changed to ' + current + ' since you opened this product, most likely an order. Check the number and save again.',
-            ),
+          throw new BadRequestError(lang.t('products.checkForm'), {
+            stock: new ValidationError('stock_changed', lang.t('products.stockChanged', { n: current })),
           });
         }
         record.set('stock', stock);
@@ -145,7 +145,7 @@ routerAdd('POST', '/api/shop/admin/products/save', (e) => {
       const base = slug(title) || 'product';
       let handle = base;
       for (let n = 2; taken(handle); n++) {
-        if (n > 999) throw new BadRequestError('Too many products share this name. Change it a little.');
+        if (n > 999) throw new BadRequestError(lang.t('products.nameTaken'));
         handle = base + '-' + n;
       }
       record.set('handle', handle);

@@ -40,6 +40,9 @@ export default {
   'common.yesDelete': 'Da, obriši',
   'common.email': 'E-mail',
   'common.password': 'Lozinka',
+  'common.tooMany': 'Previše pokušaja. Sačekajte minut i pokušajte ponovo.',
+  'common.offline': 'Prodavnica nije dostupna. Provjerite internet vezu i pokušajte ponovo.',
+  'common.serverError': 'Nešto nije u redu na našoj strani. Pokušajte ponovo za trenutak.',
 
   'validation.name': 'Unesite svoje ime.',
   'validation.email': 'Unesite ispravnu e-mail adresu.',
@@ -283,8 +286,8 @@ export default {
   'account.keep': 'Zadrži nalog',
   'account.deleteError': 'Nalog se nije mogao obrisati.',
 
-  'auth.tooMany': 'Previše pokušaja. Sačekajte minut i pokušajte ponovo.',
   'auth.wrongCredentials': 'Pogrešan e-mail ili lozinka.',
+  'auth.wrongPassword': 'To nije lozinka ovog naloga.',
   'auth.linkUsed': 'Ovaj link je istekao ili je već iskorišten.',
   'auth.addressTaken': 'Za ovu adresu već postoji nalog.',
   'auth.notAnEmail': 'Ovo ne izgleda kao e-mail adresa.',

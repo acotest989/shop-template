@@ -16,6 +16,9 @@ routerAdd('POST', '/api/shop/chat', (e) => {
   // visitor came back; it is never taken as proof of who they are.
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
+  // What a refusal says, and the Telegram message: server/pb_hooks/lang.js.
+  const lang = require(__hooks + '/lang.js').open();
+
   const info = e.requestInfo();
   const body = info.body || {};
 
@@ -28,13 +31,13 @@ routerAdd('POST', '/api/shop/chat', (e) => {
   const user = info.auth && info.auth.collection().name === 'users' ? info.auth : null;
 
   if (!UUID.test(visitor)) {
-    throw new BadRequestError('This browser has no visitor id. Reload the page and try again.');
+    throw new BadRequestError(lang.t('chat.noVisitor'));
   }
   if (!faqId === !text) {
-    throw new BadRequestError('Pick a question from the list or write one.');
+    throw new BadRequestError(lang.t('chat.pickOrWrite'));
   }
   if (text.length > MAX_LENGTH) {
-    throw new BadRequestError('A question can be at most ' + MAX_LENGTH + ' characters.');
+    throw new BadRequestError(lang.t('chat.tooLong', { n: MAX_LENGTH }));
   }
 
   let left = null;
@@ -46,10 +49,10 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     try {
       product = tx.findRecordById('products', productId);
     } catch (err) {
-      throw new BadRequestError('This product is no longer sold.');
+      throw new BadRequestError(lang.t('chat.productGone'));
     }
     if (product.getBool('hidden')) {
-      throw new BadRequestError('This product is no longer sold.');
+      throw new BadRequestError(lang.t('chat.productGone'));
     }
 
     let faq = null;
@@ -60,7 +63,7 @@ routerAdd('POST', '/api/shop/chat', (e) => {
         // gone from the dashboard since the list was loaded
       }
       if (!faq || !faq.getBool('active')) {
-        throw new BadRequestError('That question is no longer on the list.');
+        throw new BadRequestError(lang.t('chat.faqGone'));
       }
     }
 
@@ -78,7 +81,7 @@ routerAdd('POST', '/api/shop/chat', (e) => {
       left = GUEST_QUESTIONS - asked.length;
 
       if (text && left <= 0) {
-        throw new ForbiddenError('A guest can ask ' + GUEST_QUESTIONS + ' questions. Create an account or sign in to keep asking.');
+        throw new ForbiddenError(lang.t('chat.guestLimit', { n: GUEST_QUESTIONS }));
       }
     }
 
@@ -105,7 +108,7 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     if (text && !thread.getBool('waiting')) {
       notice = {
         subject: thread.getString('subject'),
-        from: user ? user.getString('name') || user.getString('email') : 'A guest',
+        from: user ? user.getString('name') || user.getString('email') : lang.t('chat.guest'),
         email: user ? user.getString('email') : '',
         text: text,
       };
@@ -173,10 +176,10 @@ routerAdd('POST', '/api/shop/chat', (e) => {
     if (on('telegram_questions')) {
       try {
         require(__hooks + '/telegram.js').send(
-          'Question about ' + notice.subject + '\n' +
+          lang.t('telegram.question', { product: notice.subject }) + '\n' +
           notice.from + (notice.email ? ' <' + notice.email + '>' : '') + ':\n\n' +
           notice.text + '\n\n' +
-          'Answer: ' + $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread,
+          lang.t('telegram.answer', { link: $app.settings().meta.appURL + '/admin/inbox?thread=' + notice.thread }),
         );
       } catch (err) {
         $app.logger().error('telegram message failed', 'thread', notice.thread, 'error', String(err));
@@ -218,7 +221,7 @@ routerAdd('POST', '/api/shop/chat/claim', (e) => {
 
   const visitor = String((e.requestInfo().body || {}).visitor || '').toLowerCase();
   if (!UUID.test(visitor)) {
-    throw new BadRequestError('This browser has no visitor id. Reload the page and try again.');
+    throw new BadRequestError(require(__hooks + '/lang.js').open().t('chat.noVisitor'));
   }
 
   const user = e.auth;

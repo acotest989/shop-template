@@ -6,9 +6,7 @@ import { t } from '../lib/i18n.js';
 // All contact with the SDK's auth lives here. The token is the SDK's business —
 // it stores it, refreshes it and sends it — so nothing above this file sees one.
 
-// The rate limiter answers 429, and its own wording is not something to hand a
-// visitor. Every entry point here can hit it, so the translation lives in one place.
-const TOO_MANY = t('auth.tooMany');
+// The rate limiter's 429 is said better in services/pb.js, for every request at once.
 const LINK_USED = t('auth.linkUsed');
 
 export async function login({ email, password }) {
@@ -16,8 +14,6 @@ export async function login({ email, password }) {
     const { record } = await pb.collection('users').authWithPassword(email.trim(), password);
     return toUser(record);
   } catch (err) {
-    if (err.status === 429) throw new Error(TOO_MANY);
-
     // PocketBase answers a bad identity or password with 400; anything else is a
     // real failure and must not be disguised as wrong credentials.
     if (err.status === 400) {
@@ -34,14 +30,14 @@ const SAID_BETTER = {
   validation_not_unique: t('auth.addressTaken'),
   validation_invalid_email: t('auth.notAnEmail'),
   validation_length_out_of_range: t('auth.tooShort', { n: 8 }),
+  validation_invalid_old_password: t('auth.wrongPassword'), // changing the password
+  validation_invalid_password: t('auth.wrongPassword'), // confirming a new address
 };
 
 // PocketBase reports validation per field. Flattening it here — and rethrowing with
 // a plain { field: message } — means a page never learns the shape of somebody
 // else's error response.
 function rethrow(err) {
-  if (err.status === 429) throw new Error(TOO_MANY);
-
   const fields = err.data?.data;
   if (!fields || Object.keys(fields).length === 0) throw err;
 
@@ -96,7 +92,7 @@ export async function requestPasswordReset(email) {
   try {
     await pb.collection('users').requestPasswordReset(email.trim());
   } catch (err) {
-    if (err.status === 429) throw new Error(TOO_MANY);
+    if (err.status === 429) throw err;
     console.error(err);
   }
 }

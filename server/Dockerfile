@@ -23,9 +23,10 @@ COPY --from=download /pb/pocketbase /pb/pocketbase
 COPY server/pb_migrations /pb/pb_migrations
 COPY server/pb_hooks /pb/pb_hooks
 
-# The mail templates, beside pb_hooks as in the repository: pb_hooks/mailer.js reads them
-# from ../mail on every send.
+# The mail templates and the server's sentences, beside pb_hooks as in the repository:
+# pb_hooks/mailer.js and pb_hooks/lang.js read them from ../mail and ../lang on every use.
 COPY server/mail /pb/mail
+COPY server/lang /pb/lang
 
 # The frontend, named file by file. Copying the repository and deleting server/ would
 # work until somebody forgot, and then pb_data/data.db would be a public download.

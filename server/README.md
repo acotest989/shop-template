@@ -25,6 +25,7 @@ To try the shop from a phone before it is deployed, a Cloudflare quick tunnel gi
 | `pb_migrations/` | **committed** — the schema as code. Change a collection in the dashboard and PocketBase writes the migration itself; commit it, and a fresh checkout gets the same collections. |
 | `pb_hooks/` | **committed** — server-side logic; see the README in there. |
 | `mail/` | **committed** — every mail the shop sends, as a template; see the README in there, and `/admin/mail`. |
+| `lang/` | **committed** — what the hooks say, one file per language: a refusal a page shows, a Telegram message. |
 | `.pb-version`, `setup.*`, `Dockerfile` | **committed** — how the binary is obtained, in dev and in production. |
 | `pb_data/` | ignored — the database and uploaded files. |
 | the binary | ignored — see above. |

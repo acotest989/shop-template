@@ -25,6 +25,8 @@ The shop speaks one language at a time, chosen in `index.html`:
 
 The `<title>` and the description in the same file's `<head>` are for search engines and link previews, which read the page as it was served, so they are written there in the shop's language too.
 
+The server never reads `index.html`, so it is told separately: **`language`** in the `shop_settings` record, in the dashboard, set to the same one. That is the language of the mails (`server/mail/`), of what the hooks answer a page with (a product that sold out while in the cart, say), and of the Telegram messages (`server/lang/`). Whatever PocketBase itself says — no connection, too many attempts, a crash — `services/pb.js` puts into the page's language on the way in.
+
 ## Writing an entry
 
 ```js
@@ -43,4 +45,6 @@ Keys read as `page.what`, so a template says what it shows. A key missing from a
 
 ## Adding a language
 
-Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, set `locale`, and point `index.html` at it. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one. The server's side — mails, and the messages the hooks send back — is separate, in `server/`.
+Copy `en/` to a folder named after the language (`de`, `hr`…), translate the values, keep the keys, set `locale`, and point `index.html` at it. Every dictionary has the same keys as `en/`, and each entry the same `{names}` as its English one.
+
+The server's side is three more things: `server/lang/en.json` copied under the language's name and translated (same syntax, plus how money is written); the mails, as a folder of the same name in `server/mail/`; and the language added to the choices of `language` in `shop_settings`, by a migration. A language other than English and its neighbours also needs its plural rule in `server/pb_hooks/lang.js`, whose engine has no `Intl`.

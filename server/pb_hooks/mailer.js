@@ -5,12 +5,28 @@
 // subject. The files are read on every send, so an edited template is the one the next mail
 // uses, with no restart. The syntax is in server/mail/README.md.
 //
+// A mail is in the shop's language, `language` in `shop_settings`: server/mail/sr-Latn/ holds
+// the Serbian files, and a file a language's folder lacks is taken from server/mail/ itself.
+//
 // Not a hook itself: a handler takes it in with require(__hooks + '/mailer.js').
 
 const DIR = __hooks + '/../mail/';
 const NAME = /^[a-z0-9-]+$/;
 
-const read = (file) => toString($os.readFile(DIR + file));
+// A file's path under server/mail/: the language's own, or else the English one.
+const locate = (file, lang) => {
+  if (lang && lang !== 'en') {
+    try {
+      $os.readFile(DIR + lang + '/' + file);
+      return lang + '/' + file;
+    } catch (err) {
+      // not translated
+    }
+  }
+  return file;
+};
+
+const read = (file, lang) => toString($os.readFile(DIR + locate(file, lang)));
 
 const escape = (value) => value
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -24,9 +40,9 @@ const strip = (template) => template.replace(/<!--(?!\[if)[\s\S]*?-->/g, '');
 
 // {{> name}}: _name.html in its place, before anything is filled in. Notes go first, so a
 // note that mentions a part does not pull it in.
-const include = (template, depth) => strip(template).replace(/\{\{>\s*([a-z0-9-]+)\s*\}\}/g, (all, name) => {
+const include = (template, depth, lang) => strip(template).replace(/\{\{>\s*([a-z0-9-]+)\s*\}\}/g, (all, name) => {
   if (depth > 5) throw new Error('mail parts nest too deep, at ' + name);
-  return include(read('_' + name + '.html'), depth + 1);
+  return include(read('_' + name + '.html', lang), depth + 1, lang);
 });
 
 // A template as a tree, parsed once, so a value filled in is never read as a template itself:
@@ -95,21 +111,23 @@ const fillNodes = (nodes, scopes, html) => nodes.map((node) => {
 
 const fill = (template, scopes, html) => fillNodes(parse(template), scopes, html);
 
-// { subject, html } for one mail. Every template may use the shop's name and address as well
-// as its own data: {{shopName}} and {{appURL}}, from Settings → Application in the dashboard.
+// { subject, html, file } for one mail. Every template may use the shop's name and address as
+// well as its own data: {{shopName}} and {{appURL}}, from Settings → Application in the
+// dashboard, and {{language}}, which the layout puts on <html>.
 function render(name, data) {
   if (!NAME.test(name)) throw new Error('not a mail: ' + name);
 
+  const lang = require(__hooks + '/lang.js').language();
   const meta = $app.settings().meta;
-  const scopes = [{ shopName: meta.appName, appURL: meta.appURL }, data || {}];
+  const scopes = [{ shopName: meta.appName, appURL: meta.appURL, language: lang }, data || {}];
 
-  const source = include(read(name + '.html'), 0);
+  const source = include(read(name + '.html', lang), 0, lang);
   const title = source.match(/<title>([\s\S]*?)<\/title>/i);
   const subject = fill(title ? title[1] : '', scopes, false).replace(/\s+/g, ' ').trim();
   const content = fill(source.replace(/<title>[\s\S]*?<\/title>/i, ''), scopes, true).trim();
-  const html = fill(strip(read('layout.html')), scopes.concat([{ subject: subject, content: content }]), true);
+  const html = fill(strip(read('layout.html', lang)), scopes.concat([{ subject: subject, content: content }]), true);
 
-  return { subject: subject, html: html };
+  return { subject: subject, html: html, file: 'server/mail/' + locate(name + '.html', lang) };
 }
 
 // A mail already filled, { subject, html }, from the shop's own address, as every mail here is.
@@ -142,9 +160,9 @@ function replace(e, name, data) {
 }
 
 // Every mail there is, in the order /admin/mail lists them, with what each one is for and the
-// sample data its preview is filled with.
+// sample data its preview is filled with, in the shop's language.
 function catalogue() {
-  return JSON.parse(read('mails.json'));
+  return JSON.parse(read('mails.json', require(__hooks + '/lang.js').language()));
 }
 
 // One mail filled with its sample, or null for a name mails.json does not have. A sample link
