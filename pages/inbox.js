@@ -43,6 +43,8 @@ export const inboxPage = () => ({
   stopThreads: null,
   stopMessages: null,
   gone: false, // the page was left while a subscription was still on its way
+  live: false, // the live connection is up, and the list keeps itself current
+  liveLate: false, // it has not come up in a while: said on the page, rather than go quietly stale
 
   get allowed() {
     return this.$store.session.user?.admin === true;
@@ -67,19 +69,24 @@ export const inboxPage = () => ({
       return;
     }
 
-    try {
-      // Subscribed before reading, and whatever lands in between is held until the list is in.
-      const early = [];
-      let loaded = false;
-      const stop = await subscribeToThreads((action, thread) =>
-        loaded ? this.receiveThread(action, thread) : early.push([action, thread]),
-      );
-      if (this.gone) return stop();
-      this.stopThreads = stop;
+    // The list does not wait on the live connection, which some networks and proxies never let
+    // through: without it the inbox still works, and a reload shows what came in. Once it is up
+    // the list is read again, so nothing that arrived while it was being made is missed.
+    subscribeToThreads((action, thread) => this.receiveThread(action, thread))
+      .then((stop) => {
+        if (this.gone) return stop();
+        this.stopThreads = stop;
+        this.live = true;
+        return this.loadThreads();
+      })
+      .catch((err) => console.error(err));
 
-      this.threads = await fetchThreads();
-      for (const [action, thread] of early) this.receiveThread(action, thread);
-      loaded = true;
+    setTimeout(() => {
+      if (!this.live && !this.gone) this.liveLate = true;
+    }, 10000);
+
+    try {
+      await this.loadThreads();
 
       // A link straight to one conversation: /admin/inbox?thread=…
       const wanted = new URLSearchParams(location.search).get('thread');
@@ -97,6 +104,11 @@ export const inboxPage = () => ({
     this.stopThreads?.();
     this.stopMessages?.();
     this.selectedId = '';
+  },
+
+  async loadThreads() {
+    const threads = await fetchThreads();
+    if (!this.gone) this.threads = threads;
   },
 
   receiveThread(action, thread) {
@@ -130,21 +142,27 @@ export const inboxPage = () => ({
     const current = () => this.selectedId === threadId;
     this.loadingMessages = true;
 
-    try {
-      const early = [];
-      let loaded = false;
-      const stop = await subscribeToMessages(threadId, (action, message) =>
-        loaded ? this.receiveMessage(action, message) : early.push([action, message]),
-      );
-      if (!current()) return stop();
-      this.stopMessages = stop;
-
+    const load = async () => {
       const messages = await fetchMessages(threadId);
       if (!current()) return;
       this.messages = messages;
-      for (const [action, message] of early) this.receiveMessage(action, message);
-      loaded = true;
       this.scrollDown();
+    };
+
+    // As with the list: the conversation loads now, live updates follow when the connection
+    // allows, and it is read once more when they do.
+    subscribeToMessages(threadId, (action, message) => {
+      if (current()) this.receiveMessage(action, message);
+    })
+      .then((stop) => {
+        if (!current()) return stop();
+        this.stopMessages = stop;
+        return load();
+      })
+      .catch((err) => console.error(err));
+
+    try {
+      await load();
     } catch (err) {
       console.error(err);
       if (current()) this.messagesError = errorMessage(err, 'Could not load this conversation.');

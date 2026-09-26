@@ -7,6 +7,12 @@
         <span x-show="waitingCount" class="badge badge-warn" x-text="waitingCount + ' waiting'"></span>
       </div>
 
+      <!-- The live connection never came up: a proxy or network in between holds it back. The
+           inbox works without it; it only stops noticing what arrives. -->
+      <p x-show="liveLate" class="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+        New messages are not arriving live on this connection. Reload the page to see what came in.
+      </p>
+
       <p x-show="error" x-text="error" role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm font-medium text-red-600"></p>
 
       <!-- Two panes from md up. Below that the list and the conversation take turns, and the

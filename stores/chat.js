@@ -148,9 +148,11 @@ export const chat = () => ({
     this.reply(product.id, 'Thanks, we have your question.');
   },
 
-  // Opens a customer's conversation about a product: what was already said, then everything
-  // said from here on, as it is said. Subscribed before reading, so a reply that lands in
-  // between is caught by one or the other.
+  // Opens a customer's conversation about a product: what was already said, and from then on
+  // whatever is said, as it is said. The history does not wait on the live connection, which
+  // some networks and proxies never let through: without it the chat still works, and a reply
+  // shows once the page is opened again. Once the connection is up the history is read a second
+  // time, so a reply that landed while it was being made is not missed.
   async follow(productId) {
     if (this.conversations[productId]) return;
 
@@ -158,19 +160,26 @@ export const chat = () => ({
     const conversation = this.conversations[productId];
     const current = () => this.conversations[productId] === conversation;
 
-    try {
-      await this.claiming;
-
-      const unsubscribe = await subscribeToConversation(productId, (action, message) =>
-        this.receive(productId, action, message, true),
-      );
-      if (!current()) return unsubscribe(); // signed out, or left the page, while this was on its way
-      conversation.unsubscribe = unsubscribe;
-
+    const read = async () => {
       const history = await fetchConversation(productId);
       if (!current()) return;
       for (const message of history) this.receive(productId, 'create', message, false);
       conversation.loaded = true;
+    };
+
+    await this.claiming;
+    if (!current()) return;
+
+    subscribeToConversation(productId, (action, message) => this.receive(productId, action, message, true))
+      .then((unsubscribe) => {
+        if (!current()) return unsubscribe(); // signed out, or left the page, while this was on its way
+        conversation.unsubscribe = unsubscribe;
+        return read();
+      })
+      .catch((err) => console.error(err)); // no live updates, and nothing else is lost
+
+    try {
+      await read();
     } catch (err) {
       if (current()) this.unfollow(productId); // so opening the panel again tries again
       throw err;

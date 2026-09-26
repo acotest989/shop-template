@@ -16,6 +16,8 @@ The trade is that `..` is the whole repository, `/server/pb_data/data.db` includ
 
 The dashboard is at `/_/`. The demo account the app signs in with is a record in the `users` collection — `demo@shop.test` / `test1234`.
 
+To try the shop from a phone before it is deployed, a Cloudflare quick tunnel gives this machine a public HTTPS address, with no account and no open port: `cloudflared tunnel --url http://127.0.0.1:8090`. Set **Application URL** to the address it prints, so the links in mails and Telegram messages lead there, and back afterwards; the address changes every time the tunnel starts. A quick tunnel holds back Server-Sent Events, which is what realtime runs on, so nothing arrives live through it — the chat and the inbox load and work, and a reload shows what is new.
+
 ## What is in git and what is not
 
 | | |
