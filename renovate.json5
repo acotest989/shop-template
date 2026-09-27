@@ -1,0 +1,58 @@
+// Renovate (github.com/apps/renovate) reads this and opens a pull request when something pinned
+// here has a newer release. Nothing merges itself: the changelog is in the PR, read it first.
+// Without the app installed on the repository, this file does nothing.
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:recommended'],
+
+  // One look a week, on Mondays, and no standing issue that lists everything.
+  schedule: ['* * * * 1'],
+  timezone: 'Europe/Sarajevo',
+  dependencyDashboard: false,
+
+  // No package manager means no file Renovate reads on its own: the versions are where the app
+  // uses them, and these say how to find them.
+  customManagers: [
+    {
+      // PocketBase itself. setup.sh, setup.ps1 and the Dockerfile all read it from here.
+      customType: 'regex',
+      managerFilePatterns: ['.pb-version'],
+      matchStrings: ['^(?<currentValue>\\S+)'],
+      depNameTemplate: 'pocketbase/pocketbase',
+      datasourceTemplate: 'github-releases',
+      extractVersionTemplate: '^v(?<version>.+)$',
+    },
+    {
+      // The import map: the PocketBase SDK from npm…
+      customType: 'regex',
+      managerFilePatterns: ['pb_public/index.html'],
+      matchStrings: ['cdn\\.jsdelivr\\.net/npm/(?<depName>(?:@[^/@]+/)?[^/@]+)@(?<currentValue>[^/"\']+)'],
+      datasourceTemplate: 'npm',
+    },
+    {
+      // …and the framework, from its tags on GitHub.
+      customType: 'regex',
+      managerFilePatterns: ['pb_public/index.html'],
+      matchStrings: ['cdn\\.jsdelivr\\.net/gh/(?<depName>[^/@]+/[^/@]+)@(?<currentValue>[^/"\']+)'],
+      datasourceTemplate: 'github-tags',
+    },
+  ],
+
+  packageRules: [
+    {
+      // Pre-1.0, and a release is often followed by a fix within days: wait those out.
+      matchPackageNames: ['pocketbase/pocketbase'],
+      commitMessageTopic: 'PocketBase',
+      minimumReleaseAge: '3 days',
+    },
+    {
+      matchDatasources: ['npm'],
+      matchPackageNames: ['pocketbase'],
+      commitMessageTopic: 'the PocketBase SDK',
+    },
+    {
+      matchPackageNames: ['acotest989/alpineshell'],
+      commitMessageTopic: 'AlpineShell',
+    },
+  ],
+}

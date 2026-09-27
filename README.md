@@ -66,6 +66,7 @@ pb_hooks/           whatever the browser must not decide
 pb_migrations/      the schema, and what a fresh install starts with
 Dockerfile          the same three folders, beside the Linux binary
 setup.ps1, setup.sh, .pb-version    the pinned PocketBase, fetched for this machine
+renovate.json5      where the versions above are, for Renovate to watch
 ```
 
 The front end's paths below leave out `pb_public/`: `services/pb.js` is `pb_public/services/pb.js`.
@@ -173,6 +174,8 @@ PocketBase is still pre-1.0 and its own documentation says backward compatibilit
 curl -s https://api.github.com/repos/pocketbase/pocketbase/releases/latest | grep tag_name
 # PowerShell: (Invoke-RestMethod https://api.github.com/repos/pocketbase/pocketbase/releases/latest).tag_name
 ```
+
+`renovate.json5` does the watching for all three versions the shop pins: PocketBase in `.pb-version`, the SDK and AlpineShell in the import map. With the [Renovate app](https://github.com/apps/renovate) installed on the repository, a newer release becomes a pull request on a Monday, changelog included, and nothing merges itself. PocketBase waits three days before it is offered, since a fix often follows a release within that time. Merging one moves the pin, not your binary: pull, then re-run the setup script.
 
 ## Not done yet
 
