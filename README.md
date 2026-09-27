@@ -9,7 +9,7 @@ The framework is [AlpineShell](https://github.com/acotest989/alpineshell), pulle
 The repository is a PocketBase app, laid out the way PocketBase looks for one: the shop's files in `pb_public/`, its server code in `pb_hooks/`, its schema in `pb_migrations/`. One process serves both halves, and needs no flags:
 
 ```bash
-./setup.sh                    # or .\setup.ps1 — fetches the pinned PocketBase
+./setup.sh                    # or .\setup.ps1 in PowerShell — fetches the pinned PocketBase
 ./pocketbase serve            # or .\pocketbase.exe serve
 ./pocketbase superuser create you@example.com yourpassword   # first run only
 ```
@@ -167,10 +167,11 @@ It puts `pb_public/`, `pb_hooks/` and `pb_migrations/` beside the binary, where 
 
 ## Pin the version
 
-PocketBase is still pre-1.0 and its own documentation says backward compatibility is not guaranteed until then. Upgrading is one line — bump `.pb-version` and re-run the setup script — but read the changelog first, never blindly. What the newest release is:
+PocketBase is still pre-1.0 and its own documentation says backward compatibility is not guaranteed until then. Upgrading is one line — bump `.pb-version` and re-run the setup script with the server stopped, since Windows will not overwrite a running binary — but read the changelog first, never blindly. To hear of a release as it comes out, watch the repository on GitHub (Watch → Custom → Releases). What the newest one is:
 
-```powershell
-(Invoke-RestMethod https://api.github.com/repos/pocketbase/pocketbase/releases/latest).tag_name
+```bash
+curl -s https://api.github.com/repos/pocketbase/pocketbase/releases/latest | grep tag_name
+# PowerShell: (Invoke-RestMethod https://api.github.com/repos/pocketbase/pocketbase/releases/latest).tag_name
 ```
 
 ## Not done yet
